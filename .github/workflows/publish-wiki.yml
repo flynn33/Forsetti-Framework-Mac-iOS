@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'wiki.md'
+      - 'README.md'
+      - 'guide.md'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Generate wiki pages from wiki.md
+      - name: Generate wiki pages from wiki.md, README.md, and guide.md
         run: python3 Scripts/split-wiki.py
 
       - name: Publish pages to GitHub wiki
