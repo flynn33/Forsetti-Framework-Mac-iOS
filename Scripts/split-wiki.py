@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """
-Generate individual GitHub wiki page files from wiki.md, README.md, and guide.md.
+Generate individual GitHub wiki page files from wiki.md, README.md, guide.md,
+and developer-guide.md.
 
 Output directory: wiki_pages/
-  - Home.md              : README.md content (repository overview / wiki landing page)
-  - Developer-Guide.md   : guide.md content (integration rules and developer workflow)
-  - <N>-<Slug>.md        : one file per ## section from wiki.md
+  - Home.md                      : README.md content (repository overview / wiki landing page)
+  - Developer-Guide.md           : guide.md content (integration rules and developer workflow)
+  - Forsetti-Developer-Guide.md  : developer-guide.md content (framework developer guide)
+  - <N>-<Slug>.md                : one file per ## section from wiki.md
 """
 
 import re
@@ -14,6 +16,7 @@ import os
 WIKI_SOURCE = "wiki.md"
 README_SOURCE = "README.md"
 GUIDE_SOURCE = "guide.md"
+DEVELOPER_GUIDE_SOURCE = "developer-guide.md"
 OUTPUT_DIR = "wiki_pages"
 
 
@@ -38,6 +41,7 @@ def read_file(path: str) -> str:
 def main() -> None:
     readme_raw = read_file(README_SOURCE)
     guide_raw = read_file(GUIDE_SOURCE)
+    developer_guide_raw = read_file(DEVELOPER_GUIDE_SOURCE)
     wiki_raw = read_file(WIKI_SOURCE)
 
     pages: dict[str, str] = {}
@@ -47,6 +51,9 @@ def main() -> None:
 
     # Developer guide page = guide.md
     pages["Developer-Guide"] = guide_raw.strip()
+
+    # Forsetti developer guide page = developer-guide.md
+    pages["Forsetti-Developer-Guide"] = developer_guide_raw.strip()
 
     # Split wiki.md on lines that start a new ## section
     parts = re.split(r"\n(?=## )", wiki_raw)
