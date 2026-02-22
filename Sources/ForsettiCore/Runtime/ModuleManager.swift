@@ -99,25 +99,11 @@ public final class ModuleManager {
             throw ModuleManagerError.moduleLocked(moduleID)
         }
 
-        if manifest.moduleType == .ui,
-           let currentUIModuleID = activeUIModuleID,
-           currentUIModuleID != moduleID {
-            try deactivateModule(moduleID: currentUIModuleID)
-        }
-
-        let module = try resolveModule(for: manifest)
-        try module.start(context: context)
-
         switch manifest.moduleType {
         case .service:
-            enabledServiceModuleIDs.insert(moduleID)
+            try activateServiceModule(manifest: manifest, moduleID: moduleID)
         case .ui:
-            guard let uiModule = module as? ForsettiUIModule else {
-                throw ModuleManagerError.notUIModule(moduleID)
-            }
-
-            activeUIModuleID = moduleID
-            uiSurfaceManager.apply(moduleID: moduleID, contributions: uiModule.uiContributions)
+            try activateUIModule(manifest: manifest, moduleID: moduleID)
         }
 
         try persistState()
@@ -125,6 +111,10 @@ public final class ModuleManager {
     }
 
     public func deactivateModule(moduleID: String) throws {
+        try deactivateModule(moduleID: moduleID, persistState: true)
+    }
+
+    private func deactivateModule(moduleID: String, persistState: Bool) throws {
         guard let manifest = manifestsByID[moduleID] else {
             throw ModuleManagerError.moduleNotDiscovered(moduleID)
         }
@@ -144,7 +134,11 @@ public final class ModuleManager {
         }
 
         loadedModules[moduleID] = nil
-        try persistState()
+
+        if persistState {
+            try self.persistState()
+        }
+
         context.logger.log(.info, message: "Deactivated module \(moduleID)")
     }
 
@@ -168,10 +162,14 @@ public final class ModuleManager {
         }
     }
 
-    public func deactivateAllModules() {
+    public func deactivateAllModules(persistState: Bool = true) {
         let activeModuleIDs = Set(loadedModules.keys)
         activeModuleIDs.forEach { moduleID in
-            try? deactivateModule(moduleID: moduleID)
+            try? deactivateModule(moduleID: moduleID, persistState: false)
+        }
+
+        if persistState {
+            try? self.persistState()
         }
     }
 
@@ -183,6 +181,48 @@ public final class ModuleManager {
         let module = try moduleRegistry.makeModule(entryPoint: manifest.entryPoint)
         loadedModules[manifest.moduleID] = module
         return module
+    }
+
+    private func activateServiceModule(manifest: ModuleManifest, moduleID: String) throws {
+        guard !enabledServiceModuleIDs.contains(moduleID) else {
+            return
+        }
+
+        let module = try resolveModule(for: manifest)
+        do {
+            try module.start(context: context)
+        } catch {
+            loadedModules[moduleID] = nil
+            throw error
+        }
+
+        enabledServiceModuleIDs.insert(moduleID)
+    }
+
+    private func activateUIModule(manifest: ModuleManifest, moduleID: String) throws {
+        guard activeUIModuleID != moduleID else {
+            return
+        }
+
+        let module = try resolveModule(for: manifest)
+        guard let uiModule = module as? ForsettiUIModule else {
+            loadedModules[moduleID] = nil
+            throw ModuleManagerError.notUIModule(moduleID)
+        }
+
+        do {
+            try module.start(context: context)
+        } catch {
+            loadedModules[moduleID] = nil
+            throw error
+        }
+
+        if let currentUIModuleID = activeUIModuleID, currentUIModuleID != moduleID {
+            try deactivateModule(moduleID: currentUIModuleID, persistState: false)
+        }
+
+        activeUIModuleID = moduleID
+        uiSurfaceManager.apply(moduleID: moduleID, contributions: uiModule.uiContributions)
     }
 
     private func persistState() throws {

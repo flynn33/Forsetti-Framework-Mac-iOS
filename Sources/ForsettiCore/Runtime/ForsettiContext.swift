@@ -1,5 +1,6 @@
 import Foundation
 
+@MainActor
 public protocol OverlayRouting: Sendable {
     func openPointer(_ pointerID: String)
     func openRoute(_ routeID: String)
@@ -24,6 +25,7 @@ public final class ForsettiContext: @unchecked Sendable {
     }
 }
 
+@MainActor
 public struct NoopOverlayRouter: OverlayRouting {
     public init() {}
 

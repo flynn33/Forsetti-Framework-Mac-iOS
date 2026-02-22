@@ -171,10 +171,20 @@ public final class ForsettiHostController: ObservableObject {
         switch action {
         case let .navigate(pointerID):
             runtime.openPointer(pointerID)
-            lastToolbarActionDescription = "Navigate pointer: \(pointerID)"
+            if let hostRouter = runtime.router as? ForsettiHostOverlayRouter,
+               let outcome = hostRouter.lastOutcome {
+                lastToolbarActionDescription = outcome.message
+            } else {
+                lastToolbarActionDescription = "Navigate pointer: \(pointerID)"
+            }
         case let .openOverlay(routeID):
             runtime.openRoute(routeID)
-            lastToolbarActionDescription = "Open overlay route: \(routeID)"
+            if let hostRouter = runtime.router as? ForsettiHostOverlayRouter,
+               let outcome = hostRouter.lastOutcome {
+                lastToolbarActionDescription = outcome.message
+            } else {
+                lastToolbarActionDescription = "Open overlay route: \(routeID)"
+            }
         case let .publishEvent(type, payload):
             runtime.eventBus.publish(
                 event: ForsettiEvent(

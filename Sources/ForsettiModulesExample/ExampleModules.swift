@@ -23,6 +23,7 @@ public final class ExampleServiceModule: ForsettiModule {
     )
 
     private var isStarted = false
+    private let lastStartedAtStorageKey = "forsetti.example.service.lastStartedAt"
 
     public init() {}
 
@@ -31,11 +32,16 @@ public final class ExampleServiceModule: ForsettiModule {
             return
         }
 
+        let startedAt = Date().ISO8601Format()
+        if let storage = context.services.resolve(StorageService.self) {
+            storage.set(startedAt, forKey: lastStartedAtStorageKey)
+        }
+
         isStarted = true
         context.eventBus.publish(
             event: ForsettiEvent(
                 type: "example.service.started",
-                payload: ["moduleID": descriptor.moduleID],
+                payload: ["moduleID": descriptor.moduleID, "startedAt": startedAt],
                 sourceModuleID: descriptor.moduleID
             )
         )
@@ -45,6 +51,10 @@ public final class ExampleServiceModule: ForsettiModule {
     public func stop(context: ForsettiContext) {
         guard isStarted else {
             return
+        }
+
+        if let storage = context.services.resolve(StorageService.self) {
+            storage.removeValue(forKey: lastStartedAtStorageKey)
         }
 
         isStarted = false

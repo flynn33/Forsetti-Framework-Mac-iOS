@@ -19,6 +19,17 @@ public enum ManifestLoaderError: Error, LocalizedError {
 
 public final class ManifestLoader {
     private let decoder: JSONDecoder
+    private let manifestRootKeys: Set<String> = [
+        "schemaVersion",
+        "moduleID",
+        "displayName",
+        "moduleVersion",
+        "moduleType",
+        "supportedPlatforms",
+        "minForsettiVersion",
+        "capabilitiesRequested",
+        "entryPoint"
+    ]
 
     public init(decoder: JSONDecoder = JSONDecoder()) {
         self.decoder = decoder
@@ -29,7 +40,11 @@ public final class ManifestLoader {
         subdirectory: String = "ForsettiManifests"
     ) throws -> [String: ModuleManifest] {
         if let directURLs = bundle.urls(forResourcesWithExtension: "json", subdirectory: subdirectory), !directURLs.isEmpty {
-            return try loadManifests(resourceURLs: directURLs)
+            return try loadManifests(
+                resourceURLs: directURLs,
+                strict: true,
+                missingDirectoryHint: subdirectory
+            )
         }
 
         // SwiftPM resource processing may flatten directories; fallback to recursive lookup.
@@ -53,21 +68,57 @@ public final class ManifestLoader {
             !requestedFolderName.isEmpty && url.path.lowercased().contains(requestedFolderName)
         }
 
-        let resolvedURLs = scopedURLs.isEmpty ? recursiveURLs : scopedURLs
+        if !scopedURLs.isEmpty {
+            return try loadManifests(
+                resourceURLs: scopedURLs,
+                strict: true,
+                missingDirectoryHint: subdirectory
+            )
+        }
 
-        guard !resolvedURLs.isEmpty else {
+        guard !recursiveURLs.isEmpty else {
             throw ManifestLoaderError.manifestsDirectoryNotFound(subdirectory)
         }
 
-        return try loadManifests(resourceURLs: resolvedURLs)
+        return try loadManifests(
+            resourceURLs: recursiveURLs,
+            strict: false,
+            missingDirectoryHint: subdirectory
+        )
     }
 
     public func loadManifests(resourceURLs: [URL]) throws -> [String: ModuleManifest] {
+        try loadManifests(
+            resourceURLs: resourceURLs,
+            strict: true,
+            missingDirectoryHint: "provided resource URLs"
+        )
+    }
+
+    private func loadManifests(
+        resourceURLs: [URL],
+        strict: Bool,
+        missingDirectoryHint: String
+    ) throws -> [String: ModuleManifest] {
         var manifests: [String: ModuleManifest] = [:]
 
         for url in resourceURLs {
             let data = try Data(contentsOf: url)
-            let manifest = try decoder.decode(ModuleManifest.self, from: data)
+
+            if !strict, !looksLikeManifestJSON(data) {
+                continue
+            }
+
+            let manifest: ModuleManifest
+            do {
+                manifest = try decoder.decode(ModuleManifest.self, from: data)
+            } catch {
+                throw ManifestLoaderError.validationFailed(
+                    file: url.lastPathComponent,
+                    reason: "invalid manifest JSON (\(error.localizedDescription))"
+                )
+            }
+
             try validate(manifest: manifest, fileName: url.lastPathComponent)
 
             if manifests[manifest.moduleID] != nil {
@@ -75,6 +126,10 @@ public final class ManifestLoader {
             }
 
             manifests[manifest.moduleID] = manifest
+        }
+
+        if manifests.isEmpty {
+            throw ManifestLoaderError.manifestsDirectoryNotFound(missingDirectoryHint)
         }
 
         return manifests
@@ -118,5 +173,14 @@ public final class ManifestLoader {
             }
         }
         return urls
+    }
+
+    private func looksLikeManifestJSON(_ data: Data) -> Bool {
+        guard let jsonObject = try? JSONSerialization.jsonObject(with: data),
+              let dictionary = jsonObject as? [String: Any] else {
+            return false
+        }
+
+        return manifestRootKeys.isSubset(of: Set(dictionary.keys))
     }
 }

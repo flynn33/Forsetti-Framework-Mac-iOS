@@ -8,10 +8,10 @@ public final class ForsettiRuntime {
     public let eventBus: ForsettiEventBus
     public let uiSurfaceManager: UISurfaceManager
     public let moduleManager: ModuleManager
+    public let router: any OverlayRouting
 
     private let entitlementProvider: any ForsettiEntitlementProvider
     private let logger: any ForsettiLogger
-    private let router: any OverlayRouting
     private var entitlementObservationTask: Task<Void, Never>?
 
     public init(
@@ -23,7 +23,7 @@ public final class ForsettiRuntime {
         capabilityPolicy: any CapabilityPolicy = AllowAllCapabilityPolicy(),
         activationStore: any ActivationStore = UserDefaultsActivationStore(),
         logger: any ForsettiLogger = ConsoleForsettiLogger(),
-        router: any OverlayRouting = NoopOverlayRouter(),
+        router: (any OverlayRouting)? = nil,
         moduleRegistry: ModuleRegistry = ModuleRegistry(),
         manifestLoader: ManifestLoader = ManifestLoader(),
         uiSurfaceManager: UISurfaceManager? = nil
@@ -34,7 +34,7 @@ public final class ForsettiRuntime {
         self.uiSurfaceManager = uiSurfaceManager ?? UISurfaceManager()
         self.entitlementProvider = entitlementProvider
         self.logger = logger
-        self.router = router
+        self.router = router ?? NoopOverlayRouter()
 
         let compatibilityChecker = CompatibilityChecker(
             runtimePlatform: platform,
@@ -46,7 +46,7 @@ public final class ForsettiRuntime {
             eventBus: eventBus,
             services: services,
             logger: logger,
-            router: router
+            router: self.router
         )
 
         self.moduleManager = ModuleManager(
@@ -69,6 +69,7 @@ public final class ForsettiRuntime {
         let manifests = try moduleManager.discoverModules(bundle: bundle, subdirectory: manifestsSubdirectory)
         logger.log(.info, message: "Discovered \(manifests.count) module manifests")
 
+        await entitlementProvider.refreshEntitlements()
         startEntitlementObservation()
 
         if restoreActivationState {
@@ -81,7 +82,7 @@ public final class ForsettiRuntime {
     public func shutdown() {
         entitlementObservationTask?.cancel()
         entitlementObservationTask = nil
-        moduleManager.deactivateAllModules()
+        moduleManager.deactivateAllModules(persistState: false)
     }
 
     public func openPointer(_ pointerID: String) {

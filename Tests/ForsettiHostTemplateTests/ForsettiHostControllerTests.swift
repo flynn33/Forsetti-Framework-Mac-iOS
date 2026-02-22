@@ -108,6 +108,34 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
+    func testToolbarRouteActionUsesHostOverlayRouterResolution() async {
+        let registry = ModuleRegistry()
+        ExampleModuleRegistry.registerAll(into: registry)
+
+        let controller = ForsettiHostTemplateBootstrap.makeController(
+            manifestsBundle: ExampleModuleResources.bundle,
+            moduleRegistry: registry,
+            entitlementProvider: StaticEntitlementProvider(
+                unlockedModuleIDs: ["com.forsetti.module.example-service"],
+                unlockedProductIDs: ["com.forsetti.iap.example-ui"]
+            ),
+            activationStore: InMemoryActivationStore()
+        )
+
+        await controller.boot(restoreActivationState: false)
+        await controller.selectUIModule(moduleID: "com.forsetti.module.example-ui")
+
+        controller.handleToolbarAction(.openOverlay(routeID: "example-overlay"))
+
+        XCTAssertEqual(
+            controller.lastToolbarActionDescription,
+            "Route 'example-overlay' resolved to overlay slot 'overlay.main'."
+        )
+
+        controller.shutdown()
+    }
+
+    @MainActor
     private func makeController(
         unlockedModules: Set<String>,
         unlockedProducts: Set<String> = []
