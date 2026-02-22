@@ -1,16 +1,19 @@
 #!/usr/bin/env python3
 """
-Split wiki.md into individual GitHub wiki page files.
+Generate individual GitHub wiki page files from wiki.md, README.md, and guide.md.
 
 Output directory: wiki_pages/
-  - Home.md          : title, intro, and table of contents
-  - <N>-<Slug>.md    : one file per ## section
+  - Home.md              : README.md content (repository overview / wiki landing page)
+  - Developer-Guide.md   : guide.md content (integration rules and developer workflow)
+  - <N>-<Slug>.md        : one file per ## section from wiki.md
 """
 
 import re
 import os
 
 WIKI_SOURCE = "wiki.md"
+README_SOURCE = "README.md"
+GUIDE_SOURCE = "guide.md"
 OUTPUT_DIR = "wiki_pages"
 
 
@@ -22,25 +25,32 @@ def slugify(title: str) -> str:
     return slug
 
 
-def main() -> None:
-    if not os.path.isfile(WIKI_SOURCE):
+def read_file(path: str) -> str:
+    if not os.path.isfile(path):
         raise SystemExit(
-            f"Error: source file '{WIKI_SOURCE}' not found. "
-            "Run this script from the repository root where wiki.md lives."
+            f"Error: source file '{path}' not found. "
+            "Run this script from the repository root."
         )
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
-    with open(WIKI_SOURCE, "r", encoding="utf-8") as f:
-        raw = f.read()
 
-    # Split on lines that start a new ## section
-    parts = re.split(r"\n(?=## )", raw)
+def main() -> None:
+    readme_raw = read_file(README_SOURCE)
+    guide_raw = read_file(GUIDE_SOURCE)
+    wiki_raw = read_file(WIKI_SOURCE)
 
-    intro_block = parts[0].strip()
-    section_parts = parts[1:]
-
-    # Build table of contents entries and page map
-    toc_lines: list[str] = []
     pages: dict[str, str] = {}
+
+    # Home page = README.md (repository overview and wiki landing page)
+    pages["Home"] = readme_raw.strip()
+
+    # Developer guide page = guide.md
+    pages["Developer-Guide"] = guide_raw.strip()
+
+    # Split wiki.md on lines that start a new ## section
+    parts = re.split(r"\n(?=## )", wiki_raw)
+    section_parts = parts[1:]  # skip the # title / intro block
 
     for section in section_parts:
         lines = section.strip().splitlines()
@@ -48,12 +58,6 @@ def main() -> None:
         title = heading.lstrip("#").strip()  # "1. Scope and Audience"
         slug = slugify(title)
         pages[slug] = section.strip()
-        toc_lines.append(f"- [{title}]({slug})")
-
-    # Home page = intro + table of contents
-    toc_block = "\n".join(toc_lines)
-    home_content = f"{intro_block}\n\n## Contents\n\n{toc_block}\n"
-    pages["Home"] = home_content
 
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     for page_name, content in pages.items():
