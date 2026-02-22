@@ -27,6 +27,7 @@ If you are implementing with Forsetti, this README is the canonical high-level r
 17. Troubleshooting
 18. FAQ
 19. Additional Documentation
+20. License
 
 ## 1) What Forsetti Is
 
@@ -406,7 +407,17 @@ Runtime-level entitlement enforcement prevents policy drift and edge-case incons
 - `forsetti-instructions.json`
   - architecture source material and phase context.
 
-## Xcode Template (Optional)
+## 20) License
+
+Forsetti is proprietary software.
+
+See full licensing terms in:
+
+- `license.md`
+
+External/commercial use requires a separate written paid license from James Daley.
+
+## 21) Xcode Template (Optional)
 
 This repo includes an Xcode project template for faster setup:
 
