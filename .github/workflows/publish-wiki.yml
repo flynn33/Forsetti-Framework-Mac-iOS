@@ -1,0 +1,40 @@
+name: Publish Wiki
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki.md'
+  workflow_dispatch:
+
+jobs:
+  publish-wiki:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate wiki pages from wiki.md
+        run: python3 Scripts/split-wiki.py
+
+      - name: Publish pages to GitHub wiki
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # NOTE: The repository wiki must be initialized (at least one page saved
+          # via the GitHub UI) before this step can clone it successfully.
+          git clone \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.wiki.git" \
+            wiki_repo
+
+          cp wiki_pages/*.md wiki_repo/
+
+          cd wiki_repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --staged --quiet || git commit -m "Update wiki from wiki.md [skip ci]"
+          git push
