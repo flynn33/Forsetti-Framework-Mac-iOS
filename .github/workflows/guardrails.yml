@@ -1,0 +1,25 @@
+name: Forsetti Guardrails
+
+on:
+  pull_request:
+  push:
+
+jobs:
+  enforce:
+    runs-on: macos-15
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          xcodebuild -version
+          swift --version
+
+      - name: Install SwiftLint
+        run: brew install swiftlint
+
+      - name: Run guardrails
+        run: ./Scripts/verify-forsetti-guardrails.sh

@@ -1,0 +1,19 @@
+{
+  "": {
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/master.swiftdeps"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Tests/ForsettiCoreTests/EntitlementProviderTests.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/EntitlementProviderTests.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/EntitlementProviderTests.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/EntitlementProviderTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/EntitlementProviderTests.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/EntitlementProviderTests.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Tests/ForsettiCoreTests/ForsettiCoreBootstrapTests.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/ForsettiCoreBootstrapTests.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/ForsettiCoreBootstrapTests.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/ForsettiCoreBootstrapTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/ForsettiCoreBootstrapTests.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiCoreTests.build/ForsettiCoreBootstrapTests.dia"
+  }
+}
