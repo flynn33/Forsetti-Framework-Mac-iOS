@@ -1,6 +1,6 @@
 {
   "artifact_type": "agentic_coding_policy",
-  "artifact_version": "1.0.0",
+  "artifact_version": "1.1.0",
   "name": "Forsetti Agentic Development Policy",
   "owner": "James Daley",
   "license_reference": "license.md",
@@ -80,6 +80,13 @@
       "rationale": "Architecture and lint/test gates must be continuously enforced."
     },
     {
+      "id": "R009",
+      "priority": "critical",
+      "rule": "In framework_repo_mode, Agent MUST run the iOS simulator package build command to match CI build expectations.",
+      "applies_to_modes": ["framework_repo_mode"],
+      "rationale": "Framework readiness requires parity with the CI ios-build gate, not only lint/tests."
+    },
+    {
       "id": "R008",
       "priority": "critical",
       "rule": "Agent MUST respect proprietary licensing boundaries and MUST_NOT imply open-source usage rights.",
@@ -140,6 +147,30 @@
       }
     ]
   },
+  "framework_behavior_invariants": {
+    "runtime_and_activation": [
+      "Runtime boot MUST refresh entitlements before restoring persisted activation state.",
+      "Runtime shutdown MUST deactivate loaded modules without clearing persisted activation state.",
+      "UI module activation MUST verify ForsettiUIModule type compatibility before lifecycle start."
+    ],
+    "manifest_loading": [
+      "Strict manifests directory loading MUST fail fast on invalid manifest JSON/validation errors.",
+      "Fallback recursive manifest discovery MUST ignore unrelated JSON payloads that are not manifest-shaped.",
+      "Manifest discovery MUST fail on duplicate moduleID values."
+    ],
+    "routing_and_host_contract": [
+      "Overlay routing MUST resolve against active overlay schema only.",
+      "Pointer and route targets MUST validate against host base destinations and overlay slot catalog.",
+      "Host routing actions SHOULD expose explicit route resolution outcomes for diagnostics."
+    ],
+    "verified_by_tests": [
+      "Tests/ForsettiCoreTests/RuntimeLifecycleTests.swift",
+      "Tests/ForsettiCoreTests/ManifestLoaderTests.swift",
+      "Tests/ForsettiCoreTests/CompatibilityCheckerTests.swift",
+      "Tests/ForsettiCoreTests/UISurfaceManagerTests.swift",
+      "Tests/ForsettiHostTemplateTests/ForsettiHostControllerTests.swift"
+    ]
+  },
   "consumer_repo_guidance": {
     "allowed_patterns": [
       "Implement app-owned modules using ForsettiModule or ForsettiUIModule.",
@@ -177,7 +208,8 @@
   },
   "required_verification_commands": {
     "framework_repo_mode": [
-      "./Scripts/verify-forsetti-guardrails.sh"
+      "./Scripts/verify-forsetti-guardrails.sh",
+      "xcodebuild -scheme ForsettiFramework-Package -destination 'generic/platform=iOS Simulator' build"
     ],
     "consumer_repo_mode": [
       "swift test --parallel --enable-code-coverage",
@@ -187,7 +219,7 @@
   "definition_of_done": [
     "All mandatory rules are satisfied.",
     "No forbidden architecture/import pattern was introduced.",
-    "Required tests and lint checks passed.",
+    "Required verification commands passed for the active mode.",
     "Documentation/comments updated where behavior or policy changed.",
     "Output summary includes validations and any known limitations."
   ],
@@ -203,14 +235,18 @@
     ]
   },
   "suggested_agent_prompt_template": {
-    "template": "You are coding in {MODE}. Follow agentic-coding-policy.json as hard constraints. Confirm R001-R008 compliance, then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
+    "template": "You are coding in {MODE}. Follow agentic-coding-policy.json as hard constraints. Confirm R001-R009 compliance (when applicable), then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
     "mode_values": ["framework_repo_mode", "consumer_repo_mode"]
   },
   "document_references": [
     "README.md",
+    "developer-guide.md",
+    "forsetti-instructions.json",
     "guide.md",
     "wiki.md",
     "license.md",
+    "Scripts/verify-forsetti-guardrails.sh",
+    ".github/workflows/guardrails.yml",
     ".swiftlint.yml",
     "Tests/ForsettiArchitectureTests/ArchitectureEnforcementTests.swift"
   ]
