@@ -2,11 +2,57 @@ import Foundation
 
 public struct ActivationState: Codable, Sendable, Hashable {
     public var enabledServiceModuleIDs: Set<String>
-    public var activeUIModuleID: String?
+    public var enabledUIModuleIDs: Set<String>
+    public var selectedUIModuleID: String?
 
+    public var activeUIModuleID: String? {
+        get { selectedUIModuleID }
+        set { selectedUIModuleID = newValue }
+    }
+
+    public init(
+        enabledServiceModuleIDs: Set<String> = [],
+        enabledUIModuleIDs: Set<String> = [],
+        selectedUIModuleID: String? = nil
+    ) {
+        self.enabledServiceModuleIDs = enabledServiceModuleIDs
+        self.enabledUIModuleIDs = enabledUIModuleIDs
+        self.selectedUIModuleID = selectedUIModuleID
+    }
+
+    // Backward-compatible initializer retained for older call sites.
     public init(enabledServiceModuleIDs: Set<String> = [], activeUIModuleID: String? = nil) {
         self.enabledServiceModuleIDs = enabledServiceModuleIDs
-        self.activeUIModuleID = activeUIModuleID
+        enabledUIModuleIDs = activeUIModuleID.map { [$0] } ?? []
+        selectedUIModuleID = activeUIModuleID
+    }
+
+    private enum CodingKeys: String, CodingKey {
+        case enabledServiceModuleIDs
+        case enabledUIModuleIDs
+        case selectedUIModuleID
+        case activeUIModuleID
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        enabledServiceModuleIDs = try container.decodeIfPresent(Set<String>.self, forKey: .enabledServiceModuleIDs) ?? []
+
+        let legacyActiveUIModuleID = try container.decodeIfPresent(String.self, forKey: .activeUIModuleID)
+        enabledUIModuleIDs = try container.decodeIfPresent(Set<String>.self, forKey: .enabledUIModuleIDs)
+            ?? legacyActiveUIModuleID.map { [$0] }
+            ?? []
+        selectedUIModuleID = try container.decodeIfPresent(String.self, forKey: .selectedUIModuleID)
+            ?? legacyActiveUIModuleID
+    }
+
+    public func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(enabledServiceModuleIDs, forKey: .enabledServiceModuleIDs)
+        try container.encode(enabledUIModuleIDs, forKey: .enabledUIModuleIDs)
+        try container.encodeIfPresent(selectedUIModuleID, forKey: .selectedUIModuleID)
+        try container.encodeIfPresent(selectedUIModuleID, forKey: .activeUIModuleID)
     }
 }
 

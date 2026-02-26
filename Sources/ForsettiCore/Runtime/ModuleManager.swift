@@ -2,6 +2,7 @@ import Foundation
 
 public enum ModuleManagerError: Error, LocalizedError {
     case moduleNotDiscovered(String)
+    case moduleNotActive(String)
     case moduleLocked(String)
     case incompatible(report: CompatibilityReport)
     case notUIModule(String)
@@ -10,6 +11,8 @@ public enum ModuleManagerError: Error, LocalizedError {
         switch self {
         case let .moduleNotDiscovered(moduleID):
             return "Module '\(moduleID)' has not been discovered."
+        case let .moduleNotActive(moduleID):
+            return "Module '\(moduleID)' is not active."
         case let .moduleLocked(moduleID):
             return "Module '\(moduleID)' is locked by entitlement rules."
         case let .incompatible(report):
@@ -24,6 +27,8 @@ public enum ModuleManagerError: Error, LocalizedError {
 @MainActor
 public final class ModuleManager {
     public private(set) var enabledServiceModuleIDs: Set<String>
+    public private(set) var enabledUIModuleIDs: Set<String>
+    // Represents the UI module currently selected for foreground presentation.
     public private(set) var activeUIModuleID: String?
     public private(set) var loadedModules: [String: ForsettiModule]
     public private(set) var manifestsByID: [String: ModuleManifest]
@@ -55,7 +60,8 @@ public final class ModuleManager {
 
         let initialState = activationStore.loadState()
         enabledServiceModuleIDs = initialState.enabledServiceModuleIDs
-        activeUIModuleID = initialState.activeUIModuleID
+        enabledUIModuleIDs = initialState.enabledUIModuleIDs
+        activeUIModuleID = initialState.selectedUIModuleID
         loadedModules = [:]
         manifestsByID = [:]
     }
@@ -73,15 +79,23 @@ public final class ModuleManager {
         manifestsByID.values.sorted { $0.moduleID < $1.moduleID }
     }
 
+    public func uiContributions(for moduleID: String) -> UIContributions? {
+        guard enabledUIModuleIDs.contains(moduleID),
+              let uiModule = loadedModules[moduleID] as? ForsettiUIModule else {
+            return nil
+        }
+        return sanitizedUIContributions(for: uiModule.uiContributions)
+    }
+
     public func isActive(moduleID: String) -> Bool {
-        enabledServiceModuleIDs.contains(moduleID) || activeUIModuleID == moduleID
+        enabledServiceModuleIDs.contains(moduleID) || enabledUIModuleIDs.contains(moduleID)
     }
 
     public func compatibilityReport(for moduleID: String) -> CompatibilityReport? {
         guard let manifest = manifestsByID[moduleID] else {
             return nil
         }
-        return compatibilityChecker.evaluate(manifest: manifest, activeUIModuleID: activeUIModuleID)
+        return compatibilityChecker.evaluate(manifest: manifest)
     }
 
     public func activateModule(moduleID: String) async throws {
@@ -89,7 +103,7 @@ public final class ModuleManager {
             throw ModuleManagerError.moduleNotDiscovered(moduleID)
         }
 
-        let report = compatibilityChecker.evaluate(manifest: manifest, activeUIModuleID: activeUIModuleID)
+        let report = compatibilityChecker.evaluate(manifest: manifest)
         if !report.isCompatible {
             throw ModuleManagerError.incompatible(report: report)
         }
@@ -107,11 +121,25 @@ public final class ModuleManager {
         }
 
         try persistState()
-        context.logger.log(.info, message: "Activated module \(moduleID)")
+        context.logModule(.info, moduleID: moduleID, message: "Activated module")
     }
 
     public func deactivateModule(moduleID: String) throws {
         try deactivateModule(moduleID: moduleID, persistState: true)
+    }
+
+    public func setSelectedUIModule(moduleID: String?) throws {
+        if let moduleID {
+            guard manifestsByID[moduleID] != nil else {
+                throw ModuleManagerError.moduleNotDiscovered(moduleID)
+            }
+            guard enabledUIModuleIDs.contains(moduleID) else {
+                throw ModuleManagerError.moduleNotActive(moduleID)
+            }
+        }
+
+        activeUIModuleID = moduleID
+        try persistState()
     }
 
     private func deactivateModule(moduleID: String, persistState: Bool) throws {
@@ -127,8 +155,9 @@ public final class ModuleManager {
         case .service:
             enabledServiceModuleIDs.remove(moduleID)
         case .ui:
+            enabledUIModuleIDs.remove(moduleID)
             if activeUIModuleID == moduleID {
-                activeUIModuleID = nil
+                activeUIModuleID = enabledUIModuleIDs.sorted().first
             }
             uiSurfaceManager.remove(moduleID: moduleID)
         }
@@ -139,7 +168,7 @@ public final class ModuleManager {
             try self.persistState()
         }
 
-        context.logger.log(.info, message: "Deactivated module \(moduleID)")
+        context.logModule(.info, moduleID: moduleID, message: "Deactivated module")
     }
 
     public func restorePersistedActivation() async {
@@ -149,7 +178,12 @@ public final class ModuleManager {
             do {
                 try await activateModule(moduleID: moduleID)
             } catch {
-                context.logger.log(.warning, message: "Failed to restore service module \(moduleID): \(error.localizedDescription)")
+                context.logModule(
+                    .warning,
+                    moduleID: moduleID,
+                    message: "Failed to restore service module",
+                    metadata: ["reason": error.localizedDescription]
+                )
             }
         }
 
@@ -157,15 +191,46 @@ public final class ModuleManager {
             do {
                 try await activateModule(moduleID: uiModuleID)
             } catch {
-                context.logger.log(.warning, message: "Failed to restore UI module \(uiModuleID): \(error.localizedDescription)")
+                context.logModule(
+                    .warning,
+                    moduleID: uiModuleID,
+                    message: "Failed to restore UI module",
+                    metadata: ["reason": error.localizedDescription]
+                )
             }
+        }
+
+        for moduleID in storedState.enabledUIModuleIDs where moduleID != storedState.activeUIModuleID {
+            do {
+                try await activateModule(moduleID: moduleID)
+            } catch {
+                context.logModule(
+                    .warning,
+                    moduleID: moduleID,
+                    message: "Failed to restore UI module",
+                    metadata: ["reason": error.localizedDescription]
+                )
+            }
+        }
+
+        if let selectedUIModuleID = storedState.selectedUIModuleID,
+           enabledUIModuleIDs.contains(selectedUIModuleID) {
+            activeUIModuleID = selectedUIModuleID
         }
     }
 
     public func deactivateAllModules(persistState: Bool = true) {
         let activeModuleIDs = Set(loadedModules.keys)
-        activeModuleIDs.forEach { moduleID in
-            try? deactivateModule(moduleID: moduleID, persistState: false)
+        for moduleID in activeModuleIDs {
+            do {
+                try deactivateModule(moduleID: moduleID, persistState: false)
+            } catch {
+                context.reportModuleError(
+                    moduleID: moduleID,
+                    message: "Failed to deactivate module during bulk deactivation",
+                    error: error
+                )
+            }
         }
 
         if persistState {
@@ -193,6 +258,12 @@ public final class ModuleManager {
             try module.start(context: context)
         } catch {
             loadedModules[moduleID] = nil
+            context.reportModuleError(
+                moduleID: moduleID,
+                message: "Module failed to start",
+                error: error,
+                metadata: ["moduleType": manifest.moduleType.rawValue]
+            )
             throw error
         }
 
@@ -200,7 +271,10 @@ public final class ModuleManager {
     }
 
     private func activateUIModule(manifest: ModuleManifest, moduleID: String) throws {
-        guard activeUIModuleID != moduleID else {
+        guard !enabledUIModuleIDs.contains(moduleID) else {
+            if activeUIModuleID == nil {
+                activeUIModuleID = moduleID
+            }
             return
         }
 
@@ -214,22 +288,40 @@ public final class ModuleManager {
             try module.start(context: context)
         } catch {
             loadedModules[moduleID] = nil
+            context.reportModuleError(
+                moduleID: moduleID,
+                message: "Module failed to start",
+                error: error,
+                metadata: ["moduleType": manifest.moduleType.rawValue]
+            )
             throw error
         }
 
-        if let currentUIModuleID = activeUIModuleID, currentUIModuleID != moduleID {
-            try deactivateModule(moduleID: currentUIModuleID, persistState: false)
+        enabledUIModuleIDs.insert(moduleID)
+        if activeUIModuleID == nil {
+            activeUIModuleID = moduleID
         }
-
-        activeUIModuleID = moduleID
-        uiSurfaceManager.apply(moduleID: moduleID, contributions: uiModule.uiContributions)
+        uiSurfaceManager.apply(
+            moduleID: moduleID,
+            contributions: sanitizedUIContributions(for: uiModule.uiContributions)
+        )
     }
 
     private func persistState() throws {
         let state = ActivationState(
             enabledServiceModuleIDs: enabledServiceModuleIDs,
-            activeUIModuleID: activeUIModuleID
+            enabledUIModuleIDs: enabledUIModuleIDs,
+            selectedUIModuleID: activeUIModuleID
         )
         try activationStore.saveState(state)
+    }
+
+    private func sanitizedUIContributions(for source: UIContributions) -> UIContributions {
+        UIContributions(
+            themeMask: nil,
+            toolbarItems: source.toolbarItems,
+            viewInjections: source.viewInjections,
+            overlaySchema: source.overlaySchema
+        )
     }
 }

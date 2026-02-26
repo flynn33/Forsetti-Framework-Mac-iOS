@@ -12,6 +12,7 @@ public enum SlotCatalog {
     public static let homeBanner = "home.banner"
     public static let dashboardPrimary = "dashboard.primary"
     public static let overlayMain = "overlay.main"
+    public static let moduleWorkspace = "module.workspace"
 
-    public static let all: [String] = [homeBanner, dashboardPrimary, overlayMain]
+    public static let all: [String] = [homeBanner, dashboardPrimary, overlayMain, moduleWorkspace]
 }

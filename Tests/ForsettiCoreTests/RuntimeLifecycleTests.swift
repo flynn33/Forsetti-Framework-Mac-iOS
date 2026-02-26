@@ -37,6 +37,7 @@ final class RuntimeLifecycleTests: XCTestCase {
 
         let storedStateAfterShutdown = activationStore.loadState()
         XCTAssertTrue(storedStateAfterShutdown.enabledServiceModuleIDs.contains(serviceModuleID))
+        XCTAssertTrue(storedStateAfterShutdown.enabledUIModuleIDs.contains(uiModuleID))
         XCTAssertEqual(storedStateAfterShutdown.activeUIModuleID, uiModuleID)
 
         let secondRegistry = ModuleRegistry()
@@ -123,6 +124,95 @@ final class RuntimeLifecycleTests: XCTestCase {
 
         XCTAssertEqual(MismatchServiceModule.startInvocationCount, 0)
     }
+
+    @MainActor
+    func testMultipleUIModulesCanRemainActiveConcurrently() async throws {
+        let moduleAID = "com.forsetti.module.ui.a"
+        let moduleBID = "com.forsetti.module.ui.b"
+
+        let testBundle = try RuntimeTestBundle()
+        let manifestsDirectory = testBundle.bundleURL.appendingPathComponent("ForsettiManifests", isDirectory: true)
+        try FileManager.default.createDirectory(at: manifestsDirectory, withIntermediateDirectories: true)
+
+        let manifestA = ModuleManifest(
+            schemaVersion: ModuleManifest.supportedSchemaVersion,
+            moduleID: moduleAID,
+            displayName: "UI A",
+            moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+            moduleType: .ui,
+            supportedPlatforms: [.iOS, .macOS],
+            minForsettiVersion: ForsettiVersion.current,
+            maxForsettiVersion: nil,
+            capabilitiesRequested: [.toolbarItems],
+            iapProductID: nil,
+            entryPoint: "TestUIModuleA"
+        )
+
+        let manifestB = ModuleManifest(
+            schemaVersion: ModuleManifest.supportedSchemaVersion,
+            moduleID: moduleBID,
+            displayName: "UI B",
+            moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+            moduleType: .ui,
+            supportedPlatforms: [.iOS, .macOS],
+            minForsettiVersion: ForsettiVersion.current,
+            maxForsettiVersion: nil,
+            capabilitiesRequested: [.toolbarItems],
+            iapProductID: nil,
+            entryPoint: "TestUIModuleB"
+        )
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+        try encoder.encode(manifestA).write(
+            to: manifestsDirectory.appendingPathComponent("UIA.json"),
+            options: .atomic
+        )
+        try encoder.encode(manifestB).write(
+            to: manifestsDirectory.appendingPathComponent("UIB.json"),
+            options: .atomic
+        )
+
+        let registry = ModuleRegistry()
+        registry.register(entryPoint: "TestUIModuleA") { TestUIModuleA() }
+        registry.register(entryPoint: "TestUIModuleB") { TestUIModuleB() }
+
+        let manager = ModuleManager(
+            manifestLoader: ManifestLoader(),
+            moduleRegistry: registry,
+            compatibilityChecker: CompatibilityChecker(
+                runtimePlatform: .macOS,
+                forsettiVersion: ForsettiVersion.current,
+                capabilityPolicy: AllowAllCapabilityPolicy()
+            ),
+            activationStore: SharedInMemoryActivationStore(),
+            entitlementProvider: StaticEntitlementProvider(),
+            uiSurfaceManager: UISurfaceManager(),
+            context: ForsettiContext(
+                eventBus: InMemoryEventBus(),
+                services: ForsettiServiceContainer(),
+                logger: ConsoleForsettiLogger(),
+                router: NoopOverlayRouter()
+            )
+        )
+
+        _ = try manager.discoverModules(bundle: testBundle.bundle, subdirectory: "ForsettiManifests")
+
+        try await manager.activateModule(moduleID: moduleAID)
+        try await manager.activateModule(moduleID: moduleBID)
+
+        XCTAssertEqual(manager.enabledUIModuleIDs, Set([moduleAID, moduleBID]))
+        XCTAssertTrue(manager.isActive(moduleID: moduleAID))
+        XCTAssertTrue(manager.isActive(moduleID: moduleBID))
+        XCTAssertEqual(manager.activeUIModuleID, moduleAID)
+
+        try manager.setSelectedUIModule(moduleID: moduleBID)
+        XCTAssertEqual(manager.activeUIModuleID, moduleBID)
+
+        try manager.deactivateModule(moduleID: moduleBID)
+        XCTAssertEqual(manager.enabledUIModuleIDs, Set([moduleAID]))
+        XCTAssertEqual(manager.activeUIModuleID, moduleAID)
+    }
 }
 
 private final class SharedInMemoryActivationStore: ActivationStore, @unchecked Sendable {
@@ -165,6 +255,78 @@ private final class MismatchServiceModule: ForsettiModule {
         Self.startInvocationCount += 1
     }
 
+    func stop(context _: ForsettiContext) {}
+}
+
+private final class TestUIModuleA: ForsettiUIModule {
+    let descriptor = ModuleDescriptor(
+        moduleID: "com.forsetti.module.ui.a",
+        displayName: "UI A",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui
+    )
+
+    let manifest = ModuleManifest(
+        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        moduleID: "com.forsetti.module.ui.a",
+        displayName: "UI A",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        maxForsettiVersion: nil,
+        capabilitiesRequested: [.toolbarItems],
+        iapProductID: nil,
+        entryPoint: "TestUIModuleA"
+    )
+
+    let uiContributions = UIContributions(
+        toolbarItems: [
+            ToolbarItemDescriptor(
+                itemID: "ui.a.action",
+                title: "A Action",
+                action: .publishEvent(type: "ui.a.action", payload: nil)
+            )
+        ]
+    )
+
+    func start(context _: ForsettiContext) throws {}
+    func stop(context _: ForsettiContext) {}
+}
+
+private final class TestUIModuleB: ForsettiUIModule {
+    let descriptor = ModuleDescriptor(
+        moduleID: "com.forsetti.module.ui.b",
+        displayName: "UI B",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui
+    )
+
+    let manifest = ModuleManifest(
+        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        moduleID: "com.forsetti.module.ui.b",
+        displayName: "UI B",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        maxForsettiVersion: nil,
+        capabilitiesRequested: [.toolbarItems],
+        iapProductID: nil,
+        entryPoint: "TestUIModuleB"
+    )
+
+    let uiContributions = UIContributions(
+        toolbarItems: [
+            ToolbarItemDescriptor(
+                itemID: "ui.b.action",
+                title: "B Action",
+                action: .publishEvent(type: "ui.b.action", payload: nil)
+            )
+        ]
+    )
+
+    func start(context _: ForsettiContext) throws {}
     func stop(context _: ForsettiContext) {}
 }
 

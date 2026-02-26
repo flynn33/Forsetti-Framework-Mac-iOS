@@ -33,7 +33,6 @@ public final class UISurfaceManager: ObservableObject {
             .map(\.value)
 
         themeMask = orderedContributions.compactMap(\.themeMask).last
-        overlaySchema = orderedContributions.compactMap(\.overlaySchema).last
         toolbarItems = orderedContributions.flatMap(\.toolbarItems)
 
         let injections = orderedContributions
@@ -46,5 +45,29 @@ public final class UISurfaceManager: ObservableObject {
             }
 
         viewInjectionsBySlot = Dictionary(grouping: injections, by: \.slot)
+
+        let schemas = orderedContributions.compactMap(\.overlaySchema)
+        guard !schemas.isEmpty else {
+            overlaySchema = nil
+            return
+        }
+
+        var pointersByID: [String: NavigationPointer] = [:]
+        var routesByID: [String: OverlayRoute] = [:]
+
+        for schema in schemas {
+            for pointer in schema.pointers {
+                pointersByID[pointer.pointerID] = pointer
+            }
+            for route in schema.routes {
+                routesByID[route.routeID] = route
+            }
+        }
+
+        overlaySchema = OverlaySchema(
+            schemaID: "forsetti.overlay.composite",
+            pointers: pointersByID.values.sorted(by: { $0.pointerID < $1.pointerID }),
+            routes: routesByID.values.sorted(by: { $0.routeID < $1.routeID })
+        )
     }
 }

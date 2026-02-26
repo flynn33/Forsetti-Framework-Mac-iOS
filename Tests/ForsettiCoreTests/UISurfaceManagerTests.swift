@@ -53,14 +53,14 @@ final class UISurfaceManagerTests: XCTestCase {
         )
 
         XCTAssertEqual(manager.themeMask?.themeID, "theme.b")
-        XCTAssertEqual(manager.overlaySchema?.schemaID, "schema.b")
+        XCTAssertEqual(manager.overlaySchema?.schemaID, "forsetti.overlay.composite")
         XCTAssertEqual(manager.toolbarItems.map(\.itemID), ["toolbar.a", "toolbar.b"])
         XCTAssertEqual(manager.viewInjectionsBySlot["home.banner"]?.map(\.viewID), ["view.b", "view.a"])
 
         manager.remove(moduleID: "com.forsetti.module.b")
 
         XCTAssertEqual(manager.themeMask?.themeID, "theme.a")
-        XCTAssertEqual(manager.overlaySchema?.schemaID, "schema.a")
+        XCTAssertEqual(manager.overlaySchema?.schemaID, "forsetti.overlay.composite")
         XCTAssertEqual(manager.toolbarItems.map(\.itemID), ["toolbar.a"])
         XCTAssertEqual(manager.viewInjectionsBySlot["home.banner"]?.map(\.viewID), ["view.a"])
 

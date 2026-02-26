@@ -35,17 +35,16 @@ final class ForsettiHostControllerTests: XCTestCase {
 
         await controller.boot(restoreActivationState: false)
 
-        await controller.setServiceModuleEnabled(
-            moduleID: "com.forsetti.module.example-service",
-            isEnabled: true
-        )
         XCTAssertTrue(controller.enabledServiceModuleIDs.contains("com.forsetti.module.example-service"))
+        XCTAssertTrue(controller.enabledUIModuleIDs.contains("com.forsetti.module.example-ui"))
 
         await controller.selectUIModule(moduleID: "com.forsetti.module.example-ui")
         XCTAssertEqual(controller.activeUIModuleID, "com.forsetti.module.example-ui")
+        XCTAssertEqual(controller.selectedModuleID, "com.forsetti.module.example-ui")
 
         await controller.selectUIModule(moduleID: nil)
-        XCTAssertNil(controller.activeUIModuleID)
+        XCTAssertNil(controller.selectedModuleID)
+        XCTAssertTrue(controller.enabledUIModuleIDs.contains("com.forsetti.module.example-ui"))
 
         controller.shutdown()
     }
@@ -62,6 +61,7 @@ final class ForsettiHostControllerTests: XCTestCase {
         await controller.selectUIModule(moduleID: "com.forsetti.module.example-ui")
 
         XCTAssertNil(controller.activeUIModuleID)
+        XCTAssertFalse(controller.enabledUIModuleIDs.contains("com.forsetti.module.example-ui"))
         XCTAssertNotNil(controller.errorMessage)
 
         let uiModule = controller.uiModules.first { $0.moduleID == "com.forsetti.module.example-ui" }
@@ -95,13 +95,14 @@ final class ForsettiHostControllerTests: XCTestCase {
 
         await controller.boot(restoreActivationState: false)
         await controller.selectUIModule(moduleID: "com.forsetti.module.example-ui")
-        XCTAssertNil(controller.activeUIModuleID)
+        XCTAssertFalse(controller.enabledUIModuleIDs.contains("com.forsetti.module.example-ui"))
 
         entitlements.setUnlockedProducts(["com.forsetti.iap.example-ui"])
         await controller.restorePurchases()
 
         await controller.selectUIModule(moduleID: "com.forsetti.module.example-ui")
         XCTAssertEqual(controller.activeUIModuleID, "com.forsetti.module.example-ui")
+        XCTAssertTrue(controller.enabledUIModuleIDs.contains("com.forsetti.module.example-ui"))
         XCTAssertNotNil(controller.runtime.moduleManager.manifestsByID["com.forsetti.module.example-ui"])
 
         controller.shutdown()

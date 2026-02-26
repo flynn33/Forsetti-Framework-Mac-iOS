@@ -96,7 +96,27 @@ final class CompatibilityCheckerTests: XCTestCase {
         })
     }
 
-    func testWarnsWhenDifferentUIModuleAlreadyActive() {
+    func testRejectsReservedFrameworkShellCapability() {
+        let checker = CompatibilityChecker(
+            runtimePlatform: .macOS,
+            forsettiVersion: ForsettiVersion.current,
+            capabilityPolicy: AllowAllCapabilityPolicy()
+        )
+
+        let report = checker.evaluate(
+            manifest: makeManifest(
+                moduleType: .ui,
+                capabilities: [.uiThemeMask]
+            )
+        )
+
+        XCTAssertFalse(report.isCompatible)
+        XCTAssertTrue(report.issues.contains {
+            $0.code == .capabilityDenied && $0.severity == .error
+        })
+    }
+
+    func testAllowsUIModuleCompatibilityCheckWithoutSingleSelectionConstraint() {
         let checker = CompatibilityChecker(
             runtimePlatform: .macOS,
             forsettiVersion: ForsettiVersion.current,
@@ -107,15 +127,12 @@ final class CompatibilityCheckerTests: XCTestCase {
             manifest: makeManifest(
                 moduleID: "com.forsetti.module.ui.secondary",
                 moduleType: .ui,
-                capabilities: [.uiThemeMask]
-            ),
-            activeUIModuleID: "com.forsetti.module.ui.primary"
+                capabilities: [.toolbarItems]
+            )
         )
 
         XCTAssertTrue(report.isCompatible)
-        XCTAssertTrue(report.issues.contains {
-            $0.code == .uiModuleAlreadyActive && $0.severity == .warning
-        })
+        XCTAssertFalse(report.issues.contains { $0.severity == .warning })
     }
 
     private func makeManifest(

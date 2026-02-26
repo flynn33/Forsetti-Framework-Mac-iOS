@@ -17,7 +17,7 @@
     "prerelease": null
   },
   "maxForsettiVersion": null,
-  "capabilitiesRequested": ["routing_overlay", "ui_theme_mask", "toolbar_items", "view_injection"],
+  "capabilitiesRequested": ["routing_overlay", "toolbar_items", "view_injection"],
   "iapProductID": "com.forsetti.iap.example-ui",
   "entryPoint": "ExampleUIModule"
 }

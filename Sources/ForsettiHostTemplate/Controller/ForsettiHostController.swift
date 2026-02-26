@@ -7,7 +7,9 @@ public final class ForsettiHostController: ObservableObject {
     @Published public private(set) var serviceModules: [ForsettiHostModuleItem] = []
     @Published public private(set) var uiModules: [ForsettiHostModuleItem] = []
     @Published public private(set) var enabledServiceModuleIDs: Set<String> = []
+    @Published public private(set) var enabledUIModuleIDs: Set<String> = []
     @Published public private(set) var activeUIModuleID: String?
+    @Published public var selectedModuleID: String?
     @Published public private(set) var isBooted = false
     @Published public private(set) var isBusy = false
     @Published public private(set) var lastToolbarActionDescription: String?
@@ -44,7 +46,10 @@ public final class ForsettiHostController: ObservableObject {
         await boot()
     }
 
-    public func boot(restoreActivationState: Bool = true) async {
+    public func boot(
+        restoreActivationState: Bool = true,
+        activateAllEligibleModules: Bool = true
+    ) async {
         isBusy = true
         defer { isBusy = false }
 
@@ -54,6 +59,11 @@ public final class ForsettiHostController: ObservableObject {
                 manifestsSubdirectory: manifestsSubdirectory,
                 restoreActivationState: restoreActivationState
             )
+
+            if activateAllEligibleModules {
+                await activateEligibleModulesOnLaunch()
+            }
+
             isBooted = true
             startEntitlementObservation()
             await refreshModuleState()
@@ -70,7 +80,9 @@ public final class ForsettiHostController: ObservableObject {
         serviceModules = []
         uiModules = []
         enabledServiceModuleIDs = []
+        enabledUIModuleIDs = []
         activeUIModuleID = nil
+        selectedModuleID = nil
         isBooted = false
     }
 
@@ -113,7 +125,18 @@ public final class ForsettiHostController: ObservableObject {
         serviceModules = nextItems.filter { $0.moduleType == .service }
         uiModules = nextItems.filter { $0.moduleType == .ui }
         enabledServiceModuleIDs = runtime.moduleManager.enabledServiceModuleIDs
+        enabledUIModuleIDs = runtime.moduleManager.enabledUIModuleIDs
         activeUIModuleID = runtime.moduleManager.activeUIModuleID
+
+        if let selectedModuleID,
+           !nextItems.contains(where: { $0.moduleID == selectedModuleID }) {
+            self.selectedModuleID = nil
+        }
+
+        if let selectedModuleID,
+           !runtime.moduleManager.isActive(moduleID: selectedModuleID) {
+            self.selectedModuleID = nil
+        }
     }
 
     public func setServiceModuleEnabled(moduleID: String, isEnabled: Bool) async {
@@ -125,6 +148,30 @@ public final class ForsettiHostController: ObservableObject {
                 try await runtime.moduleManager.activateModule(moduleID: moduleID)
             } else {
                 try runtime.moduleManager.deactivateModule(moduleID: moduleID)
+                if selectedModuleID == moduleID {
+                    selectedModuleID = nil
+                }
+            }
+        } catch {
+            present(error: error)
+        }
+
+        await refreshModuleState()
+    }
+
+    public func setUIModuleEnabled(moduleID: String, isEnabled: Bool) async {
+        isBusy = true
+        defer { isBusy = false }
+
+        do {
+            if isEnabled {
+                try await runtime.moduleManager.activateModule(moduleID: moduleID)
+                try runtime.moduleManager.setSelectedUIModule(moduleID: moduleID)
+            } else {
+                try runtime.moduleManager.deactivateModule(moduleID: moduleID)
+                if selectedModuleID == moduleID {
+                    selectedModuleID = nil
+                }
             }
         } catch {
             present(error: error)
@@ -134,20 +181,46 @@ public final class ForsettiHostController: ObservableObject {
     }
 
     public func selectUIModule(moduleID: String?) async {
+        if let moduleID {
+            await setUIModuleEnabled(moduleID: moduleID, isEnabled: true)
+            selectedModuleID = moduleID
+            return
+        }
+
+        goHome()
+
+        do {
+            try runtime.moduleManager.setSelectedUIModule(moduleID: nil)
+            await refreshModuleState()
+        } catch {
+            present(error: error)
+        }
+    }
+
+    public func openModule(moduleID: String) async {
         isBusy = true
         defer { isBusy = false }
 
         do {
-            if let moduleID {
+            if !runtime.moduleManager.isActive(moduleID: moduleID) {
                 try await runtime.moduleManager.activateModule(moduleID: moduleID)
-            } else if let activeUIModuleID = runtime.moduleManager.activeUIModuleID {
-                try runtime.moduleManager.deactivateModule(moduleID: activeUIModuleID)
             }
+
+            if let manifest = runtime.moduleManager.manifestsByID[moduleID],
+               manifest.moduleType == .ui {
+                try runtime.moduleManager.setSelectedUIModule(moduleID: moduleID)
+            }
+
+            selectedModuleID = moduleID
         } catch {
             present(error: error)
         }
 
         await refreshModuleState()
+    }
+
+    public func goHome() {
+        selectedModuleID = nil
     }
 
     public func refreshEntitlements() async {
@@ -165,6 +238,17 @@ public final class ForsettiHostController: ObservableObject {
         } catch {
             present(error: error)
         }
+    }
+
+    public func uiContributions(for moduleID: String) -> UIContributions? {
+        runtime.moduleManager.uiContributions(for: moduleID)
+    }
+
+    public func selectedModuleItem() -> ForsettiHostModuleItem? {
+        guard let selectedModuleID else {
+            return nil
+        }
+        return (serviceModules + uiModules).first(where: { $0.moduleID == selectedModuleID })
     }
 
     public func handleToolbarAction(_ action: ToolbarAction) {
@@ -190,7 +274,7 @@ public final class ForsettiHostController: ObservableObject {
                 event: ForsettiEvent(
                     type: type,
                     payload: payload ?? [:],
-                    sourceModuleID: activeUIModuleID
+                    sourceModuleID: selectedModuleID ?? activeUIModuleID
                 )
             )
             lastToolbarActionDescription = "Published event: \(type)"
@@ -212,6 +296,34 @@ public final class ForsettiHostController: ObservableObject {
 
             for await _ in stream {
                 await self.refreshModuleState()
+            }
+        }
+    }
+
+    private func activateEligibleModulesOnLaunch() async {
+        let manifests = runtime.moduleManager.discoveredManifests
+
+        for manifest in manifests {
+            guard runtime.moduleManager.compatibilityReport(for: manifest.moduleID)?.isCompatible == true else {
+                continue
+            }
+
+            let unlocked = await entitlementProvider.isUnlocked(
+                moduleID: manifest.moduleID,
+                productID: manifest.iapProductID
+            )
+            guard unlocked else {
+                continue
+            }
+
+            guard !runtime.moduleManager.isActive(moduleID: manifest.moduleID) else {
+                continue
+            }
+
+            do {
+                try await runtime.moduleManager.activateModule(moduleID: manifest.moduleID)
+            } catch {
+                present(error: error)
             }
         }
     }

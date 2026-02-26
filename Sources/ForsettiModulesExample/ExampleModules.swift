@@ -32,20 +32,19 @@ public final class ExampleServiceModule: ForsettiModule {
             return
         }
 
+        let moduleLogger = context.moduleLogger(moduleID: descriptor.moduleID)
         let startedAt = Date().ISO8601Format()
         if let storage = context.services.resolve(StorageService.self) {
             storage.set(startedAt, forKey: lastStartedAtStorageKey)
         }
 
         isStarted = true
-        context.eventBus.publish(
-            event: ForsettiEvent(
-                type: "example.service.started",
-                payload: ["moduleID": descriptor.moduleID, "startedAt": startedAt],
-                sourceModuleID: descriptor.moduleID
-            )
+        context.publishFrameworkEvent(
+            type: "example.service.started",
+            payload: ["moduleID": descriptor.moduleID, "startedAt": startedAt],
+            sourceModuleID: descriptor.moduleID
         )
-        context.logger.log(.info, message: "ExampleServiceModule started")
+        moduleLogger.info("ExampleServiceModule started")
     }
 
     public func stop(context: ForsettiContext) {
@@ -53,19 +52,18 @@ public final class ExampleServiceModule: ForsettiModule {
             return
         }
 
+        let moduleLogger = context.moduleLogger(moduleID: descriptor.moduleID)
         if let storage = context.services.resolve(StorageService.self) {
             storage.removeValue(forKey: lastStartedAtStorageKey)
         }
 
         isStarted = false
-        context.eventBus.publish(
-            event: ForsettiEvent(
-                type: "example.service.stopped",
-                payload: ["moduleID": descriptor.moduleID],
-                sourceModuleID: descriptor.moduleID
-            )
+        context.publishFrameworkEvent(
+            type: "example.service.stopped",
+            payload: ["moduleID": descriptor.moduleID],
+            sourceModuleID: descriptor.moduleID
         )
-        context.logger.log(.info, message: "ExampleServiceModule stopped")
+        moduleLogger.info("ExampleServiceModule stopped")
     }
 }
 
@@ -85,19 +83,12 @@ public final class ExampleUIModule: ForsettiUIModule {
         moduleType: .ui,
         supportedPlatforms: [.iOS, .macOS],
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
-        capabilitiesRequested: [.routingOverlay, .uiThemeMask, .toolbarItems, .viewInjection],
+        capabilitiesRequested: [.routingOverlay, .toolbarItems, .viewInjection],
         iapProductID: "com.forsetti.iap.example-ui",
         entryPoint: "ExampleUIModule"
     )
 
     public let uiContributions = UIContributions(
-        themeMask: ThemeMask(
-            themeID: "example.ui.theme",
-            tokens: [
-                ThemeToken(key: "accentColor", value: "#1479FF"),
-                ThemeToken(key: "cardRadius", value: "14")
-            ]
-        ),
         toolbarItems: [
             ToolbarItemDescriptor(
                 itemID: "example-ui-home",
@@ -109,7 +100,7 @@ public final class ExampleUIModule: ForsettiUIModule {
         viewInjections: [
             ViewInjectionDescriptor(
                 injectionID: "example-ui-banner",
-                slot: "home.banner",
+                slot: "module.workspace",
                 viewID: "example-banner",
                 priority: 100
             )
@@ -144,7 +135,7 @@ public final class ExampleUIModule: ForsettiUIModule {
         }
 
         isStarted = true
-        context.logger.log(.info, message: "ExampleUIModule started")
+        context.moduleLogger(moduleID: descriptor.moduleID).info("ExampleUIModule started")
     }
 
     public func stop(context: ForsettiContext) {
@@ -153,7 +144,7 @@ public final class ExampleUIModule: ForsettiUIModule {
         }
 
         isStarted = false
-        context.logger.log(.info, message: "ExampleUIModule stopped")
+        context.moduleLogger(moduleID: descriptor.moduleID).info("ExampleUIModule stopped")
     }
 }
 

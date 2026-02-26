@@ -110,7 +110,7 @@ public final class ForsettiRuntime {
 
     private func reconcileActiveModulesWithEntitlements() async {
         let activeServiceIDs = moduleManager.enabledServiceModuleIDs
-        let activeUIModuleID = moduleManager.activeUIModuleID
+        let activeUIModuleIDs = moduleManager.enabledUIModuleIDs
 
         for moduleID in activeServiceIDs {
             guard let manifest = moduleManager.manifestsByID[moduleID] else {
@@ -127,8 +127,11 @@ public final class ForsettiRuntime {
             }
         }
 
-        if let moduleID = activeUIModuleID,
-           let manifest = moduleManager.manifestsByID[moduleID] {
+        for moduleID in activeUIModuleIDs {
+            guard let manifest = moduleManager.manifestsByID[moduleID] else {
+                continue
+            }
+
             let unlocked = await entitlementProvider.isUnlocked(moduleID: moduleID, productID: manifest.iapProductID)
             if !unlocked {
                 do {
