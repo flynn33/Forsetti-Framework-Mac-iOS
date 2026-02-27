@@ -2,6 +2,7 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
+_Last updated: February 27, 2026_
 
 If you are evaluating Forsetti, start here.
 If you are implementing with Forsetti, this README is the canonical high-level reference.

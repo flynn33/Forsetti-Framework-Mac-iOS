@@ -2,6 +2,7 @@
 
 This guide is for teams integrating Forsetti into their own apps.
 It defines the engineering rules your project should enforce so Forsetti remains modular, native, and maintainable.
+_Last updated: February 27, 2026_
 
 ## 1. Required Stack
 

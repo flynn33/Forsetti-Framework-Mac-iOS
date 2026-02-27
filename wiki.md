@@ -2,6 +2,7 @@
 
 This wiki is the comprehensive integration manual for teams using Forsetti in their own iOS/macOS projects.
 It expands on `guide.md` with architecture patterns, implementation templates, governance rules, and operational playbooks.
+_Last updated: February 27, 2026_
 
 ## 1. Scope and Audience
 
