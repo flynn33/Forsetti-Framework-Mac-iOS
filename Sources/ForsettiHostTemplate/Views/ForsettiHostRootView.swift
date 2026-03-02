@@ -4,16 +4,24 @@ import ForsettiCore
 public struct ForsettiHostRootView: View {
     @ObservedObject private var controller: ForsettiHostController
     private let injectionRegistry: ForsettiViewInjectionRegistry
+    /// Controls whether Forsetti developer controls (Home, Settings, module switcher, error alerts)
+    /// are visible. Set to `true` during development and testing (Pattern C / dashboard use).
+    /// Set to `false` for production deployments (Pattern A / B) where the framework runs silently
+    /// and end users interact only with the module's own UI.
+    private let showDeveloperControls: Bool
 
     @State private var isSettingsPresented = false
-    @State private var isFrameworkChromeVisible = true
+    @State private var isFrameworkChromeVisible: Bool
 
     public init(
         controller: ForsettiHostController,
-        injectionRegistry: ForsettiViewInjectionRegistry = ForsettiViewInjectionRegistry()
+        injectionRegistry: ForsettiViewInjectionRegistry = ForsettiViewInjectionRegistry(),
+        showDeveloperControls: Bool = true
     ) {
         self.controller = controller
         self.injectionRegistry = injectionRegistry
+        self.showDeveloperControls = showDeveloperControls
+        _isFrameworkChromeVisible = State(initialValue: showDeveloperControls)
     }
 
     public var body: some View {
@@ -30,7 +38,7 @@ public struct ForsettiHostRootView: View {
                 }
             }
 
-            if !isFrameworkChromeVisible {
+            if !isFrameworkChromeVisible && showDeveloperControls {
                 Button {
                     withAnimation(.easeInOut(duration: 0.2)) {
                         isFrameworkChromeVisible = true
@@ -58,7 +66,7 @@ public struct ForsettiHostRootView: View {
         .alert(
             "Forsetti Error",
             isPresented: Binding(
-                get: { controller.errorMessage != nil },
+                get: { showDeveloperControls && controller.errorMessage != nil },
                 set: { isPresented in
                     if !isPresented {
                         controller.clearError()
@@ -103,7 +111,7 @@ public struct ForsettiHostRootView: View {
 
             HStack(spacing: 8) {
                 GuideInfoButton(
-                    text: "Settings is a fixed framework control and remains in the top-right corner."
+                    text: "Settings is a developer framework control. It should not be visible in production deployments. Use showDeveloperControls: false when deploying to end users."
                 )
 
                 Button {
@@ -333,18 +341,20 @@ public struct ForsettiHostRootView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
 
-                    HStack(spacing: 8) {
-                        Button {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                isFrameworkChromeVisible = false
+                    if showDeveloperControls {
+                        HStack(spacing: 8) {
+                            Button {
+                                withAnimation(.easeInOut(duration: 0.2)) {
+                                    isFrameworkChromeVisible = false
+                                }
+                            } label: {
+                                Label("Hide Framework Menus", systemImage: "rectangle.compress.vertical")
                             }
-                        } label: {
-                            Label("Hide Framework Menus", systemImage: "rectangle.compress.vertical")
-                        }
 
-                        GuideInfoButton(
-                            text: "Modules may temporarily hide framework chrome, but users can always reveal it from the top-left Show Menus control."
-                        )
+                            GuideInfoButton(
+                                text: "In developer mode, modules may temporarily hide framework chrome. Use the top-left Show Menus control to reveal it again. In production (showDeveloperControls: false), framework chrome is permanently hidden."
+                            )
+                        }
                     }
                 }
                 .padding(12)

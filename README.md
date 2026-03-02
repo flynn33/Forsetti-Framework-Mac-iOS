@@ -38,7 +38,7 @@ It is built around these capabilities:
 - Module discovery from bundled manifests.
 - Compatibility validation before activation.
 - Entitlement-aware module locking/unlocking.
-- Single-active UI module policy plus service module coexistence.
+- Flexible module activation with clear deployment patterns (see below).
 - Structured UI contributions (toolbar, theme tokens, overlays, view injection).
 - Native host integration with Swift and SwiftUI.
 
@@ -69,6 +69,48 @@ These principles are intentional constraints, not suggestions.
 - Boundary-first: dependency direction is intentional and enforced.
 - Policy-first: compatibility, capabilities, and entitlements are runtime gates.
 - Host-agnostic modules: features should be plug-in style, not host-wired.
+
+## 3b) Deployment Patterns
+
+Forsetti supports four deployment patterns. Choose the one that matches your use case.
+
+### Pattern A — Single-Module App (most common)
+
+The app is a single `ForsettiUIModule` that includes the complete application UI.
+The framework loads silently in the background.
+End users see only the module's UI and have no awareness of the framework.
+Framework controls (Home, Settings) are hidden in production.
+Framework errors go silently to the framework error log.
+Updates are delivered by swapping the module with a new version.
+
+> This is the expected pattern for the vast majority of apps built on Forsetti.
+
+### Pattern B — Multi-Module Single Application
+
+The application is composed of multiple modules: exactly one UI module plus one or more service modules.
+The UI module carries the application's UI.
+All service modules run simultaneously alongside the UI module.
+The framework enforces one active UI module at a time for this pattern.
+The framework still runs silently; end users see only the UI module's interface.
+
+> Use this pattern when your application requires background services (data sync, analytics, etc.) that are cleanly separated from the UI.
+
+### Pattern C — Developer Testing (multiple single-module apps)
+
+A developer loads multiple different single-module apps on one framework instance for testing.
+Each module represents a separate application and may have its own UI.
+Only one module is active at a time since each represents a different application.
+Framework controls (Home, Settings, module switcher) remain visible so the developer can switch between apps.
+
+> This is a development and QA pattern, not intended for production deployment.
+
+### Pattern D — Dashboard Deployment (end-user multi-app)
+
+Multiple separate applications are hosted on one framework for end-user access.
+Framework controls may remain visible to allow users to navigate between applications.
+A dedicated UI module for the dashboard itself is recommended.
+
+> Use this pattern for portal or launcher-style apps where end users explicitly switch between multiple applications.
 
 ## 4) Integration Contract (What You Can and Cannot Do)
 

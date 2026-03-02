@@ -10,7 +10,7 @@
       "Strict modularity: modules are self-contained and do not depend on other modules.",
       "Framework-mediated everything: modules communicate only through Forsetti (events/services/routing).",
       "iOS-compliant: no runtime loading of new native code; all modules ship in the app bundle and are unlocked via IAP.",
-      "One UI module active at a time; UI changes are overlays/masks, never replacing root."
+      "For single applications composed of multiple modules, exactly one UI module is active at a time. Single-module apps include their own UI inside the module and run silently; no separate UI module is needed. UI changes are overlays/masks, never replacing root."
     ]
   },
   "platforms": {
@@ -36,7 +36,7 @@
       },
       {
         "name": "ForsettiHostTemplate",
-        "role": "App template demonstrating container app composition, module UI selection UX (toggle + single UI module selection), IAP unlock UX integration points."
+        "role": "Developer-facing app template for module discovery, activation, and testing. Includes framework controls (Home, Settings, module switcher) that are intended for use during development. In production single-module apps, these controls are hidden and the framework runs silently behind the module's own UI."
       },
       {
         "name": "ForsettiModules",
@@ -50,7 +50,7 @@
       },
       "types": {
         "service_module": "Adds capabilities/services; no UI overlay required.",
-        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Exactly one active at a time."
+        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Single-module apps: the one UI module carries the full application UI and the framework runs silently. Multi-module single applications: exactly one UI module active at a time alongside any number of active service modules. Developer-testing and dashboard contexts: one module active at a time, selectable via framework controls."
       }
     }
   },
@@ -109,7 +109,7 @@
           ]
         },
         "constraints": [
-          "Framework enforces single active UI module at a time.",
+          "For multi-module single applications, framework enforces exactly one active UI module at a time alongside any number of service modules. Single-module apps carry their own full UI inside the module freely.",
           "UIContributions must be overlays/masks; never replace app root view."
         ]
       },
@@ -337,7 +337,7 @@
         "Check platform support.",
         "Check Forsetti version range.",
         "Check requested capabilities vs policy.",
-        "Check module type constraints (single UI module active).",
+        "Check UI module activation policy for multi-module applications (one UI module active per single application).",
         "Return CompatibilityReport with structured reasons."
       ]
     },
@@ -351,8 +351,9 @@
         "Coordinate entitlement gating."
       ],
       "state_model": {
-        "enabledServiceModuleIDs": "Set<String>",
-        "activeUIModuleID": "String?",
+        "enabledServiceModuleIDs": "Set<String> — all active service modules (multiple allowed simultaneously).",
+        "enabledUIModuleIDs": "Set<String> — all enabled UI modules. In multi-module single apps, exactly one should be in this set. In developer-testing and dashboard contexts, activeUIModuleID selects which one is foregrounded.",
+        "activeUIModuleID": "String? — the currently foregrounded UI module. Used in developer-testing and dashboard contexts to switch between module applications. Not a hard constraint for single-module apps.",
         "loadedModules": "Map<String, ForsettiModule>"
       }
     },
@@ -492,7 +493,9 @@
   "acceptance_criteria": [
     "On iOS, app boots, discovers all bundled manifests, and lists modules.",
     "Locked modules are visible but cannot be activated until unlocked via IAP provider.",
-    "User can enable multiple service modules and exactly one UI module.",
+    "Single-module app: the module (with its own UI) is active and the framework runs silently in the background.",
+    "Multi-module single application: all service modules and exactly one UI module are active simultaneously.",
+    "Developer-testing context: one module (application) is active at a time, switchable via framework controls.",
     "Activation state persists across launches.",
     "Deactivating a module removes its UI overlays and stops event subscriptions/services.",
     "Modules can add navigation pointers to base destinations without altering base navigation stack.",

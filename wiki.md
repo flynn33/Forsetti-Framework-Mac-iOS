@@ -50,7 +50,10 @@ Forsetti runtime model:
 1. Your app registers module factories (`entryPoint` -> factory closure).
 2. Runtime discovers module manifests from a bundle resource directory.
 3. Runtime checks compatibility and entitlement rules.
-4. Runtime activates service modules and at most one UI module.
+4. Runtime activates modules according to the deployment pattern in use:
+   - **Single-module app**: The one `ForsettiUIModule` (which carries the full app UI) is activated; the framework runs silently.
+   - **Multi-module single application**: All service modules and exactly one UI module are activated simultaneously; framework still runs silently.
+   - **Developer testing**: One module (application) is active at a time, selectable via framework controls.
 5. UI contributions are surfaced via shared UI state (`UISurfaceManager`).
 
 Key public contracts:
@@ -102,7 +105,45 @@ Note: replace URL and package identity with your actual dependency source.
 
 ## 6. Recommended App Architecture
 
-Example consumer layout:
+### 6.0 Deployment Patterns
+
+Choose the pattern that matches your use case before designing your target layout.
+
+**Pattern A — Single-Module App (most common)**
+
+One `ForsettiUIModule` includes the complete application UI.
+The framework loads silently; end users see only the module's UI.
+Framework controls are hidden in production; errors go to the framework error log.
+Updates are delivered by swapping the module.
+
+```
+MyAppHost target  ->  MyAppModule (ForsettiUIModule with full app UI)
+```
+
+**Pattern B — Multi-Module Single Application**
+
+One dedicated UI module + one or more service modules constitute a single application.
+The framework enforces one active UI module at a time.
+All service modules run simultaneously.
+The framework still runs silently.
+
+```
+MyAppHost target  ->  MyAppUIModule + MyAppServiceModuleA + MyAppServiceModuleB
+```
+
+**Pattern C — Developer Testing**
+
+Multiple different single-module apps loaded on one framework for development and QA.
+Each module may have its own UI.
+Only one module is active at a time; framework controls are visible for switching.
+
+**Pattern D — Dashboard Deployment**
+
+Multiple applications hosted on one framework for end users.
+Framework controls may remain visible.
+A dedicated UI module for the dashboard itself is recommended.
+
+### 6.1 Example Consumer Layout (Pattern A or B)
 
 - `MyAppHost` target: app shell and scene composition.
 - `MyAppModules` target: app-owned Forsetti modules and manifests.
@@ -341,7 +382,7 @@ Forsetti evaluates:
 - runtime platform support.
 - min/max Forsetti version range.
 - capability policy decisions.
-- single-active UI module behavior warnings.
+- UI module activation policy checks (one UI module per single application in multi-module deployments).
 
 A module is activatable only when the compatibility report has no error-severity issues.
 
