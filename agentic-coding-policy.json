@@ -151,7 +151,7 @@
     "runtime_and_activation": [
       "Runtime boot MUST refresh entitlements before restoring persisted activation state.",
       "Runtime shutdown MUST deactivate loaded modules without clearing persisted activation state.",
-      "UI module activation MUST verify ForsettiUIModule type compatibility before lifecycle start."
+      "UI/app module activation MUST verify ForsettiUIModule or ForsettiAppModule type compatibility before lifecycle start."
     ],
     "manifest_loading": [
       "Strict manifests directory loading MUST fail fast on invalid manifest JSON/validation errors.",
@@ -173,7 +173,7 @@
   },
   "consumer_repo_guidance": {
     "allowed_patterns": [
-      "Implement app-owned modules using ForsettiModule or ForsettiUIModule.",
+      "Implement app-owned modules using ForsettiAppModule (single-module apps), ForsettiUIModule (multi-module UI), or ForsettiModule (service/feature).",
       "Use Forsetti service container and protocol-based service contracts.",
       "Compose runtime and host through public bootstrap/runtime APIs.",
       "Create app-level architecture tests and lint rules mirroring Forsetti principles."

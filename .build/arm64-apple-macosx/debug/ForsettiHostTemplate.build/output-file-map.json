@@ -1,47 +1,54 @@
 {
   "": {
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/master.swiftdeps"
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/master.swiftdeps"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Controller/ForsettiHostController.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Controller/ForsettiHostController.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostController.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Controller/ForsettiHostTemplateBootstrap.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Controller/ForsettiHostTemplateBootstrap.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostTemplateBootstrap.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiHostCatalogs.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiHostCatalogs.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostCatalogs.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiHostModuleItem.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiHostModuleItem.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostModuleItem.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiViewInjectionRegistry.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiHostOverlayRouter.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostOverlayRouter.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostOverlayRouter.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostOverlayRouter~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostOverlayRouter.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostOverlayRouter.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiHostTemplate/Views/ForsettiHostRootView.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Models/ForsettiViewInjectionRegistry.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiViewInjectionRegistry.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiHostTemplate/Views/ForsettiHostRootView.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiHostTemplate.build/ForsettiHostRootView.dia"
   }
 }

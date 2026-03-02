@@ -21,7 +21,7 @@ Forsetti must be treated as a sealed framework in consumer projects.
 
 - Use Forsetti package products through their public APIs.
 - Build your app features in your own targets/packages.
-- Implement your own modules using public contracts such as `ForsettiModule` and `ForsettiUIModule`.
+- Implement your own modules using public contracts such as `ForsettiModule`, `ForsettiAppModule`, or `ForsettiUIModule`.
 
 ### Not Allowed
 
@@ -109,7 +109,7 @@ PRs should be blocked from merge unless guardrails also pass in CI.
 When adding capabilities in a project that uses Forsetti:
 
 1. Create or choose an app-owned target/package for your Forsetti modules.
-2. Implement `ForsettiModule` or `ForsettiUIModule` in your own codebase.
+2. Implement `ForsettiAppModule` (single-module apps), `ForsettiUIModule` (multi-module UI), or `ForsettiModule` (service/feature) in your own codebase.
 3. Define each module's descriptor/manifest and register entry points in your app bootstrap.
 4. Compose runtime/services using public Forsetti APIs only.
 5. Keep dependencies injected and avoid global mutable state.

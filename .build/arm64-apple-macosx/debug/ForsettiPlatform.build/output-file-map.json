@@ -1,19 +1,19 @@
 {
   "": {
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/master.swiftdeps"
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/master.swiftdeps"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiPlatform/EntitlementProviders.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiPlatform/EntitlementProviders.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/EntitlementProviders.dia"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/ForsettiPlatform/PlatformServices.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Sources/ForsettiPlatform/PlatformServices.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatform.build/PlatformServices.dia"
   }
 }

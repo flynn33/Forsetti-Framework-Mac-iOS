@@ -3,7 +3,7 @@ import Foundation
 extension Foundation.Bundle {
     static let module: Bundle = {
         let mainPath = Bundle.main.bundleURL.appendingPathComponent("ForsettiFramework_ForsettiModulesExample.bundle").path
-        let buildPath = "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFramework_ForsettiModulesExample.bundle"
+        let buildPath = "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFramework_ForsettiModulesExample.bundle"
 
         let preferredBundle = Bundle(path: mainPath)
 

@@ -31,6 +31,8 @@ public enum Capability: String, Codable, CaseIterable, Hashable, Sendable {
 public enum ModuleType: String, Codable, Sendable {
     case service
     case ui
+    /// A complete single-application module that includes its own UI.
+    case app
 }
 
 public struct ModuleDescriptor: Codable, Hashable, Sendable {

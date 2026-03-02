@@ -40,7 +40,7 @@
       },
       {
         "name": "ForsettiModules",
-        "role": "Bundled module targets. Each module includes a manifest and a factory, conforms to ForsettiModule or ForsettiUIModule."
+        "role": "Bundled module targets. Each module includes a manifest and a factory, conforms to ForsettiModule, ForsettiAppModule, or ForsettiUIModule."
       }
     ],
     "module_model": {
@@ -49,8 +49,9 @@
         "macOS": "Same as iOS for v1; design allows later adding external plugin bundle sources."
       },
       "types": {
-        "service_module": "Adds capabilities/services; no UI overlay required.",
-        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Single-module apps: the one UI module carries the full application UI and the framework runs silently. Multi-module single applications: exactly one UI module active at a time alongside any number of active service modules. Developer-testing and dashboard contexts: one module active at a time, selectable via framework controls."
+        "service_module": "Adds capabilities/services; no UI overlay required. Used in multi-module applications for individual features.",
+        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Used in multi-module single applications as the dedicated UI module. Exactly one UI module active at a time alongside any number of active service modules.",
+        "app_module": "A complete single-application module (ForsettiAppModule) that includes its own UI. The framework runs silently; end users see only the module's UI. Updates are delivered by swapping the module. This is the most common module type for production apps."
       }
     }
   },
@@ -100,6 +101,18 @@
         ]
       },
       {
+        "name": "ForsettiAppModule",
+        "kind": "protocol",
+        "extends": ["ForsettiUIModule"],
+        "requirements": {},
+        "notes": [
+          "A complete single-application module that includes its own UI.",
+          "Use for simple applications where the entire app (UI + logic) lives in one module.",
+          "The framework runs silently in the background; end users interact only with the module's UI.",
+          "Updates are delivered by swapping the module. Module manifest uses moduleType: app."
+        ]
+      },
+      {
         "name": "ForsettiUIModule",
         "kind": "protocol",
         "extends": ["ForsettiModule"],
@@ -109,7 +122,7 @@
           ]
         },
         "constraints": [
-          "For multi-module single applications, framework enforces exactly one active UI module at a time alongside any number of service modules. Single-module apps carry their own full UI inside the module freely.",
+          "For multi-module single applications, framework enforces exactly one active UI module at a time alongside any number of service modules.",
           "UIContributions must be overlays/masks; never replace app root view."
         ]
       },
@@ -172,7 +185,7 @@
       {
         "name": "ModuleType",
         "type": "enum",
-        "cases": ["service", "ui"]
+        "cases": ["service", "ui", "app"]
       },
       {
         "name": "ModuleDescriptor",
@@ -493,7 +506,7 @@
   "acceptance_criteria": [
     "On iOS, app boots, discovers all bundled manifests, and lists modules.",
     "Locked modules are visible but cannot be activated until unlocked via IAP provider.",
-    "Single-module app: the module (with its own UI) is active and the framework runs silently in the background.",
+    "Single-module app: the ForsettiAppModule (with its own UI) is active and the framework runs silently in the background.",
     "Multi-module single application: all service modules and exactly one UI module are active simultaneously.",
     "Developer-testing context: one module (application) is active at a time, switchable via framework controls.",
     "Activation state persists across launches.",

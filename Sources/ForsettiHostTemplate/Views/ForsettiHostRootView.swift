@@ -360,7 +360,7 @@ public struct ForsettiHostRootView: View {
                 .padding(12)
                 .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
-                if module.moduleType == .ui {
+                if module.moduleType == .ui || module.moduleType == .app {
                     moduleUISection(moduleID: module.moduleID)
                 } else {
                     Text("This service module is running in the framework runtime. Use Home to switch modules.")

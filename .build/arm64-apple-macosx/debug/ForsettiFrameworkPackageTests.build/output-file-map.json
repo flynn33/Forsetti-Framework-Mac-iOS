@@ -1,12 +1,12 @@
 {
   "": {
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/master.swiftdeps"
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/master.swiftdeps"
   },
-  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.derived/runner.swift": {
-    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.d",
-    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.swift.o",
-    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner~partial.swiftmodule",
-    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.swiftdeps",
-    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.dia"
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.derived/runner.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiFrameworkPackageTests.build/runner.dia"
   }
 }

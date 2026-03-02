@@ -123,7 +123,7 @@ public final class ForsettiHostController: ObservableObject {
         }
 
         serviceModules = nextItems.filter { $0.moduleType == .service }
-        uiModules = nextItems.filter { $0.moduleType == .ui }
+        uiModules = nextItems.filter { $0.moduleType == .ui || $0.moduleType == .app }
         enabledServiceModuleIDs = runtime.moduleManager.enabledServiceModuleIDs
         enabledUIModuleIDs = runtime.moduleManager.enabledUIModuleIDs
         activeUIModuleID = runtime.moduleManager.activeUIModuleID
@@ -207,7 +207,7 @@ public final class ForsettiHostController: ObservableObject {
             }
 
             if let manifest = runtime.moduleManager.manifestsByID[moduleID],
-               manifest.moduleType == .ui {
+               manifest.moduleType == .ui || manifest.moduleType == .app {
                 try runtime.moduleManager.setSelectedUIModule(moduleID: moduleID)
             }
 

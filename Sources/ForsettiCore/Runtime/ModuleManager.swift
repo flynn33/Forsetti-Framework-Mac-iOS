@@ -116,7 +116,7 @@ public final class ModuleManager {
         switch manifest.moduleType {
         case .service:
             try activateServiceModule(manifest: manifest, moduleID: moduleID)
-        case .ui:
+        case .ui, .app:
             try activateUIModule(manifest: manifest, moduleID: moduleID)
         }
 
@@ -154,7 +154,7 @@ public final class ModuleManager {
         switch manifest.moduleType {
         case .service:
             enabledServiceModuleIDs.remove(moduleID)
-        case .ui:
+        case .ui, .app:
             enabledUIModuleIDs.remove(moduleID)
             if activeUIModuleID == moduleID {
                 activeUIModuleID = enabledUIModuleIDs.sorted().first

@@ -51,7 +51,7 @@ Forsetti runtime model:
 2. Runtime discovers module manifests from a bundle resource directory.
 3. Runtime checks compatibility and entitlement rules.
 4. Runtime activates modules according to the deployment pattern in use:
-   - **Single-module app**: The one `ForsettiUIModule` (which carries the full app UI) is activated; the framework runs silently.
+   - **Single-module app**: The one `ForsettiAppModule` (which carries the full app UI) is activated; the framework runs silently.
    - **Multi-module single application**: All service modules and exactly one UI module are activated simultaneously; framework still runs silently.
    - **Developer testing**: One module (application) is active at a time, selectable via framework controls.
 5. UI contributions are surfaced via shared UI state (`UISurfaceManager`).
@@ -59,7 +59,8 @@ Forsetti runtime model:
 Key public contracts:
 
 - `ForsettiModule`: module lifecycle contract (`start` / `stop`).
-- `ForsettiUIModule`: `ForsettiModule` plus `uiContributions`.
+- `ForsettiAppModule`: complete single-application module with UI (`ForsettiUIModule` subprotocol).
+- `ForsettiUIModule`: `ForsettiModule` plus `uiContributions` (for UI modules in multi-module apps).
 - `ForsettiEntitlementProvider`: unlock/refresh/restore/publish entitlement state.
 - `CapabilityPolicy`: capability allow/deny decision surface.
 - `ActivationStore`: persistence of active module state.
@@ -111,13 +112,13 @@ Choose the pattern that matches your use case before designing your target layou
 
 **Pattern A — Single-Module App (most common)**
 
-One `ForsettiUIModule` includes the complete application UI.
+One `ForsettiAppModule` includes the complete application UI.
 The framework loads silently; end users see only the module's UI.
 Framework controls are hidden in production; errors go to the framework error log.
 Updates are delivered by swapping the module.
 
 ```
-MyAppHost target  ->  MyAppModule (ForsettiUIModule with full app UI)
+MyAppHost target  ->  MyAppModule (ForsettiAppModule with full app UI)
 ```
 
 **Pattern B — Multi-Module Single Application**

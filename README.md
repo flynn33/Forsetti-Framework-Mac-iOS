@@ -76,7 +76,7 @@ Forsetti supports four deployment patterns. Choose the one that matches your use
 
 ### Pattern A — Single-Module App (most common)
 
-The app is a single `ForsettiUIModule` that includes the complete application UI.
+The app is a single `ForsettiAppModule` that includes the complete application UI.
 The framework loads silently in the background.
 End users see only the module's UI and have no awareness of the framework.
 Framework controls (Home, Settings) are hidden in production.
@@ -161,7 +161,7 @@ Forsetti flow at runtime:
 
 Core contracts:
 
-- `ForsettiModule` and `ForsettiUIModule`
+- `ForsettiModule`, `ForsettiAppModule`, and `ForsettiUIModule`
 - `ModuleManifest`, `ModuleDescriptor`
 - `ModuleRegistry`
 - `ManifestLoader`
@@ -269,7 +269,7 @@ What this does:
 
 In consumer apps, create your own module target and follow this sequence.
 
-1. Define module class conforming to `ForsettiModule` or `ForsettiUIModule`.
+1. Define module class conforming to `ForsettiAppModule` (single-module apps), `ForsettiUIModule` (multi-module UI), or `ForsettiModule` (service/feature).
 2. Implement `descriptor` and `manifest` with aligned `moduleID` and `entryPoint`.
 3. Implement lifecycle (`start`/`stop`) as idempotent, bounded operations.
 4. Register module factory in your bootstrap.
@@ -416,7 +416,7 @@ Suggested files in consumer repo:
 
 `notUIModule`:
 
-- Manifest says `moduleType = ui` but factory returns non-`ForsettiUIModule`.
+- Manifest says `moduleType = ui` or `moduleType = app` but factory returns a type that does not conform to `ForsettiUIModule` or `ForsettiAppModule`.
 
 ## 18) FAQ
 

@@ -61,7 +61,11 @@ struct ForsettiTemplateRootView: View {
     var body: some View {
         ForsettiHostRootView(
             controller: container.controller,
-            injectionRegistry: container.injectionRegistry
+            injectionRegistry: container.injectionRegistry,
+            // Set to false for production deployments (Pattern A / B) where
+            // the framework runs silently behind the module's UI.
+            // Set to true for developer testing (Pattern C) or dashboard use (Pattern D).
+            showDeveloperControls: true
         )
     }
 }
