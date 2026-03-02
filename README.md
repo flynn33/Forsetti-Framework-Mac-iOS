@@ -76,7 +76,7 @@ Forsetti supports four deployment patterns. Choose the one that matches your use
 
 ### Pattern A — Single-Module App (most common)
 
-The app is a single `ForsettiUIModule` that includes the complete application UI.
+The app is a single `ForsettAppModule` that includes the complete application UI.
 The framework loads silently in the background.
 End users see only the module's UI and have no awareness of the framework.
 Framework controls (Home, Settings) are hidden in production.
