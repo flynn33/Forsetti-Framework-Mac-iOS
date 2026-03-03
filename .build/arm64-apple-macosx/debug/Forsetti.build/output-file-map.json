@@ -1,0 +1,124 @@
+{
+  "": {
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/master.swiftdeps"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/Capability.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Capability.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Capability.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Capability~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Capability.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Capability.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/ForsettiContext.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiContext.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiContext.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiContext~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiContext.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiContext.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/ForsettiProtocols.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiProtocols.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiProtocols.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiProtocols~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiProtocols.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiProtocols.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/ModuleDescriptor.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleDescriptor.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleDescriptor.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleDescriptor~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleDescriptor.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleDescriptor.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/ModuleType.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleType.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleType.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleType~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleType.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleType.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/Platform.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Platform.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Platform.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Platform~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Platform.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Platform.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/SemVer.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/SemVer.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/SemVer.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/SemVer~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/SemVer.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/SemVer.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Core/UIOverlayTypes.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/UIOverlayTypes.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/UIOverlayTypes.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/UIOverlayTypes~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/UIOverlayTypes.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/UIOverlayTypes.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Forsetti.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Forsetti.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Forsetti.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Forsetti~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Forsetti.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/Forsetti.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Manifests/ModuleManifestLoader.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleManifestLoader.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleManifestLoader.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleManifestLoader~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleManifestLoader.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ModuleManifestLoader.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Modules/Examples/ExampleServiceModule.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleServiceModule.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleServiceModule.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleServiceModule~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleServiceModule.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleServiceModule.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Modules/Examples/ExampleUIOverlayModule.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleUIOverlayModule.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleUIOverlayModule.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleUIOverlayModule~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleUIOverlayModule.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ExampleUIOverlayModule.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Runtime/ForsettiRuntime.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiRuntime.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiRuntime.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiRuntime~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiRuntime.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ForsettiRuntime.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Runtime/InAppPurchaseManager.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/InAppPurchaseManager.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/InAppPurchaseManager.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/InAppPurchaseManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/InAppPurchaseManager.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/InAppPurchaseManager.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Runtime/StoreKitInAppPurchaseManager.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/StoreKitInAppPurchaseManager.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/StoreKitInAppPurchaseManager.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/StoreKitInAppPurchaseManager~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/StoreKitInAppPurchaseManager.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/StoreKitInAppPurchaseManager.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Services/DefaultServices.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/DefaultServices.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/DefaultServices.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/DefaultServices~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/DefaultServices.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/DefaultServices.dia"
+  },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/Sources/Forsetti/Services/ServiceProtocols.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ServiceProtocols.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ServiceProtocols.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ServiceProtocols~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ServiceProtocols.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Forsetti.build/ServiceProtocols.dia"
+  }
+}
