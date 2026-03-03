@@ -2,6 +2,13 @@
   "": {
     "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/master.swiftdeps"
   },
+  "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/EntitlementProviderFactoryTests.swift": {
+    "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.d",
+    "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.swift.o",
+    "swiftmodule": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests~partial.swiftmodule",
+    "swift-dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.swiftdeps",
+    "diagnostics": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.dia"
+  },
   "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/StoreKit2EntitlementProviderTests.swift": {
     "dependencies": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/StoreKit2EntitlementProviderTests.d",
     "object": "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/StoreKit2EntitlementProviderTests.swift.o",

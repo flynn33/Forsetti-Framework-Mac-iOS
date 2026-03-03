@@ -1228,6 +1228,10 @@
       "inputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/EntitlementProviderFactoryTests.swift"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/StoreKit2EntitlementProviderTests.swift"
         },
         {
@@ -1251,6 +1255,7 @@
       "moduleName" : "ForsettiPlatformTests",
       "moduleOutputPath" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Modules/ForsettiPlatformTests.swiftmodule",
       "objects" : [
+        "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.swift.o",
         "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/StoreKit2EntitlementProviderTests.swift.o"
       ],
       "otherArguments" : [
@@ -1311,6 +1316,10 @@
       "outputs" : [
         {
           "kind" : "file",
+          "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/StoreKit2EntitlementProviderTests.swift.o"
         },
         {
@@ -1320,6 +1329,7 @@
       ],
       "prepareForIndexing" : false,
       "sources" : [
+        "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/EntitlementProviderFactoryTests.swift",
         "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/StoreKit2EntitlementProviderTests.swift"
       ],
       "tempsPath" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build",
@@ -1896,6 +1906,7 @@
       "-package-name",
       "forsetti_framwork",
       "-c",
+      "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/EntitlementProviderFactoryTests.swift",
       "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/StoreKit2EntitlementProviderTests.swift",
       "-I",
       "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/Modules",
@@ -2352,6 +2363,10 @@
         },
         {
           "kind" : "file",
+          "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/EntitlementProviderFactoryTests.swift.o"
+        },
+        {
+          "kind" : "file",
           "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/.build/arm64-apple-macosx/debug/ForsettiPlatformTests.build/StoreKit2EntitlementProviderTests.swift.o"
         }
       ],
@@ -2455,6 +2470,10 @@
         {
           "kind" : "virtual",
           "name" : "<sources-file-list>"
+        },
+        {
+          "kind" : "file",
+          "name" : "/Users/jimdaley/Documents/Projects/Dev Projects/Personal-GitHub-Repos/Forsetti-Framwork/Tests/ForsettiPlatformTests/EntitlementProviderFactoryTests.swift"
         },
         {
           "kind" : "file",

@@ -10,25 +10,27 @@ If you are implementing with Forsetti, this README is the canonical high-level r
 ## Table of Contents
 
 1. What Forsetti Is
-2. The Problem It Solves
-3. Design Principles
-4. Integration Contract (What You Can and Cannot Do)
-5. Package Structure
-6. Core Runtime Concepts
-7. Why Dependency Rules Are Strict
-8. Import Rules and Why They Exist
-9. Quick Start
-10. Module Authoring Workflow
-11. Manifest Contract
-12. Entitlements and Paid Modules
-13. Capability Governance
-14. OOP and Modularity Rules
-15. Architecture Guardrails (Lint, Tests, CI)
-16. Recommended Consumer-Repo Guardrails
-17. Troubleshooting
-18. FAQ
-19. Additional Documentation
-20. License
+2. Who This Is For
+3. The Problem It Solves
+4. Design Principles
+5. Integration Contract (What You Can and Cannot Do)
+6. Package Structure
+7. Core Runtime Concepts
+8. Why Dependency Rules Are Strict
+9. Import Rules and Why They Exist
+10. Quick Start
+11. Module Authoring Workflow
+12. Manifest Contract
+13. Entitlements and Paid Modules
+14. Capability Governance
+15. OOP and Modularity Rules
+16. Architecture Guardrails (Lint, Tests, CI)
+17. Recommended Consumer-Repo Guardrails
+18. Troubleshooting
+19. FAQ
+20. Additional Documentation
+21. License
+22. Xcode Template (Optional)
 
 ## 1) What Forsetti Is
 
@@ -47,7 +49,19 @@ Forsetti currently targets:
 - iOS
 - macOS
 
-## 2) The Problem It Solves
+## 2) Who This Is For
+
+Forsetti is designed for:
+
+- **Teams building monetized iOS and macOS apps** that need clean module boundaries, entitlement-gated features, and scalable architecture.
+- **Solo developers shipping modular applications** who want runtime governance without building custom infrastructure.
+- **Organizations managing multi-app portfolios** that want a shared modular runtime across products.
+
+Forsetti is proprietary software. Evaluation for internal assessment is permitted. Production or commercial use requires a written license from James Daley (see section 21 for details).
+
+If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode template (section 22).
+
+## 3) The Problem It Solves
 
 In many apps, feature code grows into tightly coupled systems where:
 
@@ -59,7 +73,7 @@ In many apps, feature code grows into tightly coupled systems where:
 Forsetti addresses this by enforcing module contracts and runtime policy up front.
 The goal is controlled extensibility without losing architectural integrity.
 
-## 3) Design Principles
+## 4) Design Principles
 
 Forsetti is opinionated by design.
 These principles are intentional constraints, not suggestions.
@@ -70,7 +84,7 @@ These principles are intentional constraints, not suggestions.
 - Policy-first: compatibility, capabilities, and entitlements are runtime gates.
 - Host-agnostic modules: features should be plug-in style, not host-wired.
 
-## 3b) Deployment Patterns
+## 4b) Deployment Patterns
 
 Forsetti supports four deployment patterns. Choose the one that matches your use case.
 
@@ -112,7 +126,7 @@ A dedicated UI module for the dashboard itself is recommended.
 
 > Use this pattern for portal or launcher-style apps where end users explicitly switch between multiple applications.
 
-## 4) Integration Contract (What You Can and Cannot Do)
+## 5) Integration Contract (What You Can and Cannot Do)
 
 Forsetti is meant to be consumed as a sealed framework.
 
@@ -133,7 +147,7 @@ Decision rule:
 
 - If a solution requires changing Forsetti internals in your app repo, the solution is out of policy.
 
-## 5) Package Structure
+## 6) Package Structure
 
 Forsetti ships as multiple products/targets with clear responsibilities:
 
@@ -147,7 +161,7 @@ Forsetti ships as multiple products/targets with clear responsibilities:
 - `ForsettiHostTemplate`
   - SwiftUI host controller/views for module discovery and activation UI.
 
-## 6) Core Runtime Concepts
+## 7) Core Runtime Concepts
 
 Forsetti flow at runtime:
 
@@ -171,7 +185,7 @@ Core contracts:
 - `ForsettiEntitlementProvider`
 - `ForsettiServiceProviding` / `ForsettiServiceContainer`
 
-## 7) Why Dependency Rules Are Strict
+## 8) Why Dependency Rules Are Strict
 
 A rule like “X must not import Y” means:
 
@@ -189,7 +203,7 @@ This protects:
 
 Without these rules, architectures drift into hidden coupling and regress quickly.
 
-## 8) Import Rules and Why They Exist
+## 9) Import Rules and Why They Exist
 
 These are enforced in this repo via lint/tests.
 They are intentionally strict.
@@ -234,7 +248,7 @@ Why:
 - Host must remain generic and work with any valid module set.
 - Prevents accidental hardcoding to sample implementations.
 
-## 9) Quick Start
+## 10) Quick Start
 
 ```swift
 import ForsettiCore
@@ -265,7 +279,24 @@ What this does:
 - Builds runtime and host controller.
 - Renders host UI that can discover/activate modules.
 
-## 10) Module Authoring Workflow
+### Debug / Test Entitlements
+
+For development and testing, use `makeDebug` to bypass StoreKit:
+
+```swift
+// Unlock everything (all modules treated as purchased):
+let debugProvider = ForsettiEntitlementProviderFactory.makeDebug()
+
+// Unlock specific modules/products only:
+let selectiveProvider = ForsettiEntitlementProviderFactory.makeDebug(
+    unlockedProductIDs: ["com.yourapp.iap.premium"]
+)
+```
+
+Pass the debug provider to `ForsettiHostTemplateBootstrap.makeController(entitlementProvider:)`.
+Use `StaticEntitlementProvider.setUnlockedProducts(_:)` to change unlock state at runtime during tests.
+
+## 11) Module Authoring Workflow
 
 In consumer apps, create your own module target and follow this sequence.
 
@@ -282,7 +313,7 @@ Guidance:
 - Keep module responsibilities narrow.
 - Avoid direct knowledge of host internals.
 
-## 11) Manifest Contract
+## 12) Manifest Contract
 
 A manifest is the runtime contract for discoverability and eligibility.
 
@@ -305,7 +336,7 @@ Optional fields:
 
 If key metadata is wrong (missing entry point, invalid platform, denied capability), activation fails by design.
 
-## 12) Entitlements and Paid Modules
+## 13) Entitlements and Paid Modules
 
 Forsetti entitlement model:
 
@@ -323,7 +354,7 @@ Why this matters:
 - Monetization state is not a UI-only concern; it is an activation policy concern.
 - Enforcement at runtime layer prevents “UI says locked but runtime still active” class of bugs.
 
-## 13) Capability Governance
+## 14) Capability Governance
 
 Capabilities are explicit permission requests from modules.
 Examples include storage, telemetry, routing overlay, toolbar items, and view injection.
@@ -338,7 +369,7 @@ Why enforce:
 - Prevent modules from silently expanding scope.
 - Make capability expansion a reviewable architecture decision.
 
-## 14) OOP and Modularity Rules
+## 15) OOP and Modularity Rules
 
 Forsetti intentionally favors classic OOP discipline with modern Swift patterns.
 
@@ -356,7 +387,7 @@ Why:
 - Makes coupling explicit.
 - Improves deterministic behavior under modular composition.
 
-## 15) Architecture Guardrails (Lint, Tests, CI)
+## 16) Architecture Guardrails (Lint, Tests, CI)
 
 This repository includes hard guardrails:
 
@@ -375,7 +406,7 @@ This executes:
 - `swift test --parallel --enable-code-coverage`
 - `swiftlint lint --strict --config .swiftlint.yml`
 
-## 16) Recommended Consumer-Repo Guardrails
+## 17) Recommended Consumer-Repo Guardrails
 
 If your app consumes Forsetti, replicate guardrails in your own repository:
 
@@ -391,7 +422,7 @@ Suggested files in consumer repo:
 - `Scripts/verify-forsetti-guardrails.sh`
 - `.github/workflows/forsetti-guardrails.yml`
 
-## 17) Troubleshooting
+## 18) Troubleshooting
 
 `moduleNotDiscovered`:
 
@@ -418,7 +449,7 @@ Suggested files in consumer repo:
 
 - Manifest says `moduleType = ui` or `moduleType = app` but factory returns a type that does not conform to `ForsettiUIModule` or `ForsettiAppModule`.
 
-## 18) FAQ
+## 19) FAQ
 
 ### Why so many restrictions?
 
@@ -441,7 +472,12 @@ Forsetti supports UI contributions through structured contracts instead of arbit
 Because lock/unlock state affects activation validity, not just visuals.
 Runtime-level entitlement enforcement prevents policy drift and edge-case inconsistencies.
 
-## 19) Additional Documentation
+### What about performance at scale or offline?
+
+See wiki.md section 18 for detailed guidance on cold-start overhead, 50+ module counts, and offline entitlement behavior.
+In short: keep module `start()` fast, keep manifest files small, and rely on StoreKit's local receipt cache for offline entitlement resilience.
+
+## 20) Additional Documentation
 
 - `guide.md`
   - concise integration rules and policies.
@@ -450,28 +486,38 @@ Runtime-level entitlement enforcement prevents policy drift and edge-case incons
 - `forsetti-instructions.json`
   - architecture source material and phase context.
 
-## 20) License
+## 21) License
 
-Forsetti is proprietary software.
+Forsetti is proprietary software owned by James Daley.
 
-See full licensing terms in:
+- **Evaluation:** You may access this repository to evaluate Forsetti for your team's needs. Evaluation does not grant production or distribution rights.
+- **Commercial use:** Requires a separate written license. Contact James Daley for terms and pricing.
+- **Personal/non-commercial projects:** Contact James Daley to discuss availability of a personal-use license.
 
-- `license.md`
+Full terms: `license.md`
 
-External/commercial use requires a separate written paid license from James Daley.
+## 22) Xcode Template (Optional)
 
-## 21) Xcode Template (Optional)
+This repo includes an Xcode project template for faster setup.
 
-This repo includes an Xcode project template for faster setup:
+### Option A: Script Install (recommended)
 
-- Install script: `Scripts/install-forsetti-xcode-template.sh`
-- Uninstall script: `Scripts/uninstall-forsetti-xcode-template.sh`
+```bash
+./Scripts/install-forsetti-xcode-template.sh
+```
 
-After installation, create a new project in Xcode under:
+### Option B: Manual Install
 
-- `File > New > Project`
-- `Multiplatform`
-- `Forsetti App`
+1. Copy the folder `XcodeTemplates/Project Templates/Forsetti/` to:
+   `~/Library/Developer/Xcode/Templates/Project Templates/Forsetti/`
+2. Restart Xcode.
+
+After installation, create a new project:
+File > New > Project > Multiplatform > Forsetti App.
+
+The template includes educational comments in `ForsettiBootstrap.swift` explaining each setup step.
+
+To uninstall: `Scripts/uninstall-forsetti-xcode-template.sh`
 
 ---
 

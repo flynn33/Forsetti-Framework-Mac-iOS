@@ -571,6 +571,55 @@ Suggested release criteria:
 - Guard against duplicate event subscriptions and leaked tokens.
 - Prefer deterministic registration and manifest discovery at launch.
 
+### 18.1 Cold-Start Overhead
+
+Forsetti boot performs five phases before modules are ready:
+
+1. **Bundle discovery** — `ManifestLoader.loadManifests(bundle:subdirectory:)` reads and JSON-decodes every `.json` file in the manifests subdirectory. Cost scales linearly with manifest count and bundle I/O latency.
+2. **Manifest validation** — Each manifest is checked for required fields (schemaVersion, moduleID, displayName, entryPoint, supportedPlatforms). Fast but sequential.
+3. **Compatibility evaluation** — `CompatibilityChecker.evaluate(manifest:)` runs per-manifest against platform, version range, and capability policy.
+4. **Entitlement refresh** — `ForsettiRuntime.boot()` calls `entitlementProvider.refreshEntitlements()`. On iOS with StoreKit 2 this iterates `Transaction.currentEntitlements` (may involve local receipt I/O).
+5. **Activation restore** — `ModuleManager.restorePersistedActivation()` re-activates previously enabled modules, calling `start(context:)` on each.
+
+Guidance:
+
+- Keep the manifests subdirectory clean; avoid non-manifest JSON files in the same directory.
+- Module `start(context:)` implementations should return quickly. Defer heavy initialization to background tasks.
+- Profile boot time under Instruments (Time Profiler) focused on `ForsettiRuntime.boot()`.
+
+### 18.2 Large Module Counts (50+ Modules)
+
+At scale, the runtime loads and validates all manifests at boot:
+
+- **Discovery:** `ManifestLoader` reads every JSON file in the manifests directory. File I/O is the bottleneck, not parsing. Keep manifest files small (under 1 KB each).
+- **Validation:** Sequential per-manifest, negligible for typical manifest sizes.
+- **Activation:** `restorePersistedActivation()` re-activates stored modules sequentially. If many service modules restore simultaneously, `start()` calls accumulate.
+
+Mitigation strategies:
+
+- Only register module factories that your app actually ships. Do not register factories for modules not present in the bundle.
+- Keep `start(context:)` lightweight across all modules. If a service module does heavy work at start, defer it with `Task { }`.
+- Consider partitioning modules across separate bundles if you have truly independent feature sets, loading each bundle lazily.
+- Profile with `ForsettiLogger` at `.info` level to see per-module activation timing.
+
+### 18.3 Offline Scenarios (Entitlement Checks Without Network)
+
+The `StoreKit2EntitlementProvider` reads `Transaction.currentEntitlements` from the local StoreKit receipt cache. This works offline for previously verified purchases.
+
+Behavior when offline:
+
+- **Previously purchased modules:** Remain unlocked. StoreKit caches verified transactions locally.
+- **New purchases:** Cannot complete. StoreKit requires network for the purchase flow.
+- **Subscription expiry:** If a subscription expired while offline and the cached transaction shows an expiration date in the past, the module will lock on the next entitlement refresh.
+- **Restore purchases:** `AppStore.sync()` requires network and will throw if unavailable.
+
+Guidance:
+
+- Entitlement state from the last successful refresh persists across app launches via the StoreKit receipt cache.
+- Do not force an entitlement refresh on every app foreground if connectivity is unreliable. The runtime already calls `refreshEntitlements()` once during `boot()`.
+- Use `entitlementsDidChangeStream()` to react to `Transaction.updates` (fires automatically when StoreKit processes pending transactions).
+- For macOS using `StaticEntitlementProvider`, offline behavior is entirely in your control since there is no StoreKit dependency.
+
 ## 19. Troubleshooting
 
 `moduleNotDiscovered`:

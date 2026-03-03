@@ -14,9 +14,18 @@ final class ForsettiTemplateContainer: ObservableObject {
     let injectionRegistry: ForsettiViewInjectionRegistry
 
     init() {
+        // STEP 1: Create a module registry and register your module factories.
+        // Each entry maps a manifest "entryPoint" string to a factory closure
+        // that returns a ForsettiModule (or ForsettiAppModule / ForsettiUIModule).
         let registry = ModuleRegistry()
         ExampleModuleRegistry.registerAll(into: registry)
 
+        // STEP 2: Build the host controller via ForsettiHostTemplateBootstrap.
+        // This wires up the runtime, services, entitlement provider, and manifest loader.
+        //
+        // The default provider uses StoreKit 2 on iOS and a static allowlist on macOS.
+        // For debug/test builds, swap to the debug provider to bypass StoreKit entirely:
+        //   entitlementProvider: ForsettiEntitlementProviderFactory.makeDebug()
         controller = ForsettiHostTemplateBootstrap.makeController(
             manifestsBundle: ExampleModuleResources.bundle,
             moduleRegistry: registry,
@@ -25,6 +34,8 @@ final class ForsettiTemplateContainer: ObservableObject {
             )
         )
 
+        // STEP 3: (Optional) Register view injections for modules that request
+        // the "viewInjection" capability. Each viewID maps to a SwiftUI view builder.
         injectionRegistry = ForsettiViewInjectionRegistry()
         registerDefaultInjections()
     }
@@ -62,9 +73,10 @@ struct ForsettiTemplateRootView: View {
         ForsettiHostRootView(
             controller: container.controller,
             injectionRegistry: container.injectionRegistry,
-            // Set to false for production deployments (Pattern A / B) where
-            // the framework runs silently behind the module's UI.
-            // Set to true for developer testing (Pattern C) or dashboard use (Pattern D).
+            // DEPLOYMENT PATTERN CONTROL:
+            // false = Production (Pattern A/B): framework runs silently, users see only your module UI.
+            // true  = Development (Pattern C/D): framework controls visible for module switching.
+            // See README.md section 4b for deployment pattern details.
             showDeveloperControls: true
         )
     }

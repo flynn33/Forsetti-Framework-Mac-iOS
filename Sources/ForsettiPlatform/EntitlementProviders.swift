@@ -21,6 +21,33 @@ public enum ForsettiEntitlementProviderFactory {
         return AllowAllEntitlementProvider()
         #endif
     }
+
+    /// Returns a debug/test entitlement provider that bypasses StoreKit entirely.
+    ///
+    /// - With no parameters: unlocks all modules (returns ``AllowAllEntitlementProvider``).
+    /// - With specific IDs: unlocks only those modules/products (returns ``StaticEntitlementProvider``).
+    ///
+    /// Use this in debug builds or unit tests to avoid App Store Connect sandbox setup:
+    /// ```swift
+    /// let provider = ForsettiEntitlementProviderFactory.makeDebug(
+    ///     unlockedProductIDs: ["com.yourapp.iap.premium"]
+    /// )
+    /// ```
+    ///
+    /// To change unlock state at runtime, cast to ``StaticEntitlementProvider`` and call
+    /// `setUnlockedModules(_:)` or `setUnlockedProducts(_:)`.
+    public static func makeDebug(
+        unlockedModuleIDs: Set<String> = [],
+        unlockedProductIDs: Set<String> = []
+    ) -> any ForsettiEntitlementProvider {
+        if unlockedModuleIDs.isEmpty && unlockedProductIDs.isEmpty {
+            return AllowAllEntitlementProvider()
+        }
+        return StaticEntitlementProvider(
+            unlockedModuleIDs: unlockedModuleIDs,
+            unlockedProductIDs: unlockedProductIDs
+        )
+    }
 }
 
 #if canImport(StoreKit)
