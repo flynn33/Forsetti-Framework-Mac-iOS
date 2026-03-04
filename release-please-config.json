@@ -12,6 +12,10 @@
         {
           "type": "generic",
           "path": "Sources/ForsettiCore/ForsettiVersion.swift"
+        },
+        {
+          "type": "generic",
+          "path": "README.md"
         }
       ]
     }
