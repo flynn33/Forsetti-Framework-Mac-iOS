@@ -1,0 +1,59 @@
+name: Documentation Release
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'wiki.md'
+      - 'README.md'
+      - 'guide.md'
+      - 'developer-guide.md'
+
+jobs:
+  tag-docs-release:
+    # Do not run if the commit was made by the release workflow
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine next docs version
+        id: next
+        run: |
+          # Find the highest existing docs-vN tag
+          LATEST=$(git tag -l 'docs-v*' | sed 's/docs-v//' | sort -n | tail -1)
+          if [ -z "$LATEST" ]; then
+            NEXT=1
+          else
+            NEXT=$((LATEST + 1))
+          fi
+          echo "version=$NEXT" >> "$GITHUB_OUTPUT"
+          echo "tag=docs-v$NEXT" >> "$GITHUB_OUTPUT"
+
+      - name: Create docs release tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "${{ steps.next.outputs.tag }}" -m "Documentation release ${{ steps.next.outputs.tag }}"
+          git push origin "${{ steps.next.outputs.tag }}"
+
+      - name: Create GitHub Release for docs
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { data } = await github.rest.repos.createRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag_name: '${{ steps.next.outputs.tag }}',
+              name: 'Documentation Release ${{ steps.next.outputs.tag }}',
+              body: 'Documentation-only update. See changed files in the commit.',
+              prerelease: false
+            });
+            console.log(`Created release: ${data.html_url}`);

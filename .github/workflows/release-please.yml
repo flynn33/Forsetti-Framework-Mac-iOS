@@ -1,0 +1,73 @@
+name: Release Please
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  update-docs-on-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Update version references in documentation
+        env:
+          NEW_VERSION: ${{ needs.release-please.outputs.version }}
+        run: |
+          # Update the Swift package dependency reference in wiki.md
+          sed -i "s|from: \"[0-9]*\.[0-9]*\.[0-9]*\"|from: \"${NEW_VERSION}\"|g" wiki.md
+
+          # Update _Last updated_ dates in all doc files
+          TODAY=$(date +"%B %-d, %Y")
+          for f in README.md wiki.md guide.md developer-guide.md; do
+            if [ -f "$f" ]; then
+              sed -i "s|_Last updated:.*_|_Last updated: ${TODAY}_|" "$f"
+            fi
+          done
+
+      - name: Commit documentation updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md wiki.md guide.md developer-guide.md
+          git diff --staged --quiet || git commit -m "docs: update version references to ${{ needs.release-please.outputs.version }} [skip ci]"
+          git push
+
+      - name: Trigger wiki publish
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'publish-wiki.yml',
+              ref: 'main'
+            });
