@@ -9,9 +9,20 @@ _Last updated: February 27, 2026_
 - Use native Apple technologies only for framework/runtime implementation:
   - Swift
   - Swift Package Manager / Xcode
-  - SwiftUI (host UI only)
+  - SwiftUI (including dedicated Forsetti UI modules in application implementations)
   - Native Apple frameworks (Foundation, Combine, StoreKit, etc.) where appropriate
 - Do not add cross-platform UI/runtime frameworks for core behavior.
+
+## 1b. UI Module Clarification
+
+SwiftUI is valid for the application UI in Forsetti, but the application UI must live in the correct module.
+In the multi-module single-application pattern, the application UI belongs in exactly one dedicated UI module.
+That UI module may use SwiftUI and other Apple-native UI technologies.
+This is a module-boundary rule, not a ban on SwiftUI.
+
+Metal is also a valid Apple-native technology in Forsetti-based applications when it is used in the correct app-owned module or architectural layer.
+Forsetti does not prohibit Metal.
+Forsetti requires that Metal be used in the correct module with clear modular boundaries.
 
 ## 2. Integration Boundaries (Required)
 
@@ -54,6 +65,7 @@ If a required extension point is missing, request a framework enhancement instea
 ## 5. Import Restrictions
 
 Layer-specific restrictions are enforced by lint/tests:
+these are target-specific architecture guardrails, not blanket bans for every consumer module.
 
 - `ForsettiCore` must not import:
   - `ForsettiPlatform`, `ForsettiModulesExample`, `ForsettiHostTemplate`

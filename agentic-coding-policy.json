@@ -87,6 +87,34 @@
       "rationale": "Framework readiness requires parity with the CI ios-build gate, not only lint/tests."
     },
     {
+      "id": "R010",
+      "priority": "critical",
+      "rule": "Agent MUST distinguish package-target guardrails from consumer-module implementation rules. Internal import bans in ForsettiCore/ForsettiPlatform/example targets are not blanket bans on Apple-native frameworks in app-owned modules.",
+      "applies_to_modes": ["framework_repo_mode", "consumer_repo_mode"],
+      "rationale": "Target-level architecture rules are frequently misread as global framework prohibitions and must be interpreted correctly."
+    },
+    {
+      "id": "R011",
+      "priority": "critical",
+      "rule": "For the multi-module single-application pattern, the application UI MUST live in a dedicated UI module. That UI module MAY use SwiftUI and other appropriate Apple-native UI technologies.",
+      "applies_to_modes": ["consumer_repo_mode"],
+      "rationale": "UI ownership is a boundary rule, not a SwiftUI prohibition."
+    },
+    {
+      "id": "R012",
+      "priority": "critical",
+      "rule": "Agent MUST treat Apple-native frameworks, including Metal, as valid when used in the correct owning module/layer and when consistent with Forsetti modular boundaries.",
+      "applies_to_modes": ["framework_repo_mode", "consumer_repo_mode"],
+      "rationale": "Forsetti is Apple-native by design and allows native framework usage in the proper architectural layer."
+    },
+    {
+      "id": "R013",
+      "priority": "critical",
+      "rule": "Agent MUST_NOT interpret 'host UI' as meaning only framework internals may use SwiftUI. Agent MUST interpret 'host UI' as the application UI used by the Forsetti-based app, which in multi-module single applications belongs in exactly one dedicated UI module.",
+      "applies_to_modes": ["framework_repo_mode", "consumer_repo_mode"],
+      "rationale": "Host UI shorthand is a frequent source of misinterpretation and must be interpreted explicitly."
+    },
+    {
       "id": "R008",
       "priority": "critical",
       "rule": "Agent MUST respect proprietary licensing boundaries and MUST_NOT imply open-source usage rights.",
@@ -99,7 +127,7 @@
       "ForsettiCore": "Platform-agnostic core contracts, runtime logic, compatibility, activation, policies.",
       "ForsettiPlatform": "Native platform adapters and entitlement/service implementations.",
       "ForsettiModulesExample": "Reference/example modules and manifests.",
-      "ForsettiHostTemplate": "Generic host composition and SwiftUI host UI."
+      "ForsettiHostTemplate": "Generic host composition and SwiftUI host UI reference surface; this does not prohibit SwiftUI in app-owned UI modules."
     },
     "must_not_import_rules": [
       {
@@ -174,6 +202,8 @@
   "consumer_repo_guidance": {
     "allowed_patterns": [
       "Implement app-owned modules using ForsettiAppModule (single-module apps), ForsettiUIModule (multi-module UI), or ForsettiModule (service/feature).",
+      "In multi-module single applications, keep application UI in exactly one dedicated UI module and keep service logic in separate service modules.",
+      "Treat Metal as permitted in the correct app-owned module/layer when the module responsibility justifies it.",
       "Use Forsetti service container and protocol-based service contracts.",
       "Compose runtime and host through public bootstrap/runtime APIs.",
       "Create app-level architecture tests and lint rules mirroring Forsetti principles."
@@ -235,7 +265,7 @@
     ]
   },
   "suggested_agent_prompt_template": {
-    "template": "You are coding in {MODE}. Follow agentic-coding-policy.json as hard constraints. Confirm R001-R009 compliance (when applicable), then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
+    "template": "You are coding in {MODE}. Follow agentic-coding-policy.json as hard constraints. Confirm R001-R013 compliance (when applicable), then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
     "mode_values": ["framework_repo_mode", "consumer_repo_mode"]
   },
   "document_references": [

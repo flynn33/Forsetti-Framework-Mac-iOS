@@ -4,6 +4,19 @@ This wiki is the comprehensive integration manual for teams using Forsetti in th
 It expands on `guide.md` with architecture patterns, implementation templates, governance rules, and operational playbooks.
 _Last updated: February 27, 2026_
 
+### Framework Identity Clarification
+
+Forsetti is modularity-first and Apple-native by design.
+Its boundary rules govern architectural placement, not blanket bans on Apple-native frameworks.
+
+In multi-module single-application deployments, the application UI belongs in a dedicated UI module.
+That UI module may use SwiftUI and other Apple-native UI frameworks/tools.
+Apple-native frameworks such as Metal are valid where appropriate to the owning module's responsibility.
+
+Forsetti does not ban SwiftUI or Metal.
+Forsetti requires developers to use Apple-native technologies in the correct module or layer.
+In multi-module applications, the application UI lives in a dedicated UI module, and that UI module may use SwiftUI.
+
 ## 1. Scope and Audience
 
 Use this document if your team is:
@@ -52,7 +65,7 @@ Forsetti runtime model:
 3. Runtime checks compatibility and entitlement rules.
 4. Runtime activates modules according to the deployment pattern in use:
    - **Single-module app**: The one `ForsettiAppModule` (which carries the full app UI) is activated; the framework runs silently.
-   - **Multi-module single application**: All service modules and exactly one UI module are activated simultaneously; framework still runs silently.
+   - **Multi-module single application**: All service modules and exactly one UI module are activated simultaneously; framework still runs silently. The dedicated UI module may implement the app UI with SwiftUI.
    - **Developer testing**: One module (application) is active at a time, selectable via framework controls.
 5. UI contributions are surfaced via shared UI state (`UISurfaceManager`).
 
@@ -127,6 +140,7 @@ One dedicated UI module + one or more service modules constitute a single applic
 The framework enforces one active UI module at a time.
 All service modules run simultaneously.
 The framework still runs silently.
+The dedicated UI module may contain SwiftUI-based UI and other appropriate Apple-native UI technologies.
 
 ```
 MyAppHost target  ->  MyAppUIModule + MyAppServiceModuleA + MyAppServiceModuleB
@@ -265,6 +279,9 @@ public final class OrdersSyncModule: ForsettiModule {
 
 ### 8.2 UI Module Template
 
+A dedicated UI module may implement real application UI using SwiftUI.
+The `uiContributions` contract governs integration points, but it does not prohibit module-owned SwiftUI screens.
+
 ```swift
 import ForsettiCore
 
@@ -395,6 +412,9 @@ A module is activatable only when the compatibility report has no error-severity
 - `toolbarItems`: actions surfaced in host toolbar.
 - `viewInjections`: host slot view declarations (`slot`, `viewID`, `priority`).
 - `overlaySchema`: pointers and routes for navigation/overlay behavior.
+
+`ForsettiHostTemplate` and host-root examples in this wiki are reference host surfaces.
+They do not imply a framework-only SwiftUI privilege or a prohibition on SwiftUI in app-owned UI modules.
 
 ### 10.1 View Injection Pattern
 

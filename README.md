@@ -55,6 +55,11 @@ Forsetti currently targets:
 - iOS
 - macOS
 
+### Framework Identity Clarification
+
+Forsetti is a modularity-first, object-oriented framework for building iOS and macOS applications in Xcode using Apple-native tools, libraries, and frameworks only.
+This includes Swift, SwiftUI, Metal, and other Apple-native technologies used in the correct module or architectural layer.
+
 ## 2) Who This Is For
 
 Forsetti is designed for:
@@ -112,6 +117,11 @@ The UI module carries the application's UI.
 All service modules run simultaneously alongside the UI module.
 The framework enforces one active UI module at a time for this pattern.
 The framework still runs silently; end users see only the UI module's interface.
+
+In the multi-module single-application pattern, the application is composed of exactly one dedicated UI module plus one or more service modules.
+The dedicated UI module carries the application's user interface.
+That UI module may use SwiftUI and other Apple-native UI frameworks and tools.
+Service modules remain separate from the UI module.
 
 > Use this pattern when your application requires background services (data sync, analytics, etc.) that are cleanly separated from the UI.
 
@@ -254,6 +264,11 @@ Why:
 - Host must remain generic and work with any valid module set.
 - Prevents accidental hardcoding to sample implementations.
 
+Important clarification:
+Layer and target import restrictions in Forsetti are architectural boundary rules.
+They are not global bans on Apple-native frameworks in app-owned modules.
+A consumer application may build app-owned Forsetti-compatible modules in its own targets and may use Apple-native frameworks that are appropriate to each module's responsibility, provided those frameworks are used in the correct module or architectural layer.
+
 ## 10) Quick Start
 
 ```swift
@@ -318,6 +333,7 @@ Guidance:
 - Prefer protocol-based service lookup through `ForsettiContext.services`.
 - Keep module responsibilities narrow.
 - Avoid direct knowledge of host internals.
+- For multi-module single applications, keep the application UI in a dedicated UI module. That UI module may use SwiftUI and other appropriate Apple-native frameworks.
 
 ## 12) Manifest Contract
 
@@ -468,6 +484,12 @@ You can technically do almost anything in code.
 Architecturally, bypassing these rules is equivalent to taking dependency debt that will compound.
 The framework is designed to make the correct path the easiest path.
 
+### Is Metal allowed in Forsetti-based applications?
+
+Metal is an allowed Apple-native technology in Forsetti-based applications when it is used in the correct app-owned module or architectural layer.
+For example, a rendering-oriented module may use Metal where that module's responsibility justifies it.
+Metal is not prohibited by Forsetti; it is governed by modular boundaries and correct placement.
+
 ### Why not let modules directly control host UI?
 
 Because host composition must remain stable and reviewable.
@@ -491,6 +513,10 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
   - extended integration playbook with more implementation examples.
 - `forsetti-instructions.json`
   - architecture source material and phase context.
+- `AI_IMPLEMENTATION_GUIDE.md`
+  - canonical interpretation guide for AI agents and implementers.
+- `MODULE_BOUNDARY_RULES.md`
+  - concise boundary rules that separate internal target guardrails from consumer module implementation.
 
 ## 21) License
 

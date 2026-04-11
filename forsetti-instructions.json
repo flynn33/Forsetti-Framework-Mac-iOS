@@ -3,14 +3,17 @@
   "artifact_version": "1.0.0",
   "project": {
     "name": "Forsetti Framework",
-    "summary": "A reusable, adaptable, modular Swift/SwiftUI framework template for consistent app development across iOS and macOS. Apps are containers that discover, validate, unlock (IAP), and activate built-in modules. Modules are portable across Forsetti-based apps and may only interact with OS capabilities through Forsetti-provided services.",
+    "summary": "A reusable, adaptable, modular Swift/Apple-framework runtime for consistent app development across iOS and macOS. Apps discover, validate, unlock, and activate bundled modules. Forsetti is modularity-first and Apple-native by design: app-owned modules should use Apple-native technologies in the correct architectural layer. In multi-module single applications, the app UI lives in a dedicated UI module that may use SwiftUI; Apple-native frameworks such as Metal are valid where appropriate to a module's responsibility.",
     "initial_scope": "internal_only",
     "future_scope": "possible_licensing",
     "principles": [
       "Strict modularity: modules are self-contained and do not depend on other modules.",
-      "Framework-mediated everything: modules communicate only through Forsetti (events/services/routing).",
+      "Boundary-mediated architecture: shared contracts, events, services, and routing should flow through Forsetti-defined boundaries; do not create improper cross-layer coupling or ad-hoc host dependencies.",
       "iOS-compliant: no runtime loading of new native code; all modules ship in the app bundle and are unlocked via IAP.",
-      "For single applications composed of multiple modules, exactly one UI module is active at a time. Single-module apps include their own UI inside the module and run silently; no separate UI module is needed. UI changes are overlays/masks, never replacing root."
+      "For single applications composed of multiple modules, exactly one dedicated UI module is active at a time alongside service modules. That UI module may use SwiftUI and other Apple-native UI frameworks/tools. Single-module apps include their own UI inside the module and run silently; no separate UI module is needed.",
+      "In Forsetti documentation, host UI refers to the application UI used by the app built on Forsetti. In the multi-module single-application pattern, this UI belongs in exactly one dedicated UI module.",
+      "Framework-internal target restrictions protect package layering and are not blanket bans on Apple-native frameworks in app-owned modules.",
+      "Use Apple-native frameworks in the correct module/layer, including Metal where rendering/graphics responsibilities require it."
     ]
   },
   "platforms": {
@@ -20,7 +23,7 @@
       "swift_rules": [
         "Use #if os(iOS)/#if os(macOS) for platform adapters where necessary.",
         "Expose a unified ForsettiRuntime.platform enum used by core logic.",
-        "Modules must not branch on OS; only ForsettiPlatform may."
+        "Do not place platform-branching logic in shared/core module logic. Keep platform-specific branching in the appropriate platform or app-owned layer."
       ]
     }
   },
@@ -36,7 +39,7 @@
       },
       {
         "name": "ForsettiHostTemplate",
-        "role": "Developer-facing app template for module discovery, activation, and testing. Includes framework controls (Home, Settings, module switcher) that are intended for use during development. In production single-module apps, these controls are hidden and the framework runs silently behind the module's own UI."
+        "role": "Developer-facing app template for module discovery, activation, and testing. Includes framework controls (Home, Settings, module switcher) that are intended for use during development. In production single-module apps, these controls are hidden and the framework runs silently behind the module's own UI. This host/template surface is a reference implementation and does not imply that SwiftUI is framework-internal only."
       },
       {
         "name": "ForsettiModules",
@@ -50,7 +53,7 @@
       },
       "types": {
         "service_module": "Adds capabilities/services; no UI overlay required. Used in multi-module applications for individual features.",
-        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Used in multi-module single applications as the dedicated UI module. Exactly one UI module active at a time alongside any number of active service modules.",
+        "ui_module": "Provides UI overlay/mask + optional toolbar items + optional view injections + overlay routing schema. Used in multi-module single applications as the dedicated UI module. Exactly one UI module active at a time alongside any number of active service modules. The dedicated UI module may implement application UI using SwiftUI and other Apple-native UI technologies; service modules remain separate from the UI module.",
         "app_module": "A complete single-application module (ForsettiAppModule) that includes its own UI. The framework runs silently; end users see only the module's UI. Updates are delivered by swapping the module. This is the most common module type for production apps."
       }
     }
@@ -66,7 +69,8 @@
         "ForsettiModules/ModuleB/"
       ],
       "notes": [
-        "Keep ForsettiCore independent of UIKit/AppKit. Use SwiftUI types only where unavoidable; prefer platform-neutral models.",
+        "Keep ForsettiCore independent of UI/platform frameworks. Place SwiftUI and other Apple-native UI code in the appropriate app-owned UI or host layer; prefer platform-neutral models in Core.",
+        "Apply Apple-native frameworks such as Metal in the correct owning module/layer when responsibilities require rendering, graphics, or compute.",
         "ForsettiPlatform may import UIKit/AppKit as needed."
       ]
     }
@@ -123,7 +127,7 @@
         },
         "constraints": [
           "For multi-module single applications, framework enforces exactly one active UI module at a time alongside any number of service modules.",
-          "UIContributions must be overlays/masks; never replace app root view."
+          "UIContributions must be overlays/masks; never replace app root view. This target-level rule is not a global ban on SwiftUI in app-owned UI modules."
         ]
       },
       {
