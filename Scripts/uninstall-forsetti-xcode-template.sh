@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DESTINATION_TEMPLATE_DIR="$HOME/Library/Developer/Xcode/Templates/Project Templates/Forsetti/Forsetti App.xctemplate"
+DESTINATION_ROOT="$HOME/Library/Developer/Xcode/Templates/Project Templates/Forsetti"
 
-if [[ -d "$DESTINATION_TEMPLATE_DIR" ]]; then
-  rm -rf "$DESTINATION_TEMPLATE_DIR"
-  echo "Removed template: $DESTINATION_TEMPLATE_DIR"
+if [[ -d "$DESTINATION_ROOT" ]]; then
+  find "$DESTINATION_ROOT" -mindepth 1 -maxdepth 1 -name '*.xctemplate' -exec rm -rf {} +
+
+  if [[ -z "$(find "$DESTINATION_ROOT" -mindepth 1 -maxdepth 1 2>/dev/null)" ]]; then
+    rmdir "$DESTINATION_ROOT" 2>/dev/null || true
+  fi
+
+  echo "Removed Forsetti templates from: $DESTINATION_ROOT"
 else
-  echo "Template not installed: $DESTINATION_TEMPLATE_DIR"
+  echo "Forsetti templates not installed: $DESTINATION_ROOT"
 fi

@@ -5,7 +5,7 @@
     <key>Kind</key>
     <string>Xcode.Xcode3.ProjectTemplateUnitKind</string>
     <key>Identifier</key>
-    <string>com.forsetti.template.multiplatform.app</string>
+    <string>com.forsetti.template.multiplatform.app.production</string>
     <key>Ancestors</key>
     <array>
         <string>com.apple.dt.unit.multiPlatform.app.SwiftUI</string>
@@ -13,9 +13,9 @@
     <key>Concrete</key>
     <true/>
     <key>Description</key>
-    <string>This template creates a multi-platform SwiftUI app pre-wired for the Forsetti framework.</string>
+    <string>This template creates a production-oriented Forsetti starter app with an app-owned module registry, starter module, deployment mode controls, and manifest resources.</string>
     <key>NameOfInitialFileForEditor</key>
-    <string>ContentView.swift</string>
+    <string>AppModule/___PACKAGENAME:identifier___AppModule.swift</string>
     <key>SortOrder</key>
     <integer>1</integer>
     <key>Image</key>
@@ -58,7 +58,12 @@
     <array>
         <string>___PACKAGENAME:identifier___App.swift</string>
         <string>ContentView.swift</string>
-        <string>ForsettiBootstrap.swift</string>
+        <string>___PACKAGENAME:identifier___ForsettiBootstrap.swift</string>
+        <string>___PACKAGENAME:identifier___DeploymentMode.swift</string>
+        <string>___PACKAGENAME:identifier___ModuleRegistry.swift</string>
+        <string>AppModule/___PACKAGENAME:identifier___AppModule.swift</string>
+        <string>AppModule/___PACKAGENAME:identifier___AppModuleView.swift</string>
+        <string>Resources/ForsettiManifests/___PACKAGENAME:identifier___AppModuleManifest.json</string>
     </array>
     <key>Definitions</key>
     <dict>
@@ -76,12 +81,47 @@
             <key>SortOrder</key>
             <integer>20</integer>
         </dict>
-        <key>ForsettiBootstrap.swift</key>
+        <key>___PACKAGENAME:identifier___ForsettiBootstrap.swift</key>
         <dict>
             <key>Path</key>
             <string>ForsettiBootstrap.swift</string>
             <key>SortOrder</key>
             <integer>30</integer>
+        </dict>
+        <key>___PACKAGENAME:identifier___DeploymentMode.swift</key>
+        <dict>
+            <key>Path</key>
+            <string>DeploymentMode.swift</string>
+            <key>SortOrder</key>
+            <integer>40</integer>
+        </dict>
+        <key>___PACKAGENAME:identifier___ModuleRegistry.swift</key>
+        <dict>
+            <key>Path</key>
+            <string>ModuleRegistry.swift</string>
+            <key>SortOrder</key>
+            <integer>50</integer>
+        </dict>
+        <key>AppModule/___PACKAGENAME:identifier___AppModule.swift</key>
+        <dict>
+            <key>Path</key>
+            <string>AppModule.swift</string>
+            <key>SortOrder</key>
+            <integer>60</integer>
+        </dict>
+        <key>AppModule/___PACKAGENAME:identifier___AppModuleView.swift</key>
+        <dict>
+            <key>Path</key>
+            <string>AppModuleView.swift</string>
+            <key>SortOrder</key>
+            <integer>70</integer>
+        </dict>
+        <key>Resources/ForsettiManifests/___PACKAGENAME:identifier___AppModuleManifest.json</key>
+        <dict>
+            <key>Path</key>
+            <string>AppModuleManifest.json</string>
+            <key>SortOrder</key>
+            <integer>80</integer>
         </dict>
     </dict>
 </dict>

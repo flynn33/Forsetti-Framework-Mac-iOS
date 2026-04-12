@@ -2,7 +2,7 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
-_Last updated: February 27, 2026_
+_Last updated: April 12, 2026_
 
 **Current Version: 0.1.0** <!-- x-release-please-version -->
 
@@ -36,7 +36,7 @@ If you are implementing with Forsetti, this README is the canonical high-level r
 19. FAQ
 20. Additional Documentation
 21. License
-22. Xcode Template (Optional)
+22. Xcode Templates (Production Starter)
 
 ## 1) What Forsetti Is
 
@@ -70,7 +70,7 @@ Forsetti is designed for:
 
 Forsetti is proprietary software. Evaluation for internal assessment is permitted. Production or commercial use requires a written license from James Daley (see section 21 for details).
 
-If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode template (section 22).
+If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode templates (section 22).
 
 ## 3) The Problem It Solves
 
@@ -270,6 +270,13 @@ They are not global bans on Apple-native frameworks in app-owned modules.
 A consumer application may build app-owned Forsetti-compatible modules in its own targets and may use Apple-native frameworks that are appropriate to each module's responsibility, provided those frameworks are used in the correct module or architectural layer.
 
 ## 10) Quick Start
+
+Forsetti has two intentionally different starting paths:
+
+- Evaluation/demo path: uses `ForsettiModulesExample` to inspect framework behavior quickly.
+- Production starter path: uses the Forsetti Xcode templates to generate app-owned module scaffolding.
+
+If you are preparing a real application, start with section 22 and `xcode-template-guide.md`.
 
 ```swift
 import ForsettiCore
@@ -517,6 +524,8 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
   - canonical interpretation guide for AI agents and implementers.
 - `MODULE_BOUNDARY_RULES.md`
   - concise boundary rules that separate internal target guardrails from consumer module implementation.
+- `xcode-template-guide.md`
+  - template ownership model, generated structure, and production-starter workflow.
 
 ## 21) License
 
@@ -528,28 +537,62 @@ Forsetti is proprietary software owned by James Daley.
 
 Full terms: `license.md`
 
-## 22) Xcode Template (Optional)
+## 22) Xcode Templates (Production Starter)
 
-This repo includes an Xcode project template for faster setup.
+The Xcode template set is a first-class Forsetti onboarding path for production applications.
 
-### Option A: Script Install (recommended)
+### Starter App vs Example App
+
+- `Forsetti App.xctemplate` is the production starter path.
+  It generates app-owned bootstrap/config files, an app-owned starter module, a starter module registry, and starter manifest resources.
+- `ForsettiModulesExample` remains in this repository for evaluation and learning.
+  It is sample-only content and is not the default identity of template-generated applications.
+
+### Included Templates
+
+- `Forsetti App.xctemplate`
+  - Generates app bootstrap, deployment mode config, module registry, app module, app module view, and `Resources/ForsettiManifests`.
+- `Forsetti UI Module.xctemplate`
+  - Generates a UI module scaffold suitable for Pattern A UI iteration or Pattern B UI module implementation.
+- `Forsetti Service Module.xctemplate`
+  - Generates a service/background module scaffold suitable for Pattern B multi-module applications.
+- `Forsetti Manifest.xctemplate`
+  - Generates a starter Forsetti module manifest JSON file.
+
+### Install Templates
+
+Option A: script install (recommended)
 
 ```bash
 ./Scripts/install-forsetti-xcode-template.sh
 ```
 
-### Option B: Manual Install
+Option B: manual install
 
-1. Copy the folder `XcodeTemplates/Project Templates/Forsetti/` to:
+1. Copy `XcodeTemplates/Project Templates/Forsetti/` to:
    `~/Library/Developer/Xcode/Templates/Project Templates/Forsetti/`
 2. Restart Xcode.
 
-After installation, create a new project:
-File > New > Project > Multiplatform > Forsetti App.
+### Create a Starter Project
 
-The template includes educational comments in `ForsettiBootstrap.swift` explaining each setup step.
+1. File > New > Project > Multiplatform.
+2. Choose `Forsetti App`.
+3. Add the `ForsettiFramework` Swift package to your app target.
+4. Add package products: `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`.
 
-To uninstall: `Scripts/uninstall-forsetti-xcode-template.sh`
+### Ownership Model (summary)
+
+- App-owned files: generated app bootstrap, deployment mode configuration, module registry, module implementation, and module view.
+- Framework-owned files: Forsetti package internals (`Sources/ForsettiCore`, `Sources/ForsettiPlatform`, `Sources/ForsettiHostTemplate`) in this repository.
+
+### Recommended Pattern to Start
+
+Most teams should start with Pattern A (single app-owned module), then move to Pattern B when service modules are needed.
+Use deployment mode configuration in the generated app to move from developer controls to production behavior.
+
+For full template guidance, see `xcode-template-guide.md`.
+
+To uninstall templates: `Scripts/uninstall-forsetti-xcode-template.sh`
 
 ---
 
