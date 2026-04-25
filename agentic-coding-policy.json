@@ -273,7 +273,7 @@
     "developer-guide.md",
     "forsetti-instructions.json",
     "guide.md",
-    "wiki.md",
+    "https://github.com/flynn33/Forsetti-Framework/wiki",
     "license.md",
     "Scripts/verify-forsetti-guardrails.sh",
     ".github/workflows/guardrails.yml",

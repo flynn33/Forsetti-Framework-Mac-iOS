@@ -13,12 +13,15 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Changed
 
+- Moved comprehensive wiki documentation to the GitHub Wiki as the canonical long-form documentation surface.
 - Rebuilt the Forsetti App Xcode template around an app module entry point instead of embedding application behavior directly in bootstrap code.
 - Updated template installation and uninstallation scripts for the expanded Xcode template set.
 - Expanded README coverage for the production starter templates and template-based app/module authoring workflow.
 
 ### Removed
 
+- Removed automated wiki publishing, documentation-release tagging, and source-splitting workflow files.
+- Removed the repository-local wiki source file now that the GitHub Wiki is maintained directly.
 - Removed tracked SwiftPM build products and Xcode workspace state from the repository.
 
 ## Documentation Release docs-v2 - 2026-04-11

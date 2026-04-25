@@ -111,7 +111,8 @@ public struct ForsettiHostRootView: View {
 
             HStack(spacing: 8) {
                 GuideInfoButton(
-                    text: "Settings is a developer framework control. It should not be visible in production deployments. Use showDeveloperControls: false when deploying to end users."
+                    text: "Settings is a developer framework control. It should not be visible in production deployments. "
+                        + "Use showDeveloperControls: false when deploying to end users."
                 )
 
                 Button {
@@ -352,7 +353,9 @@ public struct ForsettiHostRootView: View {
                             }
 
                             GuideInfoButton(
-                                text: "In developer mode, modules may temporarily hide framework chrome. Use the top-left Show Menus control to reveal it again. In production (showDeveloperControls: false), framework chrome is permanently hidden."
+                                text: "In developer mode, modules may temporarily hide framework chrome. "
+                                    + "Use the top-left Show Menus control to reveal it again. "
+                                    + "In production (showDeveloperControls: false), framework chrome is permanently hidden."
                             )
                         }
                     }
@@ -370,7 +373,9 @@ public struct ForsettiHostRootView: View {
             .padding(16)
         }
     }
+}
 
+private extension ForsettiHostRootView {
     private func moduleUISection(moduleID: String) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {

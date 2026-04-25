@@ -509,15 +509,15 @@ Runtime-level entitlement enforcement prevents policy drift and edge-case incons
 
 ### What about performance at scale or offline?
 
-See wiki.md section 18 for detailed guidance on cold-start overhead, 50+ module counts, and offline entitlement behavior.
+See the [Performance and Reliability](https://github.com/flynn33/Forsetti-Framework/wiki/Security-Privacy-and-Reliability#performance-and-reliability) wiki section for detailed guidance on cold-start overhead, larger module counts, and offline entitlement behavior.
 In short: keep module `start()` fast, keep manifest files small, and rely on StoreKit's local receipt cache for offline entitlement resilience.
 
 ## 20) Additional Documentation
 
 - `guide.md`
   - concise integration rules and policies.
-- `wiki.md`
-  - extended integration playbook with more implementation examples.
+- [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework/wiki)
+  - comprehensive architecture, runtime, workflow, and integration documentation.
 - `forsetti-instructions.json`
   - architecture source material and phase context.
 - `AI_IMPLEMENTATION_GUIDE.md`
