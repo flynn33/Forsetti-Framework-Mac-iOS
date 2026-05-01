@@ -15,6 +15,7 @@ After remediation, the template defaults to an app-owned module flow:
 - App-owned starter module view (`AppModule/___PACKAGENAME___AppModuleView.swift`)
 - Explicit deployment mode configuration (`___PACKAGENAME___DeploymentMode.swift`)
 - Starter manifest resources under `Resources/ForsettiManifests/`
+- Production rendering waits for runtime boot and app module activation before showing the app module view.
 
 `ForsettiModulesExample` remains available for evaluation only, not as the default production starter path.
 
@@ -168,7 +169,7 @@ Pattern D (dashboard or multi-app host):
 In `<MyApp>DeploymentMode.swift`:
 
 - `.development`: keeps framework controls visible for testing.
-- `.production`: switches generated app root behavior to app-owned module UI as the primary user surface.
+- `.production`: boots the runtime, activates the configured app module, and then shows the app-owned module UI as the primary user surface.
 
 Production checklist:
 
@@ -176,7 +177,8 @@ Production checklist:
 2. Confirm app module view is production UI, not placeholder text.
 3. Confirm no example/demo package dependency is required for app identity.
 4. Validate manifests and module registry alignment.
-5. Run tests and guardrails before release.
+5. Confirm the app module manifest declares capabilities needed by its UI contributions, such as `view_injection`.
+6. Run tests and guardrails before release.
 
 ## 9. Template install and uninstall
 

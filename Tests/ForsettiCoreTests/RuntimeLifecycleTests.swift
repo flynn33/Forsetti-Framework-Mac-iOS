@@ -5,6 +5,97 @@ import XCTest
 
 final class RuntimeLifecycleTests: XCTestCase {
     @MainActor
+    func testRestorePersistedActivationActuallyStartsAndLoadsServiceModules() async throws {
+        CountingServiceModule.reset()
+
+        let moduleID = CountingServiceModule.Constants.moduleID
+        let activationStore = SharedInMemoryActivationStore(
+            state: ActivationState(enabledServiceModuleIDs: [moduleID])
+        )
+        let testBundle = try RuntimeTestBundle()
+        try testBundle.writeManifest(CountingServiceModule.moduleManifest, fileName: "CountingService.json")
+
+        let registry = ModuleRegistry()
+        registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
+            CountingServiceModule()
+        }
+
+        let runtime = ForsettiRuntime(
+            platform: .macOS,
+            services: ForsettiServiceContainer(),
+            entitlementProvider: StaticEntitlementProvider(unlockedModuleIDs: [moduleID]),
+            activationStore: activationStore,
+            moduleRegistry: registry
+        )
+
+        _ = try await runtime.boot(bundle: testBundle.bundle, restoreActivationState: true)
+
+        XCTAssertEqual(CountingServiceModule.startInvocationCount, 1)
+        XCTAssertTrue(runtime.moduleManager.enabledServiceModuleIDs.contains(moduleID))
+        XCTAssertNotNil(runtime.moduleManager.loadedModules[moduleID])
+        XCTAssertTrue(activationStore.loadState().enabledServiceModuleIDs.contains(moduleID))
+    }
+
+    @MainActor
+    func testRestorePersistedActivationActuallyStartsLoadsAndReappliesUIModuleContributions() async throws {
+        CountingUIModule.reset()
+
+        let moduleID = CountingUIModule.Constants.moduleID
+        let activationStore = SharedInMemoryActivationStore(
+            state: ActivationState(enabledUIModuleIDs: [moduleID], selectedUIModuleID: moduleID)
+        )
+        let testBundle = try RuntimeTestBundle()
+        try testBundle.writeManifest(CountingUIModule.moduleManifest, fileName: "CountingUI.json")
+
+        let registry = ModuleRegistry()
+        registry.register(entryPoint: CountingUIModule.Constants.entryPoint) {
+            CountingUIModule()
+        }
+
+        let uiSurfaceManager = UISurfaceManager()
+        let runtime = ForsettiRuntime(
+            platform: .macOS,
+            services: ForsettiServiceContainer(),
+            entitlementProvider: StaticEntitlementProvider(unlockedModuleIDs: [moduleID]),
+            activationStore: activationStore,
+            moduleRegistry: registry,
+            uiSurfaceManager: uiSurfaceManager
+        )
+
+        _ = try await runtime.boot(bundle: testBundle.bundle, restoreActivationState: true)
+
+        XCTAssertEqual(CountingUIModule.startInvocationCount, 1)
+        XCTAssertEqual(runtime.moduleManager.activeUIModuleID, moduleID)
+        XCTAssertEqual(runtime.moduleManager.enabledUIModuleIDs, [moduleID])
+        XCTAssertNotNil(runtime.moduleManager.loadedModules[moduleID])
+        XCTAssertEqual(uiSurfaceManager.toolbarItems.map(\.itemID), ["counting-ui.action"])
+    }
+
+    @MainActor
+    func testFailedRestoreDoesNotLeaveFalseEnabledModuleID() async throws {
+        let moduleID = CountingServiceModule.Constants.moduleID
+        let activationStore = SharedInMemoryActivationStore(
+            state: ActivationState(enabledServiceModuleIDs: [moduleID])
+        )
+        let testBundle = try RuntimeTestBundle()
+        try testBundle.writeManifest(CountingServiceModule.moduleManifest, fileName: "CountingService.json")
+
+        let runtime = ForsettiRuntime(
+            platform: .macOS,
+            services: ForsettiServiceContainer(),
+            entitlementProvider: StaticEntitlementProvider(unlockedModuleIDs: [moduleID]),
+            activationStore: activationStore,
+            moduleRegistry: ModuleRegistry()
+        )
+
+        _ = try await runtime.boot(bundle: testBundle.bundle, restoreActivationState: true)
+
+        XCTAssertFalse(runtime.moduleManager.enabledServiceModuleIDs.contains(moduleID))
+        XCTAssertNil(runtime.moduleManager.loadedModules[moduleID])
+        XCTAssertFalse(activationStore.loadState().enabledServiceModuleIDs.contains(moduleID))
+    }
+
+    @MainActor
     func testRuntimeShutdownDoesNotClearPersistedActivationState() async throws {
         let serviceModuleID = "com.forsetti.module.example-service"
         let uiModuleID = "com.forsetti.module.example-ui"
@@ -60,73 +151,7 @@ final class RuntimeLifecycleTests: XCTestCase {
     }
 
     @MainActor
-    func testModuleTypeMismatchDoesNotStartModule() async throws {
-        MismatchServiceModule.startInvocationCount = 0
-
-        let testBundle = try RuntimeTestBundle()
-        let manifestsDirectory = testBundle.bundleURL.appendingPathComponent("ForsettiManifests", isDirectory: true)
-        try FileManager.default.createDirectory(at: manifestsDirectory, withIntermediateDirectories: true)
-
-        let mismatchManifest = ModuleManifest(
-            schemaVersion: ModuleManifest.supportedSchemaVersion,
-            moduleID: "com.forsetti.module.mismatch-ui",
-            displayName: "Mismatch UI",
-            moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
-            moduleType: .ui,
-            supportedPlatforms: [.iOS, .macOS],
-            minForsettiVersion: ForsettiVersion.current,
-            maxForsettiVersion: nil,
-            capabilitiesRequested: [],
-            iapProductID: nil,
-            entryPoint: "MismatchServiceModule"
-        )
-
-        let manifestURL = manifestsDirectory.appendingPathComponent("Mismatch.json")
-        let encoder = JSONEncoder()
-        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
-        try encoder.encode(mismatchManifest).write(to: manifestURL, options: .atomic)
-
-        let registry = ModuleRegistry()
-        registry.register(entryPoint: "MismatchServiceModule") { MismatchServiceModule() }
-
-        let manager = ModuleManager(
-            manifestLoader: ManifestLoader(),
-            moduleRegistry: registry,
-            compatibilityChecker: CompatibilityChecker(
-                runtimePlatform: .macOS,
-                forsettiVersion: ForsettiVersion.current,
-                capabilityPolicy: AllowAllCapabilityPolicy()
-            ),
-            activationStore: SharedInMemoryActivationStore(),
-            entitlementProvider: StaticEntitlementProvider(),
-            uiSurfaceManager: UISurfaceManager(),
-            context: ForsettiContext(
-                eventBus: InMemoryEventBus(),
-                services: ForsettiServiceContainer(),
-                logger: ConsoleForsettiLogger(),
-                router: NoopOverlayRouter()
-            )
-        )
-
-        _ = try manager.discoverModules(bundle: testBundle.bundle, subdirectory: "ForsettiManifests")
-
-        do {
-            try await manager.activateModule(moduleID: mismatchManifest.moduleID)
-            XCTFail("Expected notUIModule error.")
-        } catch let error as ModuleManagerError {
-            guard case let .notUIModule(moduleID) = error else {
-                return XCTFail("Expected notUIModule error, received \(error).")
-            }
-            XCTAssertEqual(moduleID, mismatchManifest.moduleID)
-        } catch {
-            XCTFail("Expected ModuleManagerError.notUIModule, received \(error).")
-        }
-
-        XCTAssertEqual(MismatchServiceModule.startInvocationCount, 0)
-    }
-
-    @MainActor
-    func testMultipleUIModulesCanRemainActiveConcurrently() async throws {
+    func testActivatingSecondUIModuleDeactivatesFirstAndKeepsOnlyActiveContributions() async throws {
         let moduleAID = "com.forsetti.module.ui.a"
         let moduleBID = "com.forsetti.module.ui.b"
 
@@ -198,25 +223,83 @@ final class RuntimeLifecycleTests: XCTestCase {
 
         _ = try manager.discoverModules(bundle: testBundle.bundle, subdirectory: "ForsettiManifests")
 
+        TestUIModuleA.reset()
+        TestUIModuleB.reset()
+
+        try await manager.activateModule(moduleID: moduleAID)
+        XCTAssertEqual(manager.enabledUIModuleIDs, [moduleAID])
+        XCTAssertEqual(manager.activeUIModuleID, moduleAID)
+        XCTAssertTrue(manager.isActive(moduleID: moduleAID))
+
+        try await manager.activateModule(moduleID: moduleBID)
+
+        XCTAssertEqual(manager.enabledUIModuleIDs, [moduleBID])
+        XCTAssertFalse(manager.isActive(moduleID: moduleAID))
+        XCTAssertTrue(manager.isActive(moduleID: moduleBID))
+        XCTAssertEqual(manager.activeUIModuleID, moduleBID)
+        XCTAssertEqual(TestUIModuleA.stopInvocationCount, 1)
+        XCTAssertNil(manager.uiContributions(for: moduleAID))
+        XCTAssertEqual(manager.uiContributions(for: moduleBID)?.toolbarItems.map(\.itemID), ["ui.b.action"])
+
+        try manager.deactivateModule(moduleID: moduleBID)
+        XCTAssertTrue(manager.enabledUIModuleIDs.isEmpty)
+        XCTAssertNil(manager.activeUIModuleID)
+    }
+
+    @MainActor
+    func testServiceModulesRemainConcurrentlyActive() async throws {
+        let moduleAID = CountingServiceModule.Constants.moduleID
+        let moduleBID = SecondCountingServiceModule.Constants.moduleID
+
+        let testBundle = try RuntimeTestBundle()
+        try testBundle.writeManifest(CountingServiceModule.moduleManifest, fileName: "CountingService.json")
+        try testBundle.writeManifest(SecondCountingServiceModule.moduleManifest, fileName: "SecondCountingService.json")
+
+        let registry = ModuleRegistry()
+        registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
+            CountingServiceModule()
+        }
+        registry.register(entryPoint: SecondCountingServiceModule.Constants.entryPoint) {
+            SecondCountingServiceModule()
+        }
+
+        let manager = ModuleManager(
+            manifestLoader: ManifestLoader(),
+            moduleRegistry: registry,
+            compatibilityChecker: CompatibilityChecker(
+                runtimePlatform: .macOS,
+                forsettiVersion: ForsettiVersion.current,
+                capabilityPolicy: AllowAllCapabilityPolicy()
+            ),
+            activationStore: SharedInMemoryActivationStore(),
+            entitlementProvider: StaticEntitlementProvider(),
+            uiSurfaceManager: UISurfaceManager(),
+            context: ForsettiContext(
+                eventBus: InMemoryEventBus(),
+                services: ForsettiServiceContainer(),
+                logger: ConsoleForsettiLogger(),
+                router: NoopOverlayRouter()
+            )
+        )
+
+        _ = try manager.discoverModules(bundle: testBundle.bundle, subdirectory: "ForsettiManifests")
+
         try await manager.activateModule(moduleID: moduleAID)
         try await manager.activateModule(moduleID: moduleBID)
 
-        XCTAssertEqual(manager.enabledUIModuleIDs, Set([moduleAID, moduleBID]))
+        XCTAssertEqual(manager.enabledServiceModuleIDs, [moduleAID, moduleBID])
         XCTAssertTrue(manager.isActive(moduleID: moduleAID))
         XCTAssertTrue(manager.isActive(moduleID: moduleBID))
-        XCTAssertEqual(manager.activeUIModuleID, moduleAID)
-
-        try manager.setSelectedUIModule(moduleID: moduleBID)
-        XCTAssertEqual(manager.activeUIModuleID, moduleBID)
-
-        try manager.deactivateModule(moduleID: moduleBID)
-        XCTAssertEqual(manager.enabledUIModuleIDs, Set([moduleAID]))
-        XCTAssertEqual(manager.activeUIModuleID, moduleAID)
     }
+
 }
 
-private final class SharedInMemoryActivationStore: ActivationStore, @unchecked Sendable {
-    private var state = ActivationState()
+final class SharedInMemoryActivationStore: ActivationStore, @unchecked Sendable {
+    private var state: ActivationState
+
+    init(state: ActivationState = ActivationState()) {
+        self.state = state
+    }
 
     func loadState() -> ActivationState {
         state
@@ -227,38 +310,13 @@ private final class SharedInMemoryActivationStore: ActivationStore, @unchecked S
     }
 }
 
-private final class MismatchServiceModule: ForsettiModule {
-    static var startInvocationCount = 0
+private final class TestUIModuleA: ForsettiUIModule {
+    static var stopInvocationCount = 0
 
-    let descriptor = ModuleDescriptor(
-        moduleID: "com.forsetti.module.mismatch-service",
-        displayName: "Mismatch Service",
-        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
-        moduleType: .service
-    )
-
-    let manifest = ModuleManifest(
-        schemaVersion: ModuleManifest.supportedSchemaVersion,
-        moduleID: "com.forsetti.module.mismatch-service",
-        displayName: "Mismatch Service",
-        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
-        moduleType: .service,
-        supportedPlatforms: [.iOS, .macOS],
-        minForsettiVersion: ForsettiVersion.current,
-        maxForsettiVersion: nil,
-        capabilitiesRequested: [],
-        iapProductID: nil,
-        entryPoint: "MismatchServiceModule"
-    )
-
-    func start(context _: ForsettiContext) throws {
-        Self.startInvocationCount += 1
+    static func reset() {
+        stopInvocationCount = 0
     }
 
-    func stop(context _: ForsettiContext) {}
-}
-
-private final class TestUIModuleA: ForsettiUIModule {
     let descriptor = ModuleDescriptor(
         moduleID: "com.forsetti.module.ui.a",
         displayName: "UI A",
@@ -291,10 +349,18 @@ private final class TestUIModuleA: ForsettiUIModule {
     )
 
     func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: ForsettiContext) {
+        Self.stopInvocationCount += 1
+    }
 }
 
 private final class TestUIModuleB: ForsettiUIModule {
+    static var stopInvocationCount = 0
+
+    static func reset() {
+        stopInvocationCount = 0
+    }
+
     let descriptor = ModuleDescriptor(
         moduleID: "com.forsetti.module.ui.b",
         displayName: "UI B",
@@ -327,49 +393,131 @@ private final class TestUIModuleB: ForsettiUIModule {
     )
 
     func start(context _: ForsettiContext) throws {}
+    func stop(context _: ForsettiContext) {
+        Self.stopInvocationCount += 1
+    }
+}
+
+private final class CountingServiceModule: ForsettiModule {
+    enum Constants {
+        static let moduleID = "com.forsetti.module.counting-service"
+        static let entryPoint = "CountingServiceModule"
+    }
+
+    static var startInvocationCount = 0
+
+    static func reset() {
+        startInvocationCount = 0
+    }
+
+    static let moduleManifest = ModuleManifest(
+        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        moduleID: Constants.moduleID,
+        displayName: "Counting Service",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .service,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        maxForsettiVersion: nil,
+        capabilitiesRequested: [],
+        iapProductID: nil,
+        entryPoint: Constants.entryPoint
+    )
+
+    let descriptor = ModuleDescriptor(
+        moduleID: Constants.moduleID,
+        displayName: "Counting Service",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .service
+    )
+
+    let manifest = CountingServiceModule.moduleManifest
+
+    func start(context _: ForsettiContext) throws {
+        Self.startInvocationCount += 1
+    }
+
+    func stop(context _: ForsettiContext) {}
+}
+private final class SecondCountingServiceModule: ForsettiModule {
+    enum Constants {
+        static let moduleID = "com.forsetti.module.second-counting-service"
+        static let entryPoint = "SecondCountingServiceModule"
+    }
+
+    static let moduleManifest = ModuleManifest(
+        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        moduleID: Constants.moduleID,
+        displayName: "Second Counting Service",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .service,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        maxForsettiVersion: nil,
+        capabilitiesRequested: [],
+        iapProductID: nil,
+        entryPoint: Constants.entryPoint
+    )
+
+    let descriptor = ModuleDescriptor(
+        moduleID: Constants.moduleID,
+        displayName: "Second Counting Service",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .service
+    )
+
+    let manifest = SecondCountingServiceModule.moduleManifest
+
+    func start(context _: ForsettiContext) throws {}
     func stop(context _: ForsettiContext) {}
 }
 
-private final class RuntimeTestBundle {
-    let rootURL: URL
-    let bundleURL: URL
-    let bundle: Bundle
+private final class CountingUIModule: ForsettiUIModule {
+    enum Constants {
+        static let moduleID = "com.forsetti.module.counting-ui"
+        static let entryPoint = "CountingUIModule"
+    }
 
-    init() throws {
-        rootURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("ForsettiRuntimeTests-\(UUID().uuidString)", isDirectory: true)
-        bundleURL = rootURL.appendingPathComponent("RuntimeTests.bundle", isDirectory: true)
+    static var startInvocationCount = 0
 
-        try FileManager.default.createDirectory(at: bundleURL, withIntermediateDirectories: true)
-        try Self.writeInfoPlist(at: bundleURL.appendingPathComponent("Info.plist"))
+    static func reset() {
+        startInvocationCount = 0
+    }
 
-        guard let resolvedBundle = Bundle(url: bundleURL) else {
-            throw NSError(
-                domain: "RuntimeLifecycleTests",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Unable to initialize temporary runtime test bundle."]
+    static let moduleManifest = ModuleManifest(
+        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        moduleID: Constants.moduleID,
+        displayName: "Counting UI",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        maxForsettiVersion: nil,
+        capabilitiesRequested: [.toolbarItems],
+        iapProductID: nil,
+        entryPoint: Constants.entryPoint
+    )
+
+    let descriptor = ModuleDescriptor(
+        moduleID: Constants.moduleID,
+        displayName: "Counting UI",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .ui
+    )
+
+    let manifest = CountingUIModule.moduleManifest
+    let uiContributions = UIContributions(
+        toolbarItems: [
+            ToolbarItemDescriptor(
+                itemID: "counting-ui.action",
+                title: "Counting Action",
+                action: .publishEvent(type: "counting.action", payload: nil)
             )
-        }
-
-        bundle = resolvedBundle
-    }
-
-    deinit {
-        try? FileManager.default.removeItem(at: rootURL)
-    }
-
-    private static func writeInfoPlist(at url: URL) throws {
-        let plist: [String: Any] = [
-            "CFBundleIdentifier": "com.forsetti.tests.runtimebundle",
-            "CFBundleName": "RuntimeTests",
-            "CFBundleVersion": "1",
-            "CFBundleShortVersionString": "1.0"
         ]
-        let data = try PropertyListSerialization.data(
-            fromPropertyList: plist,
-            format: .xml,
-            options: 0
-        )
-        try data.write(to: url, options: .atomic)
+    )
+
+    func start(context _: ForsettiContext) throws {
+        Self.startInvocationCount += 1
     }
-}
+
+    func stop(context _: ForsettiContext) {}

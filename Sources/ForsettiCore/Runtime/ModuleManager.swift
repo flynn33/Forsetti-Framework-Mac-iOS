@@ -6,6 +6,8 @@ public enum ModuleManagerError: Error, LocalizedError {
     case moduleLocked(String)
     case incompatible(report: CompatibilityReport)
     case notUIModule(String)
+    case moduleIdentityMismatch(moduleID: String, field: String, expected: String, actual: String)
+    case missingCapability(moduleID: String, capability: Capability, usage: String)
 
     public var errorDescription: String? {
         switch self {
@@ -20,6 +22,10 @@ public enum ModuleManagerError: Error, LocalizedError {
             return "Module '\(report.moduleID)' is incompatible. \(details)"
         case let .notUIModule(moduleID):
             return "Module '\(moduleID)' is not a UI module."
+        case let .moduleIdentityMismatch(moduleID, field, expected, actual):
+            return "Module '\(moduleID)' identity mismatch for \(field). Expected '\(expected)', received '\(actual)'."
+        case let .missingCapability(moduleID, capability, usage):
+            return "Module '\(moduleID)' cannot use \(usage) without capability '\(capability.rawValue)'."
         }
     }
 }
@@ -58,10 +64,9 @@ public final class ModuleManager {
         self.uiSurfaceManager = uiSurfaceManager
         self.context = context
 
-        let initialState = activationStore.loadState()
-        enabledServiceModuleIDs = initialState.enabledServiceModuleIDs
-        enabledUIModuleIDs = initialState.enabledUIModuleIDs
-        activeUIModuleID = initialState.selectedUIModuleID
+        enabledServiceModuleIDs = []
+        enabledUIModuleIDs = []
+        activeUIModuleID = nil
         loadedModules = [:]
         manifestsByID = [:]
     }
@@ -80,7 +85,8 @@ public final class ModuleManager {
     }
 
     public func uiContributions(for moduleID: String) -> UIContributions? {
-        guard enabledUIModuleIDs.contains(moduleID),
+        guard activeUIModuleID == moduleID,
+              enabledUIModuleIDs.contains(moduleID),
               let uiModule = loadedModules[moduleID] as? ForsettiUIModule else {
             return nil
         }
@@ -129,13 +135,19 @@ public final class ModuleManager {
     }
 
     public func setSelectedUIModule(moduleID: String?) throws {
-        if let moduleID {
-            guard manifestsByID[moduleID] != nil else {
-                throw ModuleManagerError.moduleNotDiscovered(moduleID)
+        guard let moduleID else {
+            if let activeUIModuleID {
+                try deactivateModule(moduleID: activeUIModuleID, persistState: false)
             }
-            guard enabledUIModuleIDs.contains(moduleID) else {
-                throw ModuleManagerError.moduleNotActive(moduleID)
-            }
+            try persistState()
+            return
+        }
+
+        guard manifestsByID[moduleID] != nil else {
+            throw ModuleManagerError.moduleNotDiscovered(moduleID)
+        }
+        guard enabledUIModuleIDs.contains(moduleID) else {
+            throw ModuleManagerError.moduleNotActive(moduleID)
         }
 
         activeUIModuleID = moduleID
@@ -148,7 +160,7 @@ public final class ModuleManager {
         }
 
         if let module = loadedModules[moduleID] {
-            module.stop(context: context)
+            module.stop(context: contextFor(manifest: manifest))
         }
 
         switch manifest.moduleType {
@@ -157,7 +169,7 @@ public final class ModuleManager {
         case .ui, .app:
             enabledUIModuleIDs.remove(moduleID)
             if activeUIModuleID == moduleID {
-                activeUIModuleID = enabledUIModuleIDs.sorted().first
+                activeUIModuleID = nil
             }
             uiSurfaceManager.remove(moduleID: moduleID)
         }
@@ -174,7 +186,7 @@ public final class ModuleManager {
     public func restorePersistedActivation() async {
         let storedState = activationStore.loadState()
 
-        for moduleID in storedState.enabledServiceModuleIDs {
+        for moduleID in storedState.enabledServiceModuleIDs.sorted() {
             do {
                 try await activateModule(moduleID: moduleID)
             } catch {
@@ -187,7 +199,10 @@ public final class ModuleManager {
             }
         }
 
-        if let uiModuleID = storedState.activeUIModuleID {
+        let desiredUIModuleID = storedState.selectedUIModuleID
+            ?? storedState.enabledUIModuleIDs.sorted().first
+
+        if let uiModuleID = desiredUIModuleID {
             do {
                 try await activateModule(moduleID: uiModuleID)
             } catch {
@@ -200,22 +215,14 @@ public final class ModuleManager {
             }
         }
 
-        for moduleID in storedState.enabledUIModuleIDs where moduleID != storedState.activeUIModuleID {
-            do {
-                try await activateModule(moduleID: moduleID)
-            } catch {
-                context.logModule(
-                    .warning,
-                    moduleID: moduleID,
-                    message: "Failed to restore UI module",
-                    metadata: ["reason": error.localizedDescription]
-                )
-            }
-        }
-
-        if let selectedUIModuleID = storedState.selectedUIModuleID,
-           enabledUIModuleIDs.contains(selectedUIModuleID) {
-            activeUIModuleID = selectedUIModuleID
+        do {
+            try persistState()
+        } catch {
+            context.reportModuleError(
+                moduleID: "forsetti.runtime",
+                message: "Failed to persist reconciled activation state",
+                error: error
+            )
         }
     }
 
@@ -240,10 +247,12 @@ public final class ModuleManager {
 
     private func resolveModule(for manifest: ModuleManifest) throws -> ForsettiModule {
         if let loadedModule = loadedModules[manifest.moduleID] {
+            try validateResolvedModule(loadedModule, against: manifest)
             return loadedModule
         }
 
         let module = try moduleRegistry.makeModule(entryPoint: manifest.entryPoint)
+        try validateResolvedModule(module, against: manifest)
         loadedModules[manifest.moduleID] = module
         return module
     }
@@ -254,8 +263,9 @@ public final class ModuleManager {
         }
 
         let module = try resolveModule(for: manifest)
+        let moduleContext = contextFor(manifest: manifest)
         do {
-            try module.start(context: context)
+            try module.start(context: moduleContext)
         } catch {
             loadedModules[moduleID] = nil
             context.reportModuleError(
@@ -271,10 +281,7 @@ public final class ModuleManager {
     }
 
     private func activateUIModule(manifest: ModuleManifest, moduleID: String) throws {
-        guard !enabledUIModuleIDs.contains(moduleID) else {
-            if activeUIModuleID == nil {
-                activeUIModuleID = moduleID
-            }
+        if activeUIModuleID == moduleID, enabledUIModuleIDs.contains(moduleID) {
             return
         }
 
@@ -284,8 +291,15 @@ public final class ModuleManager {
             throw ModuleManagerError.notUIModule(moduleID)
         }
 
+        try validateUIContributions(uiModule.uiContributions, manifest: manifest)
+
+        if let activeUIModuleID, activeUIModuleID != moduleID {
+            try deactivateModule(moduleID: activeUIModuleID, persistState: false)
+        }
+
+        let moduleContext = contextFor(manifest: manifest)
         do {
-            try module.start(context: context)
+            try module.start(context: moduleContext)
         } catch {
             loadedModules[moduleID] = nil
             context.reportModuleError(
@@ -297,10 +311,10 @@ public final class ModuleManager {
             throw error
         }
 
+        enabledUIModuleIDs.removeAll()
         enabledUIModuleIDs.insert(moduleID)
-        if activeUIModuleID == nil {
-            activeUIModuleID = moduleID
-        }
+        activeUIModuleID = moduleID
+        uiSurfaceManager.clear()
         uiSurfaceManager.apply(
             moduleID: moduleID,
             contributions: sanitizedUIContributions(for: uiModule.uiContributions)
@@ -322,6 +336,120 @@ public final class ModuleManager {
             toolbarItems: source.toolbarItems,
             viewInjections: source.viewInjections,
             overlaySchema: source.overlaySchema
+        )
+    }
+
+    private func contextFor(manifest: ModuleManifest) -> ForsettiContext {
+        context.scopedToModule(
+            moduleID: manifest.moduleID,
+            grantedCapabilities: Set(manifest.capabilitiesRequested)
+        )
+    }
+
+    private func validateResolvedModule(_ module: ForsettiModule, against manifest: ModuleManifest) throws {
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "descriptor.moduleID",
+            expected: manifest.moduleID,
+            actual: module.descriptor.moduleID
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "descriptor.moduleType",
+            expected: manifest.moduleType.rawValue,
+            actual: module.descriptor.moduleType.rawValue
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "descriptor.moduleVersion",
+            expected: manifest.moduleVersion.description,
+            actual: module.descriptor.moduleVersion.description
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.moduleID",
+            expected: manifest.moduleID,
+            actual: module.manifest.moduleID
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.moduleType",
+            expected: manifest.moduleType.rawValue,
+            actual: module.manifest.moduleType.rawValue
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.entryPoint",
+            expected: manifest.entryPoint,
+            actual: module.manifest.entryPoint
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.moduleVersion",
+            expected: manifest.moduleVersion.description,
+            actual: module.manifest.moduleVersion.description
+        )
+    }
+
+    private func validateIdentity(moduleID: String, field: String, expected: String, actual: String) throws {
+        guard expected == actual else {
+            throw ModuleManagerError.moduleIdentityMismatch(
+                moduleID: moduleID,
+                field: field,
+                expected: expected,
+                actual: actual
+            )
+        }
+    }
+
+    private func validateUIContributions(_ contributions: UIContributions, manifest: ModuleManifest) throws {
+        let capabilities = Set(manifest.capabilitiesRequested)
+
+        try requireCapability(
+            .toolbarItems,
+            for: manifest,
+            usage: "toolbar item contributions",
+            when: !contributions.toolbarItems.isEmpty,
+            grantedCapabilities: capabilities
+        )
+        try requireCapability(
+            .viewInjection,
+            for: manifest,
+            usage: "view injection contributions",
+            when: !contributions.viewInjections.isEmpty,
+            grantedCapabilities: capabilities
+        )
+        try requireCapability(
+            .routingOverlay,
+            for: manifest,
+            usage: "routing overlay contributions",
+            when: contributions.overlaySchema != nil,
+            grantedCapabilities: capabilities
+        )
+        try requireCapability(
+            .uiThemeMask,
+            for: manifest,
+            usage: "theme mask contributions",
+            when: contributions.themeMask != nil,
+            grantedCapabilities: capabilities
+        )
+    }
+
+    private func requireCapability(
+        _ capability: Capability,
+        for manifest: ModuleManifest,
+        usage: String,
+        when condition: Bool,
+        grantedCapabilities: Set<Capability>
+    ) throws {
+        guard condition, !grantedCapabilities.contains(capability) else {
+            return
+        }
+
+        throw ModuleManagerError.missingCapability(
+            moduleID: manifest.moduleID,
+            capability: capability,
+            usage: usage
         )
     }
 }

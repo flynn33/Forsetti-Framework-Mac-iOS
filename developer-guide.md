@@ -2,7 +2,7 @@
 
 This guide is for teams integrating Forsetti into their own apps.
 It defines the engineering rules your project should enforce so Forsetti remains modular, native, and maintainable.
-_Last updated: February 27, 2026_
+_Last updated: May 1, 2026_
 
 ## 1. Required Stack
 
@@ -23,6 +23,12 @@ This is a module-boundary rule, not a ban on SwiftUI.
 Metal is also a valid Apple-native technology in Forsetti-based applications when it is used in the correct app-owned module or architectural layer.
 Forsetti does not prohibit Metal.
 Forsetti requires that Metal be used in the correct module with clear modular boundaries.
+
+## 1c. Host UI Definition
+
+In Forsetti documentation, "host UI" refers to the application user interface used by the app built on Forsetti.
+In the multi-module single-application pattern, this application UI belongs in a dedicated UI module.
+The requirement is about modular separation of responsibilities, not avoidance of Apple-native UI frameworks.
 
 ## 2. Integration Boundaries (Required)
 
@@ -61,6 +67,8 @@ If a required extension point is missing, request a framework enhancement instea
 - Keep public APIs minimal and stable.
 - Prefer composition over inheritance across module boundaries.
 - Avoid cyclic dependencies (direct or indirect).
+- Use production platform defaults for app composition; keep in-memory secure storage as an explicit test/debug choice.
+- Treat file export filenames as untrusted input and keep writes inside the configured export directory.
 
 ## 5. Import Restrictions
 
@@ -124,10 +132,11 @@ When adding capabilities in a project that uses Forsetti:
 2. Implement `ForsettiAppModule` (single-module apps), `ForsettiUIModule` (multi-module UI), or `ForsettiModule` (service/feature) in your own codebase.
 3. Define each module's descriptor/manifest and register entry points in your app bootstrap.
 4. Compose runtime/services using public Forsetti APIs only.
-5. Keep dependencies injected and avoid global mutable state.
-6. Add tests for module behavior and architecture policy in your repository.
-7. Run guardrails before opening/updating a PR.
-8. If an API gap is discovered, propose an upstream Forsetti change; do not patch internal framework code.
+5. Declare only the capabilities the module needs; service access and UI contributions are enforced against those capabilities at runtime.
+6. Keep dependencies injected and avoid global mutable state.
+7. Add tests for module behavior and architecture policy in your repository.
+8. Run guardrails before opening/updating a PR.
+9. If an API gap is discovered, propose an upstream Forsetti change; do not patch internal framework code.
 
 ## 9. Review Checklist
 

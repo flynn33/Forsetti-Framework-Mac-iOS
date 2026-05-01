@@ -26,7 +26,7 @@ final class ___PACKAGENAME:identifier___AppModule: ForsettiAppModule {
         moduleType: .app,
         supportedPlatforms: [.iOS, .macOS],
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
-        capabilitiesRequested: [.telemetry],
+        capabilitiesRequested: [.telemetry, .viewInjection],
         iapProductID: nil,
         entryPoint: Constants.entryPoint
     )

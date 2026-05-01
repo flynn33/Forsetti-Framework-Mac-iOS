@@ -55,11 +55,14 @@ public struct DefaultModuleCommunicationGuard: ModuleCommunicationGuard {
 
 public enum ForsettiContextError: Error, LocalizedError {
     case moduleCommunicationDenied(reason: String)
+    case moduleIdentitySpoofingDenied(expectedModuleID: String, requestedModuleID: String)
 
     public var errorDescription: String? {
         switch self {
         case let .moduleCommunicationDenied(reason):
             return "Module communication denied. \(reason)"
+        case let .moduleIdentitySpoofingDenied(expectedModuleID, requestedModuleID):
+            return "Module identity spoofing denied. Expected '\(expectedModuleID)', received '\(requestedModuleID)'."
         }
     }
 }
@@ -115,6 +118,7 @@ public final class ForsettiContext: @unchecked Sendable {
     public let router: any OverlayRouting
     private let eventBus: ForsettiEventBus
     private let moduleCommunicationGuard: any ModuleCommunicationGuard
+    private let boundModuleID: String?
     private static let targetModuleIDPayloadKey = "_forsetti.targetModuleID"
 
     public init(
@@ -122,13 +126,35 @@ public final class ForsettiContext: @unchecked Sendable {
         services: any ForsettiServiceProviding,
         logger: any ForsettiLogger,
         router: any OverlayRouting,
-        moduleCommunicationGuard: any ModuleCommunicationGuard = DefaultModuleCommunicationGuard()
+        moduleCommunicationGuard: any ModuleCommunicationGuard = DefaultModuleCommunicationGuard(),
+        boundModuleID: String? = nil
     ) {
         self.eventBus = eventBus
         self.services = services
         self.logger = logger
         self.router = router
         self.moduleCommunicationGuard = moduleCommunicationGuard
+        self.boundModuleID = boundModuleID
+    }
+
+    public var moduleID: String? {
+        boundModuleID
+    }
+
+    public func scopedToModule(moduleID: String, grantedCapabilities: Set<Capability>) -> ForsettiContext {
+        ForsettiContext(
+            eventBus: eventBus,
+            services: CapabilityScopedServiceProvider(
+                baseProvider: services,
+                moduleID: moduleID,
+                grantedCapabilities: grantedCapabilities,
+                logger: logger
+            ),
+            logger: logger,
+            router: router,
+            moduleCommunicationGuard: moduleCommunicationGuard,
+            boundModuleID: moduleID
+        )
     }
 
     public func publishFrameworkEvent(
@@ -136,12 +162,37 @@ public final class ForsettiContext: @unchecked Sendable {
         payload: [String: String] = [:],
         sourceModuleID: String? = nil
     ) {
+        let effectiveSourceModuleID = effectiveSourceModuleID(
+            requestedModuleID: sourceModuleID,
+            operation: "publish framework event"
+        )
+
         eventBus.publish(
             event: ForsettiEvent(
                 type: type,
                 payload: payload,
-                sourceModuleID: sourceModuleID
+                sourceModuleID: effectiveSourceModuleID
             )
+        )
+    }
+
+    @discardableResult
+    public func sendModuleMessage(
+        to targetModuleID: String,
+        type eventType: String,
+        payload: [String: String] = [:]
+    ) throws -> ForsettiEvent {
+        guard let boundModuleID else {
+            throw ForsettiContextError.moduleCommunicationDenied(
+                reason: "A module-scoped context is required to send without an explicit source."
+            )
+        }
+
+        return try sendModuleMessage(
+            from: boundModuleID,
+            to: targetModuleID,
+            type: eventType,
+            payload: payload
         )
     }
 
@@ -152,6 +203,24 @@ public final class ForsettiContext: @unchecked Sendable {
         type eventType: String,
         payload: [String: String] = [:]
     ) throws -> ForsettiEvent {
+        if let boundModuleID, sourceModuleID != boundModuleID {
+            let error = ForsettiContextError.moduleIdentitySpoofingDenied(
+                expectedModuleID: boundModuleID,
+                requestedModuleID: sourceModuleID
+            )
+            logger.logError(
+                error,
+                message: "Blocked module source identity spoofing",
+                sourceModuleID: boundModuleID,
+                metadata: [
+                    "requestedSourceModuleID": sourceModuleID,
+                    "targetModuleID": targetModuleID,
+                    "eventType": eventType
+                ]
+            )
+            throw error
+        }
+
         let decision = moduleCommunicationGuard.evaluate(
             sourceModuleID: sourceModuleID,
             targetModuleID: targetModuleID,
@@ -205,7 +274,11 @@ public final class ForsettiContext: @unchecked Sendable {
     }
 
     public func moduleLogger(moduleID: String) -> ForsettiModuleLogger {
-        ForsettiModuleLogger(moduleID: moduleID, logger: logger)
+        let effectiveModuleID = effectiveSourceModuleID(
+            requestedModuleID: moduleID,
+            operation: "create module logger"
+        ) ?? moduleID
+        return ForsettiModuleLogger(moduleID: effectiveModuleID, logger: logger)
     }
 
     public func logModule(
@@ -214,7 +287,11 @@ public final class ForsettiContext: @unchecked Sendable {
         message: String,
         metadata: [String: String] = [:]
     ) {
-        logger.log(level, message: message, sourceModuleID: moduleID, metadata: metadata)
+        let effectiveModuleID = effectiveSourceModuleID(
+            requestedModuleID: moduleID,
+            operation: "log module message"
+        ) ?? moduleID
+        logger.log(level, message: message, sourceModuleID: effectiveModuleID, metadata: metadata)
     }
 
     public func reportModuleError(
@@ -224,6 +301,24 @@ public final class ForsettiContext: @unchecked Sendable {
         metadata: [String: String] = [:]
     ) {
         moduleLogger(moduleID: moduleID).error(message, error: error, metadata: metadata)
+    }
+
+    private func effectiveSourceModuleID(requestedModuleID: String?, operation: String) -> String? {
+        guard let boundModuleID else {
+            return requestedModuleID
+        }
+
+        guard let requestedModuleID, requestedModuleID != boundModuleID else {
+            return boundModuleID
+        }
+
+        logger.log(
+            .warning,
+            message: "Ignored source module ID override during \(operation).",
+            sourceModuleID: boundModuleID,
+            metadata: ["requestedSourceModuleID": requestedModuleID]
+        )
+        return boundModuleID
     }
 }
 

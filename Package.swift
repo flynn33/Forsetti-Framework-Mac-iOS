@@ -10,7 +10,6 @@ let package = Package(
     products: [
         .library(name: "ForsettiCore", targets: ["ForsettiCore"]),
         .library(name: "ForsettiPlatform", targets: ["ForsettiPlatform"]),
-        .library(name: "ForsettiModulesExample", targets: ["ForsettiModulesExample"]),
         .library(name: "ForsettiHostTemplate", targets: ["ForsettiHostTemplate"])
     ],
     targets: [

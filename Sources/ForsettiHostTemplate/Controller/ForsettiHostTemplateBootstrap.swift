@@ -10,6 +10,7 @@ public enum ForsettiHostTemplateBootstrap {
         entitlementProvider: any ForsettiEntitlementProvider = ForsettiEntitlementProviderFactory.makeDefault(),
         capabilityPolicy: any CapabilityPolicy = AllowAllCapabilityPolicy(),
         activationStore: any ActivationStore = UserDefaultsActivationStore(),
+        logger: any ForsettiLogger = OSLogForsettiLogger(),
         router: (any OverlayRouting)? = nil,
         manifestsSubdirectory: String = "ForsettiManifests",
         slotCatalog: [String] = SlotCatalog.all
@@ -27,6 +28,7 @@ public enum ForsettiHostTemplateBootstrap {
             entitlementProvider: entitlementProvider,
             capabilityPolicy: capabilityPolicy,
             activationStore: activationStore,
+            logger: logger,
             router: resolvedRouter,
             moduleRegistry: moduleRegistry,
             uiSurfaceManager: uiSurfaceManager

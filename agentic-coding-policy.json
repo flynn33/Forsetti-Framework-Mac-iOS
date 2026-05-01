@@ -3,7 +3,7 @@
   "artifact_version": "1.1.0",
   "name": "Forsetti Agentic Development Policy",
   "owner": "James Daley",
-  "license_reference": "license.md",
+  "license_reference": "LICENSE.md",
   "description": "Comprehensive machine-readable instructions for coding agents working with Forsetti or apps that consume Forsetti.",
   "usage": {
     "intended_for": [
@@ -274,7 +274,7 @@
     "forsetti-instructions.json",
     "guide.md",
     "https://github.com/flynn33/Forsetti-Framework/wiki",
-    "license.md",
+    "LICENSE.md",
     "Scripts/verify-forsetti-guardrails.sh",
     ".github/workflows/guardrails.yml",
     ".swiftlint.yml",

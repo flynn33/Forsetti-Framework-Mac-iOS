@@ -2,7 +2,7 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
-_Last updated: April 12, 2026_
+_Last updated: May 1, 2026_
 
 **Current Version: 0.1.0** <!-- x-release-please-version -->
 
@@ -172,10 +172,10 @@ Forsetti ships as multiple products/targets with clear responsibilities:
   - Platform-agnostic logic only.
 - `ForsettiPlatform`
   - Native platform service adapters and entitlement implementations.
-- `ForsettiModulesExample`
-  - Example modules + manifests for reference and testing.
 - `ForsettiHostTemplate`
   - SwiftUI host controller/views for module discovery and activation UI.
+- `ForsettiModulesExample`
+  - Internal reference/test target with example modules and manifests. It is not exposed as a public package product.
 
 ## 7) Core Runtime Concepts
 
@@ -185,7 +185,7 @@ Forsetti flow at runtime:
 2. Boot `ForsettiRuntime` with services, entitlement provider, and policy.
 3. Load manifests from a bundle subdirectory.
 4. Validate each manifest for compatibility/capability/version constraints.
-5. Activate eligible modules.
+5. Restore prior activation state or explicitly activate selected modules.
 6. Reflect UI contributions through `UISurfaceManager`.
 7. React to entitlement changes and reconcile active modules.
 
@@ -200,6 +200,12 @@ Core contracts:
 - `ActivationStore`
 - `ForsettiEntitlementProvider`
 - `ForsettiServiceProviding` / `ForsettiServiceContainer`
+
+Platform defaults:
+
+- `DefaultForsettiPlatformServices` uses Apple-native networking, storage, Keychain-backed secure storage, local file export, and telemetry placeholders.
+- `InMemorySecureStorageService` remains available for explicit tests/debug composition only.
+- `LocalFileExportService` sanitizes suggested filenames and writes only inside its configured export directory.
 
 ## 8) Why Dependency Rules Are Strict
 
@@ -273,7 +279,7 @@ A consumer application may build app-owned Forsetti-compatible modules in its ow
 
 Forsetti has two intentionally different starting paths:
 
-- Evaluation/demo path: uses `ForsettiModulesExample` to inspect framework behavior quickly.
+- Repository-local evaluation path: uses the internal `ForsettiModulesExample` target to inspect framework behavior quickly.
 - Production starter path: uses the Forsetti Xcode templates to generate app-owned module scaffolding.
 
 If you are preparing a real application, start with section 22 and `xcode-template-guide.md`.
@@ -281,11 +287,10 @@ If you are preparing a real application, start with section 22 and `xcode-templa
 ```swift
 import ForsettiCore
 import ForsettiPlatform
-import ForsettiModulesExample
 import ForsettiHostTemplate
 
 let registry = ModuleRegistry()
-ExampleModuleRegistry.registerAll(into: registry)
+MyAppModuleRegistry.registerAll(into: registry)
 
 let entitlementProvider = ForsettiEntitlementProviderFactory.makeDefault(
     macOSUnlockedProductIDs: ["com.forsetti.iap.example-ui"]
@@ -305,7 +310,7 @@ What this does:
 - Registers module factories.
 - Uses default entitlement provider strategy by platform.
 - Builds runtime and host controller.
-- Renders host UI that can discover/activate modules.
+- Renders host UI that can discover modules and activate them through explicit launch or user action.
 
 ### Debug / Test Entitlements
 
@@ -395,6 +400,8 @@ Use capability policy to enforce least privilege:
 
 Why enforce:
 
+- Service resolution is scoped to the active module's granted capabilities.
+- UI contributions are accepted only when the module has the matching UI capability.
 - Prevent modules from silently expanding scope.
 - Make capability expansion a reviewable architecture decision.
 
@@ -478,6 +485,14 @@ Suggested files in consumer repo:
 
 - Manifest says `moduleType = ui` or `moduleType = app` but factory returns a type that does not conform to `ForsettiUIModule` or `ForsettiAppModule`.
 
+`moduleIdentityMismatch`:
+
+- Registry factory returned a module whose descriptor or bundled manifest does not match the discovered manifest identity, type, version, or entry point.
+
+`missingCapability`:
+
+- Module tried to contribute UI or resolve a service without the required declared/granted capability.
+
 ## 19) FAQ
 
 ### Why so many restrictions?
@@ -514,8 +529,10 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 
 ## 20) Additional Documentation
 
+- `developer-guide.md`
+  - canonical integration rules and policies.
 - `guide.md`
-  - concise integration rules and policies.
+  - redirect to `developer-guide.md`.
 - [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework/wiki)
   - comprehensive architecture, runtime, workflow, and integration documentation.
 - `forsetti-instructions.json`
@@ -535,7 +552,7 @@ Forsetti is proprietary software owned by James Daley.
 - **Commercial use:** Requires a separate written license. Contact James Daley for terms and pricing.
 - **Personal/non-commercial projects:** Contact James Daley to discuss availability of a personal-use license.
 
-Full terms: `license.md`
+Full terms: `LICENSE.md`
 
 ## 22) Xcode Templates (Production Starter)
 
@@ -546,7 +563,7 @@ The Xcode template set is a first-class Forsetti onboarding path for production 
 - `Forsetti App.xctemplate` is the production starter path.
   It generates app-owned bootstrap/config files, an app-owned starter module, a starter module registry, and starter manifest resources.
 - `ForsettiModulesExample` remains in this repository for evaluation and learning.
-  It is sample-only content and is not the default identity of template-generated applications.
+  It is sample-only content, is not exposed as a public package product, and is not the default identity of template-generated applications.
 
 ### Included Templates
 

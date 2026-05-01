@@ -18,7 +18,8 @@
     "patch": 0
   },
   "capabilitiesRequested": [
-    "telemetry"
+    "telemetry",
+    "view_injection"
   ],
   "entryPoint": "___PACKAGENAME:identifier___AppModule"
 }

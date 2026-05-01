@@ -6,6 +6,12 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Added
 
+- Added repository-level remediation guidance and a local baseline verification record.
+- Added module-scoped service resolution so service access is constrained by granted capabilities.
+- Added runtime checks for UI contribution capabilities, module source identity, and factory/manifest identity alignment.
+- Added an explicit host launch activation strategy for restore-only, development auto-activation, and specific module activation.
+- Added Keychain-backed secure storage and OSLog-backed diagnostics for platform defaults.
+- Added focused regression tests for activation restore, module identity validation, capability enforcement, host launch behavior, and platform service hardening.
 - Added production starter Xcode templates for app modules, UI modules, service modules, and standalone module manifests.
 - Added starter module files for app, UI, and service module authoring, including module manifests and SwiftUI views.
 - Added `DeploymentMode` and template-local module registry support for template-created Forsetti app projects.
@@ -13,13 +19,31 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Changed
 
+- Restored activation state is now reconciled through the normal activation path instead of being treated as already-live runtime state.
+- UI/app module activation now follows the single-active UI model by default while service modules remain concurrently active.
+- Production template rendering now waits for successful runtime boot and module activation before showing app module UI.
+- `DefaultForsettiPlatformServices` now uses production-capable secure storage by default.
+- `LocalFileExportService` now sanitizes suggested filenames and keeps exports inside the configured directory.
+- Split large host root view responsibilities into focused SwiftUI components.
+- Renamed `license.md` to `LICENSE.md` and updated references.
+- Added `version.txt` to Release Please managed files.
+- Limited guardrail workflow push runs to `main` while preserving pull request checks.
 - Moved comprehensive wiki documentation to the GitHub Wiki as the canonical long-form documentation surface.
 - Rebuilt the Forsetti App Xcode template around an app module entry point instead of embedding application behavior directly in bootstrap code.
 - Updated template installation and uninstallation scripts for the expanded Xcode template set.
 - Expanded README coverage for the production starter templates and template-based app/module authoring workflow.
 
+### Fixed
+
+- Fixed persisted activation restore so restored modules are resolved, validated, started, loaded, and reconnected to UI surfaces.
+- Fixed failed restore behavior so modules are not left falsely enabled after restore failures.
+- Fixed factory mismatch handling so descriptor and manifest identity mismatches fail before lifecycle start.
+- Fixed module context APIs so scoped modules cannot spoof source IDs when publishing events or sending module messages.
+- Fixed stale entitlement change stream documentation and UI activation wording.
+
 ### Removed
 
+- Removed `ForsettiModulesExample` from public package products while keeping the target available for internal examples and tests.
 - Removed automated wiki publishing, documentation-release tagging, and source-splitting workflow files.
 - Removed the repository-local wiki source file now that the GitHub Wiki is maintained directly.
 - Removed tracked SwiftPM build products and Xcode workspace state from the repository.

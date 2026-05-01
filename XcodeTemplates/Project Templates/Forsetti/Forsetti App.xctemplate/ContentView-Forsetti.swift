@@ -19,13 +19,11 @@ struct ContentView: View {
                 ForsettiHostRootView(
                     controller: bootstrap.controller,
                     injectionRegistry: bootstrap.injectionRegistry,
-                    showDeveloperControls: true
+                    showDeveloperControls: true,
+                    launchActivationStrategy: .activateAllEligibleForDevelopment
                 )
             case .production:
-                ___PACKAGENAME:identifier___AppModuleView()
-                    .task {
-                        await bootstrap.bootForProduction()
-                    }
+                ___PACKAGENAME:identifier___ProductionRootView(bootstrap: bootstrap)
             }
         }
         #else
@@ -37,6 +35,37 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+#if canImport(ForsettiCore) && canImport(ForsettiHostTemplate) && canImport(ForsettiPlatform)
+private struct ___PACKAGENAME:identifier___ProductionRootView: View {
+    @ObservedObject var bootstrap: ___PACKAGENAME:identifier___ForsettiBootstrap
+
+    var body: some View {
+        Group {
+            switch bootstrap.productionState {
+            case .idle, .booting:
+                ProgressView()
+            case .ready:
+                ___PACKAGENAME:identifier___AppModuleView()
+            case .failed:
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.system(size: 32))
+                        .foregroundStyle(.orange)
+                    Text("Unable to start")
+                        .font(.headline)
+                    Text("Please try again later.")
+                        .foregroundStyle(.secondary)
+                }
+                .padding(24)
+            }
+        }
+        .task {
+            await bootstrap.bootForProduction()
+        }
+    }
+}
+#endif
 
 private struct MissingForsettiProductsView: View {
     var body: some View {

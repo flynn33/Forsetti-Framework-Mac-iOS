@@ -7,10 +7,18 @@ import ForsettiCore
 import ForsettiHostTemplate
 import ForsettiPlatform
 
+enum ___PACKAGENAME:identifier___ProductionBootState: Equatable {
+    case idle
+    case booting
+    case ready
+    case failed(String)
+}
+
 @MainActor
 final class ___PACKAGENAME:identifier___ForsettiBootstrap: ObservableObject {
     let controller: ForsettiHostController
     let injectionRegistry: ForsettiViewInjectionRegistry
+    @Published private(set) var productionState: ___PACKAGENAME:identifier___ProductionBootState = .idle
 
     init() {
         // Previous template behavior used ExampleModuleRegistry from ForsettiModulesExample.
@@ -33,15 +41,35 @@ final class ___PACKAGENAME:identifier___ForsettiBootstrap: ObservableObject {
     }
 
     func bootForProduction() async {
-        await controller.bootIfNeeded()
-        await controller.openModule(moduleID: ___PACKAGENAME:identifier___AppModule.Constants.moduleID)
+        guard productionState != .ready, productionState != .booting else {
+            return
+        }
+
+        productionState = .booting
+        await controller.bootIfNeeded(
+            activationStrategy: .activate(moduleIDs: [___PACKAGENAME:identifier___AppModule.Constants.moduleID])
+        )
+
+        if controller.activeUIModuleID == ___PACKAGENAME:identifier___AppModule.Constants.moduleID {
+            productionState = .ready
+            return
+        }
+
+        productionState = .failed(controller.errorMessage ?? "Activation failed.")
     }
 }
 #else
 import Foundation
+import SwiftUI
 
 @MainActor
 final class ___PACKAGENAME:identifier___ForsettiBootstrap: ObservableObject {
+    enum ProductionBootState {
+        case idle
+    }
+
+    let productionState = ProductionBootState.idle
+
     func bootForProduction() async {}
 }
 #endif

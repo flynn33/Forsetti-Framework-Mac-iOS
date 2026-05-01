@@ -137,7 +137,7 @@
           "methods": [
             "isUnlocked(moduleID: String, productID: String?) async -> Bool",
             "refreshEntitlements() async",
-            "entitlementsDidChangePublisher() -> AnyPublisher<Void, Never> (or async stream equivalent)"
+            "entitlementsDidChangeStream() -> AsyncStream<Void>"
           ]
         },
         "notes": [
@@ -369,8 +369,8 @@
       ],
       "state_model": {
         "enabledServiceModuleIDs": "Set<String> — all active service modules (multiple allowed simultaneously).",
-        "enabledUIModuleIDs": "Set<String> — all enabled UI modules. In multi-module single apps, exactly one should be in this set. In developer-testing and dashboard contexts, activeUIModuleID selects which one is foregrounded.",
-        "activeUIModuleID": "String? — the currently foregrounded UI module. Used in developer-testing and dashboard contexts to switch between module applications. Not a hard constraint for single-module apps.",
+        "enabledUIModuleIDs": "Set<String> — compatibility state for the active UI/app module. The default runtime model keeps this set empty or containing exactly one module ID.",
+        "activeUIModuleID": "String? — the active UI/app module. Activating another UI/app module deactivates the previous one; service modules remain concurrently active.",
         "loadedModules": "Map<String, ForsettiModule>"
       }
     },

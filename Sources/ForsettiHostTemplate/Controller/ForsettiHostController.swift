@@ -2,6 +2,12 @@ import Combine
 import Foundation
 import ForsettiCore
 
+public enum ForsettiLaunchActivationStrategy: Sendable, Equatable {
+    case restoreOnly
+    case activateAllEligibleForDevelopment
+    case activate(moduleIDs: Set<String>)
+}
+
 @MainActor
 public final class ForsettiHostController: ObservableObject {
     @Published public private(set) var serviceModules: [ForsettiHostModuleItem] = []
@@ -37,18 +43,24 @@ public final class ForsettiHostController: ObservableObject {
         self.slotCatalog = slotCatalog
     }
 
-    public func bootIfNeeded() async {
+    public func bootIfNeeded(
+        restoreActivationState: Bool = true,
+        activationStrategy: ForsettiLaunchActivationStrategy = .restoreOnly
+    ) async {
         guard !isBooted else {
             await refreshModuleState()
             return
         }
 
-        await boot()
+        await boot(
+            restoreActivationState: restoreActivationState,
+            activationStrategy: activationStrategy
+        )
     }
 
     public func boot(
         restoreActivationState: Bool = true,
-        activateAllEligibleModules: Bool = true
+        activationStrategy: ForsettiLaunchActivationStrategy = .restoreOnly
     ) async {
         isBusy = true
         defer { isBusy = false }
@@ -60,9 +72,7 @@ public final class ForsettiHostController: ObservableObject {
                 restoreActivationState: restoreActivationState
             )
 
-            if activateAllEligibleModules {
-                await activateEligibleModulesOnLaunch()
-            }
+            await applyLaunchActivationStrategy(activationStrategy)
 
             isBooted = true
             startEntitlementObservation()
@@ -70,6 +80,17 @@ public final class ForsettiHostController: ObservableObject {
         } catch {
             present(error: error)
         }
+    }
+
+    @available(*, deprecated, message: "Use boot(restoreActivationState:activationStrategy:) with an explicit launch activation strategy.")
+    public func boot(
+        restoreActivationState: Bool,
+        activateAllEligibleModules: Bool
+    ) async {
+        await boot(
+            restoreActivationState: restoreActivationState,
+            activationStrategy: activateAllEligibleModules ? .activateAllEligibleForDevelopment : .restoreOnly
+        )
     }
 
     public func shutdown() {
@@ -324,6 +345,27 @@ public final class ForsettiHostController: ObservableObject {
                 try await runtime.moduleManager.activateModule(moduleID: manifest.moduleID)
             } catch {
                 present(error: error)
+            }
+        }
+    }
+
+    private func applyLaunchActivationStrategy(_ strategy: ForsettiLaunchActivationStrategy) async {
+        switch strategy {
+        case .restoreOnly:
+            return
+        case .activateAllEligibleForDevelopment:
+            await activateEligibleModulesOnLaunch()
+        case let .activate(moduleIDs):
+            for moduleID in moduleIDs.sorted() {
+                do {
+                    try await runtime.moduleManager.activateModule(moduleID: moduleID)
+                    if let manifest = runtime.moduleManager.manifestsByID[moduleID],
+                       manifest.moduleType == .ui || manifest.moduleType == .app {
+                        try runtime.moduleManager.setSelectedUIModule(moduleID: moduleID)
+                    }
+                } catch {
+                    present(error: error)
+                }
             }
         }
     }
