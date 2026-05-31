@@ -1,55 +1,70 @@
-# Forsetti Proprietary License (Internal Use Only)
+# Software License
 
-Copyright (c) 2026 James Daley. All Rights Reserved.
+Copyright © James Daley. All rights reserved.
 
-## 1. Ownership and Copyright
+## 1. Grant of Permission
 
-Forsetti (including all source code, documentation, templates, scripts, and related materials) is a copyrighted proprietary software framework owned exclusively by James Daley.
+Permission is hereby granted to use this software free of charge for:
 
-No ownership rights are transferred by access to this repository.
+- Personal use
+- Non-commercial academic use
+- Educational research
+- Evaluation and testing
 
-## 2. Internal Use Only
+This permission includes the right to download, install, run, and study the software for the purposes listed above.
 
-Forsetti is provided for internal development purposes only, unless and until a separate written commercial license is granted by James Daley.
+## 2. Commercial Use
 
-Use of Forsetti is limited to the copyright owner and any internal team members or entities explicitly authorized in writing by James Daley.
+Commercial use of this software is not permitted without a separate written license agreement from James Daley.
 
-## 3. No Open-Source License Granted
+Commercial use includes, but is not limited to:
 
-This is not an open-source license.
+- Use by a business, company, contractor, consultant, or commercial organization
+- Use in connection with paid services
+- Use in commercial products, platforms, or internal business tools
+- Redistribution as part of a paid product or service
+- Use that directly or indirectly generates revenue
 
-No rights are granted under MIT, Apache, GPL, BSD, or any other open-source terms.
+To obtain a commercial license, written permission must be granted by James Daley before commercial use begins.
 
-## 4. License Requirement for Outside Developers
+## 3. Restrictions
 
-Any outside developer, contractor, company, organization, or third party that wishes to use, copy, modify, distribute, integrate, host, sublicense, or otherwise exploit Forsetti must first purchase and obtain a separate written license from James Daley.
+Without prior written permission from James Daley, you may not:
 
-Absent such written license, all such use is strictly prohibited.
+- Sell, lease, sublicense, or commercially distribute the software
+- Rebrand the software as your own
+- Remove or alter copyright notices
+- Use the software in a commercial environment
+- Incorporate the software into a commercial product or service
 
-## 5. Restrictions Without Separate Written License
+## 4. Ownership
 
-Without a separate written license from James Daley, you may not:
+All rights, title, and interest in and to the software, including all intellectual property rights, remain the exclusive property of James Daley.
 
-- copy or reproduce Forsetti in whole or in part;
-- modify, adapt, translate, or create derivative works;
-- distribute, publish, sublicense, lease, rent, sell, or transfer Forsetti;
-- provide Forsetti as part of a commercial product or service;
-- expose Forsetti to third parties for development or production use.
+This license does not transfer ownership of the software or any associated intellectual property.
 
-## 6. Reservation of Rights
+## 5. No Warranty
 
-All rights not expressly granted are reserved by James Daley.
+The software is provided “as is,” without warranty of any kind, express or implied.
+
+James Daley makes no warranties regarding the software, including but not limited to warranties of merchantability, fitness for a particular purpose, reliability, security, or non-infringement.
+
+## 6. Limitation of Liability
+
+In no event shall James Daley be liable for any claim, damages, loss, or other liability arising from the use of, inability to use, or misuse of the software.
+
+Use of the software is entirely at your own risk.
 
 ## 7. Termination
 
-Any unauthorized use automatically terminates any implied permission to access or use Forsetti and may result in legal action.
+This license is automatically terminated if you violate any of its terms.
 
-Upon termination, all copies in possession or control of the unauthorized user must be permanently deleted.
+Upon termination, you must stop using the software and remove all copies in your possession or control.
 
 ## 8. Contact for Commercial Licensing
 
-To request a paid external/commercial license, contact:
+For commercial licensing, redistribution rights, or other permissions, contact James Daley directly.
 
-- Licensor: James Daley
-- Framework: Forsetti
-- Purpose: External use and commercial licensing
+---
+
+By using this software, you agree to the terms of this license.
