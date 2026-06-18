@@ -69,7 +69,7 @@ Forsetti is designed for:
 - **Solo developers shipping modular applications** who want runtime governance without building custom infrastructure.
 - **Organizations managing multi-app portfolios** that want a shared modular runtime across products.
 
-Forsetti is proprietary software. Evaluation for internal assessment is permitted. Production or commercial use requires a written license from James Daley (see section 22 for details).
+Forsetti is proprietary software. Evaluation and permitted non-commercial use are governed by `LICENSE.md`. Commercial licensing is not yet available (see section 22 for details).
 
 If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode templates (section 23).
 
@@ -589,8 +589,9 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 Forsetti is proprietary software owned by James Daley.
 
 - **Evaluation:** You may access this repository to evaluate Forsetti for your team's needs. Evaluation does not grant production or distribution rights.
-- **Commercial use:** Requires a separate written license. Contact James Daley for terms and pricing.
-- **Personal/non-commercial projects:** Contact James Daley to discuss availability of a personal-use license.
+- **Permitted non-commercial use:** Personal use, non-commercial academic use, educational research, evaluation, and testing are permitted under `LICENSE.md`.
+- **Commercial use:** Not permitted. Commercial licensing is not yet available.
+- **Production or distribution rights:** Not granted by evaluation access and not available commercially at this time.
 
 Full terms: `LICENSE.md`
 
