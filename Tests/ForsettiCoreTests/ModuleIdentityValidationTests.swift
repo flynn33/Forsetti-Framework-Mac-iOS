@@ -3,6 +3,26 @@ import XCTest
 @testable import ForsettiCore
 
 final class ModuleIdentityValidationTests: XCTestCase {
+    func testDuplicateEntryPointRegistrationThrowsUnlessReplacementIsExplicit() throws {
+        let registry = ModuleRegistry()
+        try registry.register(entryPoint: "DuplicateModule") { MismatchServiceModule() }
+
+        XCTAssertThrowsError(
+            try registry.register(entryPoint: "DuplicateModule") { MismatchServiceModule() }
+        ) { error in
+            guard case let ModuleRegistryError.duplicateEntryPoint(entryPoint) = error else {
+                return XCTFail("Expected duplicateEntryPoint error, received \(error).")
+            }
+            XCTAssertEqual(entryPoint, "DuplicateModule")
+        }
+
+        XCTAssertNoThrow(
+            try registry.register(entryPoint: "DuplicateModule", replacingExisting: true) {
+                MismatchServiceModule()
+            }
+        )
+    }
+
     @MainActor
     func testActivationRejectsFactoryReturningWrongModuleIDBeforeStart() async throws {
         MismatchServiceModule.startInvocationCount = 0
@@ -24,7 +44,7 @@ final class ModuleIdentityValidationTests: XCTestCase {
         try testBundle.writeManifest(mismatchManifest, fileName: "Mismatch.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: "MismatchServiceModule") { MismatchServiceModule() }
+        try registry.register(entryPoint: "MismatchServiceModule") { MismatchServiceModule() }
         let manager = makeManager(registry: registry)
 
         _ = try manager.discoverModules(bundle: testBundle.bundle, subdirectory: "ForsettiManifests")
@@ -57,7 +77,7 @@ final class ModuleIdentityValidationTests: XCTestCase {
         try testBundle.writeManifest(discoveredManifest, fileName: "WrongTypeUI.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: WrongTypeUIModule.Constants.entryPoint) {
+        try registry.register(entryPoint: WrongTypeUIModule.Constants.entryPoint) {
             WrongTypeUIModule()
         }
         let manager = makeManager(registry: registry)
@@ -90,7 +110,7 @@ final class ModuleIdentityValidationTests: XCTestCase {
         try testBundle.writeManifest(discoveredManifest, fileName: "WrongEntryPointUI.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: WrongEntryPointUIModule.Constants.expectedEntryPoint) {
+        try registry.register(entryPoint: WrongEntryPointUIModule.Constants.expectedEntryPoint) {
             WrongEntryPointUIModule()
         }
         let manager = makeManager(registry: registry)
@@ -159,11 +179,11 @@ private final class MismatchServiceModule: ForsettiModule {
         entryPoint: "MismatchServiceModule"
     )
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         Self.startInvocationCount += 1
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class WrongTypeUIModule: ForsettiUIModule {
@@ -200,11 +220,11 @@ private final class WrongTypeUIModule: ForsettiUIModule {
     let manifest = WrongTypeUIModule.moduleManifest(moduleType: .service, entryPoint: Constants.entryPoint)
     let uiContributions = UIContributions.empty
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         Self.startInvocationCount += 1
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class WrongEntryPointUIModule: ForsettiUIModule {
@@ -242,9 +262,9 @@ private final class WrongEntryPointUIModule: ForsettiUIModule {
     let manifest = WrongEntryPointUIModule.moduleManifest(entryPoint: Constants.actualEntryPoint)
     let uiContributions = UIContributions.empty
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         Self.startInvocationCount += 1
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }

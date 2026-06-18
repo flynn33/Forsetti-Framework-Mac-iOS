@@ -144,7 +144,7 @@ A dedicated UI module for the dashboard itself is recommended.
 
 ## 5) Integration Contract (What You Can and Cannot Do)
 
-Forsetti is meant to be consumed as a sealed framework.
+Forsetti is the sealed runtime framework. Framework internals are sealed behind public contracts, while applications and modules are built inside the Forsetti runtime model through manifests, registration, entitlements, compatibility, capability-scoped services, framework-mediated communication, and structured UI contribution contracts.
 
 Allowed:
 
@@ -290,7 +290,7 @@ import ForsettiPlatform
 import ForsettiHostTemplate
 
 let registry = ModuleRegistry()
-MyAppModuleRegistry.registerAll(into: registry)
+try MyAppModuleRegistry.registerAll(into: registry)
 
 let entitlementProvider = ForsettiEntitlementProviderFactory.makeDefault(
     macOSUnlockedProductIDs: ["com.forsetti.iap.example-ui"]
@@ -342,7 +342,8 @@ In consumer apps, create your own module target and follow this sequence.
 
 Guidance:
 
-- Prefer protocol-based service lookup through `ForsettiContext.services`.
+- Prefer protocol-based service lookup through `ForsettiModuleContext.services`.
+- Use `context.logger`, `context.publishEvent(type:payload:)`, and `context.sendMessage(to:type:payload:)` from module lifecycle code.
 - Keep module responsibilities narrow.
 - Avoid direct knowledge of host internals.
 - For multi-module single applications, keep the application UI in a dedicated UI module. That UI module may use SwiftUI and other appropriate Apple-native frameworks.
@@ -354,6 +355,7 @@ A manifest is the runtime contract for discoverability and eligibility.
 Required fields:
 
 - `schemaVersion`
+- `manifestTemplateVersion`
 - `moduleID`
 - `displayName`
 - `moduleVersion`
@@ -362,13 +364,19 @@ Required fields:
 - `minForsettiVersion`
 - `capabilitiesRequested`
 - `entryPoint`
+- `runtimeRequirements`
 
 Optional fields:
 
 - `maxForsettiVersion`
 - `iapProductID`
+- `defaultModuleRole`
 
-If key metadata is wrong (missing entry point, invalid platform, denied capability), activation fails by design.
+Current generated manifests use schema/template `1.1`.
+Existing `1.0` manifests still decode with safe defaults: no I/O requirements, no UI requirements, private data isolation, and no default module role.
+
+Discovery creates framework-owned registration records from manifests.
+Activation fails by design when key metadata is wrong, a registration record is missing or stale, a capability is denied, a required I/O/default-role provider is unavailable, or UI contributions exceed declared UI requirements.
 
 ## 13) Entitlements and Paid Modules
 
@@ -391,7 +399,7 @@ Why this matters:
 ## 14) Capability Governance
 
 Capabilities are explicit permission requests from modules.
-Examples include storage, telemetry, routing overlay, toolbar items, and view injection.
+Examples include storage, telemetry, routing overlay, toolbar items, view injection, shared database, authentication, diagnostics, API, and security.
 
 Use capability policy to enforce least privilege:
 
@@ -535,10 +543,10 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
   - redirect to `developer-guide.md`.
 - [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework/wiki)
   - comprehensive architecture, runtime, workflow, and integration documentation.
-- `forsetti-instructions.json`
-  - architecture source material and phase context.
-- `AI_IMPLEMENTATION_GUIDE.md`
-  - canonical interpretation guide for AI agents and implementers.
+- `framework-policy.json`
+  - architecture source material, runtime policy, and phase context.
+- `IMPLEMENTATION_GUIDE.md`
+  - canonical implementation guidance for developers and reviewers.
 - `MODULE_BOUNDARY_RULES.md`
   - concise boundary rules that separate internal target guardrails from consumer module implementation.
 - `xcode-template-guide.md`

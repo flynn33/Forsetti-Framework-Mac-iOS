@@ -4,11 +4,14 @@ public typealias ModuleFactory = @Sendable () -> ForsettiModule
 
 public enum ModuleRegistryError: Error, LocalizedError {
     case entryPointNotRegistered(String)
+    case duplicateEntryPoint(String)
 
     public var errorDescription: String? {
         switch self {
         case let .entryPointNotRegistered(entryPoint):
             return "No module factory registered for entryPoint '\(entryPoint)'."
+        case let .duplicateEntryPoint(entryPoint):
+            return "Module factory already registered for entryPoint '\(entryPoint)'."
         }
     }
 }
@@ -27,10 +30,17 @@ public final class ModuleRegistry: @unchecked Sendable {
         return factories.keys.sorted()
     }
 
-    public func register(entryPoint: String, factory: @escaping ModuleFactory) {
+    public func register(
+        entryPoint: String,
+        replacingExisting: Bool = false,
+        factory: @escaping ModuleFactory
+    ) throws {
         lock.lock()
+        defer { lock.unlock() }
+        if factories[entryPoint] != nil, !replacingExisting {
+            throw ModuleRegistryError.duplicateEntryPoint(entryPoint)
+        }
         factories[entryPoint] = factory
-        lock.unlock()
     }
 
     public func makeModule(entryPoint: String) throws -> ForsettiModule {

@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "manifestTemplateVersion": "1.1",
   "moduleID": "com.yourcompany.___PACKAGENAME:identifier___.app-module",
   "displayName": "___PACKAGENAME___ App Module",
   "moduleVersion": {
@@ -21,5 +22,29 @@
     "telemetry",
     "view_injection"
   ],
-  "entryPoint": "___PACKAGENAME:identifier___AppModule"
+  "entryPoint": "___PACKAGENAME:identifier___AppModule",
+  "defaultModuleRole": "ui",
+  "runtimeRequirements": {
+    "io": [
+      {
+        "requirementID": "___PACKAGENAME:identifier___.app-module.telemetry.lifecycle",
+        "kind": "telemetry",
+        "access": "emit",
+        "required": false
+      }
+    ],
+    "ui": {
+      "viewIDs": [
+        "___PACKAGENAME:identifier___.app-module.workspace-root"
+      ],
+      "slotIDs": [
+        "module.workspace"
+      ]
+    },
+    "dataIsolation": {
+      "mode": "private_to_module",
+      "ownedStoreIDs": [],
+      "requiredDefaultRoles": []
+    }
+  }
 }

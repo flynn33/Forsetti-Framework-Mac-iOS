@@ -1,0 +1,83 @@
+{
+  "baseline_commit": "47b774717c84e944ba50f2bb9590f9c274c6ecde",
+  "branch": "alignment/apple-runtime-boundaries",
+  "commands": [
+    {
+      "command": "git status --short",
+      "notes": ".forsetti/ was the only untracked path after evidence creation.",
+      "status": "pass"
+    },
+    {
+      "command": "git rev-parse --abbrev-ref HEAD",
+      "output": "alignment/apple-runtime-boundaries",
+      "status": "pass"
+    },
+    {
+      "command": "git rev-parse HEAD",
+      "output": "47b774717c84e944ba50f2bb9590f9c274c6ecde",
+      "status": "pass"
+    },
+    {
+      "command": "swift --version",
+      "output": "Apple Swift version 6.3.2; target arm64-apple-macosx26.0",
+      "status": "pass"
+    },
+    {
+      "command": "xcodebuild -version",
+      "output": "Xcode 26.5, build 17F42",
+      "status": "pass"
+    },
+    {
+      "command": "swiftlint version",
+      "output": "0.63.2",
+      "status": "pass"
+    },
+    {
+      "command": "find . -name '*.json' -print0 | xargs -0 python3 -m json.tool >/dev/null",
+      "notes": "Failed because the command passes multiple input files to json.tool.",
+      "status": "fail"
+    },
+    {
+      "command": "find . -path './.build' -prune -o -path './.git' -prune -o -name '*.json' -print0 | xargs -0 -n1 python3 -m json.tool >/dev/null",
+      "notes": "Corrected one-file-at-a-time JSON validation.",
+      "status": "pass"
+    },
+    {
+      "command": "swift package dump-package >/tmp/forsetti-dump-package.json",
+      "status": "pass"
+    },
+    {
+      "command": "swift test --parallel --enable-code-coverage",
+      "notes": "Failed during test compilation in Tests/ForsettiCoreTests/RuntimeLifecycleTests.swift because CountingUIModule is missing a closing brace.",
+      "status": "fail"
+    },
+    {
+      "command": "swiftlint lint --strict --config .swiftlint.yml",
+      "notes": "0 violations across 50 Swift files.",
+      "status": "pass"
+    },
+    {
+      "command": "xcodebuild -scheme ForsettiFramework-Package -destination 'generic/platform=iOS Simulator' build",
+      "status": "pass"
+    },
+    {
+      "command": "./Scripts/verify-forsetti-guardrails.sh",
+      "notes": "Failed during Swift test compilation for the same RuntimeLifecycleTests.swift syntax error.",
+      "status": "fail"
+    }
+  ],
+  "inventory": {
+    "file": ".forsetti/alignment/baseline-file-inventory.json",
+    "file_count": 96,
+    "source": "git ls-files"
+  },
+  "phase": "00",
+  "status": "complete",
+  "toolchain": {
+    "swift": "Apple Swift version 6.3.2",
+    "swift_target": "arm64-apple-macosx26.0",
+    "swiftlint": "0.63.2",
+    "xcode": "26.5",
+    "xcode_build": "17F42"
+  }
+}

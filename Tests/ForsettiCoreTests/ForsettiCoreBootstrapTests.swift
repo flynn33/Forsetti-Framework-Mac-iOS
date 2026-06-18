@@ -25,7 +25,7 @@ final class ForsettiCoreBootstrapTests: XCTestCase {
     func testModuleManagerActivatesServiceAndUI() async throws {
         let manifestLoader = ManifestLoader()
         let registry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: registry)
+        try ExampleModuleRegistry.registerAll(into: registry)
 
         let checker = CompatibilityChecker(
             runtimePlatform: .macOS,

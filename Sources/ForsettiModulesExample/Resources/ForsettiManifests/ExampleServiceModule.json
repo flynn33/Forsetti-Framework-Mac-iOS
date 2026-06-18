@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "manifestTemplateVersion": "1.1",
   "moduleID": "com.forsetti.module.example-service",
   "displayName": "Example Service",
   "moduleVersion": {
@@ -19,5 +20,28 @@
   "maxForsettiVersion": null,
   "capabilitiesRequested": ["storage", "telemetry"],
   "iapProductID": null,
-  "entryPoint": "ExampleServiceModule"
+  "entryPoint": "ExampleServiceModule",
+  "defaultModuleRole": null,
+  "runtimeRequirements": {
+    "io": [
+      {
+        "requirementID": "example-service.storage.last-started",
+        "kind": "storage",
+        "access": "read_write",
+        "required": false
+      },
+      {
+        "requirementID": "example-service.telemetry.lifecycle",
+        "kind": "telemetry",
+        "access": "emit",
+        "required": false
+      }
+    ],
+    "ui": null,
+    "dataIsolation": {
+      "mode": "private_to_module",
+      "ownedStoreIDs": ["example-service"],
+      "requiredDefaultRoles": []
+    }
+  }
 }

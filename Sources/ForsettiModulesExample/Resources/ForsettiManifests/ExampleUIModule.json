@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "manifestTemplateVersion": "1.1",
   "moduleID": "com.forsetti.module.example-ui",
   "displayName": "Example UI",
   "moduleVersion": {
@@ -19,5 +20,21 @@
   "maxForsettiVersion": null,
   "capabilitiesRequested": ["routing_overlay", "toolbar_items", "view_injection"],
   "iapProductID": "com.forsetti.iap.example-ui",
-  "entryPoint": "ExampleUIModule"
+  "entryPoint": "ExampleUIModule",
+  "defaultModuleRole": "ui",
+  "runtimeRequirements": {
+    "io": [],
+    "ui": {
+      "viewIDs": ["example-banner", "example-overlay-view"],
+      "slotIDs": ["module.workspace", "overlay.main"],
+      "toolbarItemIDs": ["example-ui-home"],
+      "routeIDs": ["example-overlay"],
+      "pointerIDs": ["home"]
+    },
+    "dataIsolation": {
+      "mode": "private_to_module",
+      "ownedStoreIDs": [],
+      "requiredDefaultRoles": []
+    }
+  }
 }

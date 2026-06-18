@@ -10,7 +10,7 @@ _Last updated: May 1, 2026_
   - Swift
   - Swift Package Manager / Xcode
   - SwiftUI (including dedicated Forsetti UI modules in application implementations)
-  - Native Apple frameworks (Foundation, Combine, StoreKit, etc.) where appropriate
+  - Native Apple frameworks where appropriate outside `ForsettiCore`
 - Do not add cross-platform UI/runtime frameworks for core behavior.
 
 ## 1b. UI Module Clarification
@@ -32,7 +32,7 @@ The requirement is about modular separation of responsibilities, not avoidance o
 
 ## 2. Integration Boundaries (Required)
 
-Forsetti must be treated as a sealed framework in consumer projects.
+Forsetti must be treated as the sealed runtime framework in consumer projects. Framework internals remain sealed behind public contracts, while applications and modules are built inside the runtime model.
 
 ### Allowed
 
@@ -77,7 +77,7 @@ these are target-specific architecture guardrails, not blanket bans for every co
 
 - `ForsettiCore` must not import:
   - `ForsettiPlatform`, `ForsettiModulesExample`, `ForsettiHostTemplate`
-  - `SwiftUI`, `UIKit`, `AppKit`, `StoreKit`
+  - `SwiftUI`, `UIKit`, `AppKit`, `StoreKit`, `Combine`
 - `ForsettiPlatform` must not import:
   - `ForsettiModulesExample`, `ForsettiHostTemplate`
   - `SwiftUI`, `UIKit`, `AppKit`
@@ -130,13 +130,15 @@ When adding capabilities in a project that uses Forsetti:
 
 1. Create or choose an app-owned target/package for your Forsetti modules.
 2. Implement `ForsettiAppModule` (single-module apps), `ForsettiUIModule` (multi-module UI), or `ForsettiModule` (service/feature) in your own codebase.
-3. Define each module's descriptor/manifest and register entry points in your app bootstrap.
+3. Define each module's descriptor/manifest and register entry points in your app bootstrap with the throwing `ModuleRegistry.register` API.
 4. Compose runtime/services using public Forsetti APIs only.
-5. Declare only the capabilities the module needs; service access and UI contributions are enforced against those capabilities at runtime.
-6. Keep dependencies injected and avoid global mutable state.
-7. Add tests for module behavior and architecture policy in your repository.
-8. Run guardrails before opening/updating a PR.
-9. If an API gap is discovered, propose an upstream Forsetti change; do not patch internal framework code.
+5. Use manifest schema/template `1.1` for new modules and declare `runtimeRequirements` for I/O, UI, data isolation, and default-role dependencies.
+6. Declare only the capabilities the module needs; service access and UI contributions are enforced against those capabilities at runtime.
+7. Use `ForsettiModuleContext` in lifecycle code. Do not send, subscribe, or log as another module.
+8. Keep dependencies injected and avoid global mutable state.
+9. Add tests for module behavior and architecture policy in your repository.
+10. Run guardrails before opening/updating a PR.
+11. If an API gap is discovered, propose an upstream Forsetti change; do not patch internal framework code.
 
 ## 9. Review Checklist
 

@@ -4,7 +4,7 @@ This document explains how to interpret Forsetti’s architectural boundaries co
 
 ## Why this document exists
 
-AI coding agents and developers can misread boundary rules if they are written too tersely.
+Developers and reviewers can misread boundary rules if they are written too tersely.
 
 This document states the boundary rules explicitly so they are hard to misinterpret.
 

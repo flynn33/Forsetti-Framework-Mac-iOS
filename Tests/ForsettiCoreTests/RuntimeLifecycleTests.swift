@@ -16,7 +16,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         try testBundle.writeManifest(CountingServiceModule.moduleManifest, fileName: "CountingService.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
+        try registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
             CountingServiceModule()
         }
 
@@ -48,7 +48,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         try testBundle.writeManifest(CountingUIModule.moduleManifest, fileName: "CountingUI.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: CountingUIModule.Constants.entryPoint) {
+        try registry.register(entryPoint: CountingUIModule.Constants.entryPoint) {
             CountingUIModule()
         }
 
@@ -108,7 +108,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         )
 
         let firstRegistry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: firstRegistry)
+        try ExampleModuleRegistry.registerAll(into: firstRegistry)
 
         let firstRuntime = ForsettiRuntime(
             platform: .macOS,
@@ -132,7 +132,7 @@ final class RuntimeLifecycleTests: XCTestCase {
         XCTAssertEqual(storedStateAfterShutdown.activeUIModuleID, uiModuleID)
 
         let secondRegistry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: secondRegistry)
+        try ExampleModuleRegistry.registerAll(into: secondRegistry)
 
         let secondRuntime = ForsettiRuntime(
             platform: .macOS,
@@ -199,8 +199,8 @@ final class RuntimeLifecycleTests: XCTestCase {
         )
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: "TestUIModuleA") { TestUIModuleA() }
-        registry.register(entryPoint: "TestUIModuleB") { TestUIModuleB() }
+        try registry.register(entryPoint: "TestUIModuleA") { TestUIModuleA() }
+        try registry.register(entryPoint: "TestUIModuleB") { TestUIModuleB() }
 
         let manager = ModuleManager(
             manifestLoader: ManifestLoader(),
@@ -256,10 +256,10 @@ final class RuntimeLifecycleTests: XCTestCase {
         try testBundle.writeManifest(SecondCountingServiceModule.moduleManifest, fileName: "SecondCountingService.json")
 
         let registry = ModuleRegistry()
-        registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
+        try registry.register(entryPoint: CountingServiceModule.Constants.entryPoint) {
             CountingServiceModule()
         }
-        registry.register(entryPoint: SecondCountingServiceModule.Constants.entryPoint) {
+        try registry.register(entryPoint: SecondCountingServiceModule.Constants.entryPoint) {
             SecondCountingServiceModule()
         }
 
@@ -348,8 +348,8 @@ private final class TestUIModuleA: ForsettiUIModule {
         ]
     )
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {
         Self.stopInvocationCount += 1
     }
 }
@@ -392,8 +392,8 @@ private final class TestUIModuleB: ForsettiUIModule {
         ]
     )
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {
         Self.stopInvocationCount += 1
     }
 }
@@ -433,11 +433,11 @@ private final class CountingServiceModule: ForsettiModule {
 
     let manifest = CountingServiceModule.moduleManifest
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         Self.startInvocationCount += 1
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 private final class SecondCountingServiceModule: ForsettiModule {
     enum Constants {
@@ -468,8 +468,8 @@ private final class SecondCountingServiceModule: ForsettiModule {
 
     let manifest = SecondCountingServiceModule.moduleManifest
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {}
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class CountingUIModule: ForsettiUIModule {
@@ -516,8 +516,9 @@ private final class CountingUIModule: ForsettiUIModule {
         ]
     )
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         Self.startInvocationCount += 1
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
+}

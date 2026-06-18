@@ -1,6 +1,6 @@
-# AI Implementation Guide
+# Implementation Guide
 
-This file is a canonical implementation guide for AI coding agents and developers implementing applications with Forsetti.
+This file is a canonical implementation guide for developers and reviewers implementing applications with Forsetti.
 
 ## Purpose
 

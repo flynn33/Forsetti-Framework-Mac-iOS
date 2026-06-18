@@ -8,6 +8,7 @@ public enum CompatibilitySeverity: String, Sendable {
 
 public enum CompatibilityIssueCode: String, Sendable {
     case invalidSchemaVersion
+    case invalidManifestTemplateVersion
     case unsupportedPlatform
     case unsupportedForsettiVersion
     case capabilityDenied
@@ -57,12 +58,33 @@ public final class CompatibilityChecker {
     public func evaluate(manifest: ModuleManifest) -> CompatibilityReport {
         var issues: [CompatibilityIssue] = []
 
-        if manifest.schemaVersion != ModuleManifest.supportedSchemaVersion {
+        if !ModuleManifest.supportedSchemaVersions.contains(manifest.schemaVersion) {
             issues.append(
                 CompatibilityIssue(
                     code: .invalidSchemaVersion,
                     severity: .error,
-                    message: "Unsupported schema \(manifest.schemaVersion). Expected \(ModuleManifest.supportedSchemaVersion)."
+                    message: "Unsupported schema \(manifest.schemaVersion). Supported schemas: \(Self.supportedSchemaDescription)."
+                )
+            )
+        }
+
+        if !ModuleManifest.supportedManifestTemplateVersions.contains(manifest.manifestTemplateVersion) {
+            issues.append(
+                CompatibilityIssue(
+                    code: .invalidManifestTemplateVersion,
+                    severity: .error,
+                    message: "Unsupported manifest template \(manifest.manifestTemplateVersion.rawValue)."
+                )
+            )
+        }
+
+        if manifest.schemaVersion == ModuleManifest.currentSchemaVersion,
+           manifest.manifestTemplateVersion != .current {
+            issues.append(
+                CompatibilityIssue(
+                    code: .invalidManifestTemplateVersion,
+                    severity: .error,
+                    message: "Schema \(ModuleManifest.currentSchemaVersion) requires manifest template \(ManifestTemplateVersion.current.rawValue)."
                 )
             )
         }
@@ -98,17 +120,6 @@ public final class CompatibilityChecker {
         }
 
         manifest.capabilitiesRequested.forEach { capability in
-            if capability == .uiThemeMask {
-                issues.append(
-                    CompatibilityIssue(
-                        code: .capabilityDenied,
-                        severity: .error,
-                        message: "Capability \(capability.rawValue) is reserved for the Forsetti framework shell."
-                    )
-                )
-                return
-            }
-
             let decision = capabilityPolicy.evaluate(moduleID: manifest.moduleID, capability: capability)
             if case let .denied(reason) = decision {
                 issues.append(
@@ -122,5 +133,9 @@ public final class CompatibilityChecker {
         }
 
         return CompatibilityReport(moduleID: manifest.moduleID, issues: issues)
+    }
+
+    private static var supportedSchemaDescription: String {
+        ModuleManifest.supportedSchemaVersions.sorted().joined(separator: ", ")
     }
 }

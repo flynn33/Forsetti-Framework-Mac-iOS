@@ -4,8 +4,8 @@
 import ForsettiCore
 
 enum ___PACKAGENAME:identifier___ModuleRegistry {
-    static func registerAll(into registry: ModuleRegistry) {
-        registry.register(entryPoint: ___PACKAGENAME:identifier___AppModule.Constants.entryPoint) {
+    static func registerAll(into registry: ModuleRegistry) throws {
+        try registry.register(entryPoint: ___PACKAGENAME:identifier___AppModule.Constants.entryPoint) {
             ___PACKAGENAME:identifier___AppModule()
         }
     }

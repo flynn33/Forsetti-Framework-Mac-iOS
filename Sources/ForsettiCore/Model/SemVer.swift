@@ -34,6 +34,10 @@ public struct SemVer: Codable, Hashable, Comparable, Sendable {
         )
     }
 
+    public var hasNonNegativeComponents: Bool {
+        major >= 0 && minor >= 0 && patch >= 0
+    }
+
     public var description: String {
         if let prerelease {
             return "\(major).\(minor).\(patch)-\(prerelease)"

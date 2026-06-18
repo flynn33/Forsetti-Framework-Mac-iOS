@@ -24,7 +24,11 @@ final class ___PACKAGENAME:identifier___ForsettiBootstrap: ObservableObject {
         // Previous template behavior used ExampleModuleRegistry from ForsettiModulesExample.
         // New template behavior registers an app-owned starter module by default.
         let registry = ModuleRegistry()
-        ___PACKAGENAME:identifier___ModuleRegistry.registerAll(into: registry)
+        do {
+            try ___PACKAGENAME:identifier___ModuleRegistry.registerAll(into: registry)
+        } catch {
+            assertionFailure("Failed to register starter module: \(error.localizedDescription)")
+        }
 
         controller = ForsettiHostTemplateBootstrap.makeController(
             manifestsBundle: .main,

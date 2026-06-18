@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "manifestTemplateVersion": "1.1",
   "moduleID": "com.yourcompany.___PACKAGENAME:identifier___.ui-module",
   "displayName": "___PACKAGENAME___ UI Module",
   "moduleVersion": {
@@ -21,5 +22,25 @@
     "toolbar_items",
     "view_injection"
   ],
-  "entryPoint": "___PACKAGENAME:identifier___UIModule"
+  "entryPoint": "___PACKAGENAME:identifier___UIModule",
+  "defaultModuleRole": "ui",
+  "runtimeRequirements": {
+    "io": [],
+    "ui": {
+      "viewIDs": [
+        "___PACKAGENAME:identifier___.ui-module.workspace"
+      ],
+      "slotIDs": [
+        "module.workspace"
+      ],
+      "toolbarItemIDs": [
+        "___PACKAGENAME:identifier___.ui-module.refresh"
+      ]
+    },
+    "dataIsolation": {
+      "mode": "private_to_module",
+      "ownedStoreIDs": [],
+      "requiredDefaultRoles": []
+    }
+  }
 }

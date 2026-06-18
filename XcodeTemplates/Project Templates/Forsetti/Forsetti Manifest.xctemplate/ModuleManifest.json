@@ -1,5 +1,6 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
+  "manifestTemplateVersion": "1.1",
   "moduleID": "com.yourcompany.___PACKAGENAME:identifier___.module",
   "displayName": "___PACKAGENAME___ Module",
   "moduleVersion": {
@@ -20,5 +21,17 @@
   "capabilitiesRequested": [
     "toolbar_items"
   ],
-  "entryPoint": "___PACKAGENAME:identifier___Module"
+  "entryPoint": "___PACKAGENAME:identifier___Module",
+  "defaultModuleRole": "ui",
+  "runtimeRequirements": {
+    "io": [],
+    "ui": {
+      "toolbarItemIDs": []
+    },
+    "dataIsolation": {
+      "mode": "private_to_module",
+      "ownedStoreIDs": [],
+      "requiredDefaultRoles": []
+    }
+  }
 }

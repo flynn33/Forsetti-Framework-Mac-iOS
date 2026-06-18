@@ -4,6 +4,30 @@ import XCTest
 
 @MainActor
 final class CapabilityEnforcementTests: XCTestCase {
+    @MainActor
+    func testActivationFailsWhenRequiredServiceIsUnavailable() async throws {
+        let manifest = RequiredStorageServiceModule.moduleManifest
+
+        let manager = try makeManager(
+            manifests: [manifest],
+            registrations: [
+                RequiredStorageServiceModule.entryPoint: { RequiredStorageServiceModule() }
+            ],
+            services: ForsettiServiceContainer()
+        )
+
+        do {
+            try await manager.activateModule(moduleID: manifest.moduleID)
+            XCTFail("Expected unsatisfiedRuntimeRequirement.")
+        } catch {
+            guard case let ModuleManagerError.unsatisfiedRuntimeRequirement(moduleID, reason) = error else {
+                return XCTFail("Expected unsatisfiedRuntimeRequirement, received \(error).")
+            }
+            XCTAssertEqual(moduleID, manifest.moduleID)
+            XCTAssertTrue(reason.contains("storage.required-service"))
+        }
+    }
+
     func testModuleWithoutStorageCapabilityCannotResolveStorageServiceAndLogsWarning() async throws {
         StorageProbeModule.reset()
 
@@ -33,7 +57,9 @@ final class CapabilityEnforcementTests: XCTestCase {
         let manager = try makeManager(
             manifests: [StorageProbeModule.moduleManifest(capabilities: [.storage])],
             registrations: [
-                StorageProbeModule.Constants.entryPoint: { StorageProbeModule() }
+                StorageProbeModule.Constants.entryPoint: {
+                    StorageProbeModule(manifest: StorageProbeModule.moduleManifest(capabilities: [.storage]))
+                }
             ],
             services: makeServices()
         )
@@ -174,7 +200,7 @@ final class CapabilityEnforcementTests: XCTestCase {
         let testBundle = try CapabilityTestBundle(manifests: manifests)
         let registry = ModuleRegistry()
         for (entryPoint, factory) in registrations {
-            registry.register(entryPoint: entryPoint, factory: factory)
+            try registry.register(entryPoint: entryPoint, factory: factory)
         }
 
         let manager = ModuleManager(
@@ -206,6 +232,39 @@ final class CapabilityEnforcementTests: XCTestCase {
         services.register(SecureStorageService.self, service: CapabilitySecureStorageService())
         return services
     }
+}
+
+private final class RequiredStorageServiceModule: ForsettiModule {
+    static let moduleID = "com.forsetti.tests.required-storage-service"
+    static let entryPoint = "RequiredStorageServiceModule"
+    static let moduleManifest = ModuleManifest(
+        schemaVersion: ModuleManifest.currentSchemaVersion,
+        manifestTemplateVersion: .v1_1,
+        moduleID: moduleID,
+        displayName: "Required Storage Service",
+        moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
+        moduleType: .service,
+        supportedPlatforms: [.iOS, .macOS],
+        minForsettiVersion: ForsettiVersion.current,
+        capabilitiesRequested: [.storage],
+        entryPoint: entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            io: [
+                ModuleIORequirement(
+                    requirementID: "storage.required-service",
+                    kind: .storage,
+                    access: .readWrite,
+                    required: true
+                )
+            ]
+        )
+    )
+
+    let descriptor = serviceDescriptor(moduleID: moduleID, displayName: "Required Storage Service")
+    let manifest = RequiredStorageServiceModule.moduleManifest
+
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class StorageProbeModule: ForsettiModule {
@@ -241,13 +300,17 @@ private final class StorageProbeModule: ForsettiModule {
         moduleType: .service
     )
 
-    let manifest = StorageProbeModule.moduleManifest(capabilities: [])
+    let manifest: ModuleManifest
 
-    func start(context: ForsettiContext) throws {
+    init(manifest: ModuleManifest = StorageProbeModule.moduleManifest(capabilities: [])) {
+        self.manifest = manifest
+    }
+
+    func start(context: any ForsettiModuleContext) throws {
         Self.didResolveStorage = context.services.resolve(StorageService.self) != nil
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class SecureStorageProbeModule: ForsettiModule {
@@ -285,11 +348,11 @@ private final class SecureStorageProbeModule: ForsettiModule {
 
     let manifest = SecureStorageProbeModule.moduleManifest(capabilities: [])
 
-    func start(context: ForsettiContext) throws {
+    func start(context: any ForsettiModuleContext) throws {
         Self.didResolveSecureStorage = context.services.resolve(SecureStorageService.self) != nil
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class ToolbarOnlyUIModule: ForsettiUIModule {
@@ -319,8 +382,8 @@ private final class ToolbarOnlyUIModule: ForsettiUIModule {
         ]
     )
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {}
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class ViewInjectionOnlyUIModule: ForsettiUIModule {
@@ -351,8 +414,8 @@ private final class ViewInjectionOnlyUIModule: ForsettiUIModule {
         ]
     )
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {}
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class OverlayOnlyUIModule: ForsettiUIModule {
@@ -386,8 +449,8 @@ private final class OverlayOnlyUIModule: ForsettiUIModule {
         )
     )
 
-    func start(context _: ForsettiContext) throws {}
-    func stop(context _: ForsettiContext) {}
+    func start(context _: any ForsettiModuleContext) throws {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class SourceSpoofingEventModule: ForsettiModule {
@@ -407,15 +470,20 @@ private final class SourceSpoofingEventModule: ForsettiModule {
     let descriptor = serviceDescriptor(moduleID: Constants.moduleID, displayName: "Source Event")
     let manifest = SourceSpoofingEventModule.moduleManifest
 
-    func start(context: ForsettiContext) throws {
-        context.publishFrameworkEvent(
+    func start(context: any ForsettiModuleContext) throws {
+        guard let runtimeContext = context as? ForsettiContext else {
+            context.publishEvent(type: "capability.spoof.event", payload: [:])
+            return
+        }
+
+        runtimeContext.publishFrameworkEvent(
             type: "capability.spoof.event",
             payload: [:],
             sourceModuleID: "com.forsetti.tests.spoofed"
         )
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class SourceSpoofingMessageModule: ForsettiModule {
@@ -438,9 +506,13 @@ private final class SourceSpoofingMessageModule: ForsettiModule {
     let descriptor = serviceDescriptor(moduleID: Constants.moduleID, displayName: "Source Message")
     let manifest = SourceSpoofingMessageModule.moduleManifest
 
-    func start(context: ForsettiContext) throws {
+    func start(context: any ForsettiModuleContext) throws {
+        guard let runtimeContext = context as? ForsettiContext else {
+            return
+        }
+
         do {
-            try context.sendModuleMessage(
+            try runtimeContext.sendModuleMessage(
                 from: "com.forsetti.tests.spoofed",
                 to: "com.forsetti.tests.target",
                 type: "capability.message",
@@ -451,7 +523,7 @@ private final class SourceSpoofingMessageModule: ForsettiModule {
         }
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private func serviceDescriptor(moduleID: String, displayName: String) -> ModuleDescriptor {

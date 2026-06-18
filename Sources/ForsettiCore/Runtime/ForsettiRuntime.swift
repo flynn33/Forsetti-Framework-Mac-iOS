@@ -22,6 +22,7 @@ public final class ForsettiRuntime {
         entitlementProvider: any ForsettiEntitlementProvider = AllowAllEntitlementProvider(),
         capabilityPolicy: any CapabilityPolicy = AllowAllCapabilityPolicy(),
         activationStore: any ActivationStore = UserDefaultsActivationStore(),
+        registrationStore: any ModuleRegistrationStore = UserDefaultsModuleRegistrationStore(),
         logger: any ForsettiLogger = ConsoleForsettiLogger(),
         router: (any OverlayRouting)? = nil,
         moduleRegistry: ModuleRegistry = ModuleRegistry(),
@@ -54,6 +55,7 @@ public final class ForsettiRuntime {
             moduleRegistry: moduleRegistry,
             compatibilityChecker: compatibilityChecker,
             activationStore: activationStore,
+            registrationStore: registrationStore,
             entitlementProvider: entitlementProvider,
             uiSurfaceManager: self.uiSurfaceManager,
             context: context

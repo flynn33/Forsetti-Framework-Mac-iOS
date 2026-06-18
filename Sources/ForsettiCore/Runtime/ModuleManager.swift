@@ -8,6 +8,9 @@ public enum ModuleManagerError: Error, LocalizedError {
     case notUIModule(String)
     case moduleIdentityMismatch(moduleID: String, field: String, expected: String, actual: String)
     case missingCapability(moduleID: String, capability: Capability, usage: String)
+    case registrationMissing(String)
+    case registrationMismatch(moduleID: String, reason: String)
+    case unsatisfiedRuntimeRequirement(moduleID: String, reason: String)
 
     public var errorDescription: String? {
         switch self {
@@ -26,6 +29,12 @@ public enum ModuleManagerError: Error, LocalizedError {
             return "Module '\(moduleID)' identity mismatch for \(field). Expected '\(expected)', received '\(actual)'."
         case let .missingCapability(moduleID, capability, usage):
             return "Module '\(moduleID)' cannot use \(usage) without capability '\(capability.rawValue)'."
+        case let .registrationMissing(moduleID):
+            return "Module '\(moduleID)' has no registration record."
+        case let .registrationMismatch(moduleID, reason):
+            return "Module '\(moduleID)' registration does not match the current manifest. \(reason)"
+        case let .unsatisfiedRuntimeRequirement(moduleID, reason):
+            return "Module '\(moduleID)' runtime requirement is not satisfied. \(reason)"
         }
     }
 }
@@ -43,6 +52,7 @@ public final class ModuleManager {
     private let moduleRegistry: ModuleRegistry
     private let compatibilityChecker: CompatibilityChecker
     private let activationStore: any ActivationStore
+    private let registrationStore: any ModuleRegistrationStore
     private let entitlementProvider: any ForsettiEntitlementProvider
     private let uiSurfaceManager: UISurfaceManager
     private let context: ForsettiContext
@@ -52,6 +62,7 @@ public final class ModuleManager {
         moduleRegistry: ModuleRegistry,
         compatibilityChecker: CompatibilityChecker,
         activationStore: any ActivationStore,
+        registrationStore: any ModuleRegistrationStore = InMemoryModuleRegistrationStore(),
         entitlementProvider: any ForsettiEntitlementProvider,
         uiSurfaceManager: UISurfaceManager,
         context: ForsettiContext
@@ -60,6 +71,7 @@ public final class ModuleManager {
         self.moduleRegistry = moduleRegistry
         self.compatibilityChecker = compatibilityChecker
         self.activationStore = activationStore
+        self.registrationStore = registrationStore
         self.entitlementProvider = entitlementProvider
         self.uiSurfaceManager = uiSurfaceManager
         self.context = context
@@ -77,11 +89,16 @@ public final class ModuleManager {
         subdirectory: String = "ForsettiManifests"
     ) throws -> [ModuleManifest] {
         manifestsByID = try manifestLoader.loadManifests(bundle: bundle, subdirectory: subdirectory)
+        try registerDiscoveredManifests()
         return manifestsByID.values.sorted { $0.moduleID < $1.moduleID }
     }
 
     public var discoveredManifests: [ModuleManifest] {
         manifestsByID.values.sorted { $0.moduleID < $1.moduleID }
+    }
+
+    public func registeredModuleRecords() throws -> [ModuleRegistrationRecord] {
+        try registrationStore.allRecords()
     }
 
     public func uiContributions(for moduleID: String) -> UIContributions? {
@@ -113,6 +130,8 @@ public final class ModuleManager {
         if !report.isCompatible {
             throw ModuleManagerError.incompatible(report: report)
         }
+
+        try validateRegistration(for: manifest)
 
         let unlocked = await entitlementProvider.isUnlocked(moduleID: moduleID, productID: manifest.iapProductID)
         guard unlocked else {
@@ -263,6 +282,7 @@ public final class ModuleManager {
         }
 
         let module = try resolveModule(for: manifest)
+        try validateRuntimeRequirements(for: manifest, module: module)
         let moduleContext = contextFor(manifest: manifest)
         do {
             try module.start(context: moduleContext)
@@ -291,6 +311,7 @@ public final class ModuleManager {
             throw ModuleManagerError.notUIModule(moduleID)
         }
 
+        try validateRuntimeRequirements(for: manifest, module: uiModule)
         try validateUIContributions(uiModule.uiContributions, manifest: manifest)
 
         if let activeUIModuleID, activeUIModuleID != moduleID {
@@ -345,6 +366,32 @@ public final class ModuleManager {
             grantedCapabilities: Set(manifest.capabilitiesRequested)
         )
     }
+}
+
+private extension ModuleManager {
+    private func registerDiscoveredManifests() throws {
+        for manifest in discoveredManifests {
+            let newRecord = try ModuleRegistrationRecord.make(manifest: manifest)
+            if let existingRecord = try registrationStore.loadRecord(moduleID: manifest.moduleID),
+               try existingRecord.matches(manifest: manifest) {
+                continue
+            }
+            try registrationStore.saveRecord(newRecord)
+        }
+    }
+
+    private func validateRegistration(for manifest: ModuleManifest) throws {
+        guard let record = try registrationStore.loadRecord(moduleID: manifest.moduleID) else {
+            throw ModuleManagerError.registrationMissing(manifest.moduleID)
+        }
+
+        guard try record.matches(manifest: manifest) else {
+            throw ModuleManagerError.registrationMismatch(
+                moduleID: manifest.moduleID,
+                reason: "Recorded manifest hash or identity fields are stale."
+            )
+        }
+    }
 
     private func validateResolvedModule(_ module: ForsettiModule, against manifest: ModuleManifest) throws {
         try validateIdentity(
@@ -389,67 +436,169 @@ public final class ModuleManager {
             expected: manifest.moduleVersion.description,
             actual: module.manifest.moduleVersion.description
         )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.schemaVersion",
+            expected: manifest.schemaVersion,
+            actual: module.manifest.schemaVersion
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.manifestTemplateVersion",
+            expected: manifest.manifestTemplateVersion.rawValue,
+            actual: module.manifest.manifestTemplateVersion.rawValue
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.capabilitiesRequested",
+            expected: manifest.capabilitiesRequested.map(\.rawValue).joined(separator: ","),
+            actual: module.manifest.capabilitiesRequested.map(\.rawValue).joined(separator: ",")
+        )
+        try validateIdentity(
+            moduleID: manifest.moduleID,
+            field: "manifest.defaultModuleRole",
+            expected: manifest.defaultModuleRole?.rawValue ?? "",
+            actual: module.manifest.defaultModuleRole?.rawValue ?? ""
+        )
+        if module.manifest.runtimeRequirements != manifest.runtimeRequirements {
+            throw ModuleManagerError.moduleIdentityMismatch(
+                moduleID: manifest.moduleID,
+                field: "manifest.runtimeRequirements",
+                expected: "registered runtime requirements",
+                actual: "module runtime requirements"
+            )
+        }
+    }
+}
+
+private extension ModuleManager {
+    private func validateRuntimeRequirements(for manifest: ModuleManifest, module: ForsettiModule) throws {
+        let capabilities = Set(manifest.capabilitiesRequested)
+
+        try validateDefaultModuleRole(for: manifest, capabilities: capabilities)
+        try validateIORequirements(for: manifest, capabilities: capabilities)
+        try validateDataIsolationRequirements(for: manifest, capabilities: capabilities)
+        try validateServiceRuntimeBoundary(for: manifest, module: module)
     }
 
-    private func validateIdentity(moduleID: String, field: String, expected: String, actual: String) throws {
-        guard expected == actual else {
-            throw ModuleManagerError.moduleIdentityMismatch(
-                moduleID: moduleID,
-                field: field,
-                expected: expected,
-                actual: actual
+    private func validateDefaultModuleRole(for manifest: ModuleManifest, capabilities: Set<Capability>) throws {
+        if let defaultModuleRole = manifest.defaultModuleRole {
+            guard defaultModuleRole.isValid(for: manifest.moduleType) else {
+                throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                    moduleID: manifest.moduleID,
+                    reason: "defaultModuleRole '\(defaultModuleRole.rawValue)' is invalid for moduleType '\(manifest.moduleType.rawValue)'."
+                )
+            }
+            if let capability = defaultModuleRole.requiredCapability, !capabilities.contains(capability) {
+                throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                    moduleID: manifest.moduleID,
+                    reason: "defaultModuleRole '\(defaultModuleRole.rawValue)' requires capability '\(capability.rawValue)'."
+                )
+            }
+        }
+    }
+
+    private func validateIORequirements(for manifest: ModuleManifest, capabilities: Set<Capability>) throws {
+        for requirement in manifest.runtimeRequirements.io {
+            let capability = requirement.kind.requiredCapability
+            guard capabilities.contains(capability) else {
+                throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                    moduleID: manifest.moduleID,
+                    reason: "I/O requirement '\(requirement.requirementID)' requires capability '\(capability.rawValue)'."
+                )
+            }
+
+            guard !requirement.required || providerAvailable(for: requirement.kind) else {
+                throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                    moduleID: manifest.moduleID,
+                    reason: "I/O requirement '\(requirement.requirementID)' requires unavailable provider '\(requirement.kind.rawValue)'."
+                )
+            }
+        }
+    }
+
+    private func validateDataIsolationRequirements(for manifest: ModuleManifest, capabilities: Set<Capability>) throws {
+        for role in manifest.runtimeRequirements.dataIsolation.requiredDefaultRoles {
+            try validateDefaultRoleDependency(role, manifest: manifest, capabilities: capabilities)
+        }
+
+        if manifest.runtimeRequirements.dataIsolation.mode == .frameworkMediatedShared,
+           !providerAvailable(for: DefaultModuleRole.sharedDatabase) {
+            throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                moduleID: manifest.moduleID,
+                reason: "framework_mediated_shared data isolation requires a shared_database provider."
             )
         }
     }
 
-    private func validateUIContributions(_ contributions: UIContributions, manifest: ModuleManifest) throws {
-        let capabilities = Set(manifest.capabilitiesRequested)
-
-        try requireCapability(
-            .toolbarItems,
-            for: manifest,
-            usage: "toolbar item contributions",
-            when: !contributions.toolbarItems.isEmpty,
-            grantedCapabilities: capabilities
-        )
-        try requireCapability(
-            .viewInjection,
-            for: manifest,
-            usage: "view injection contributions",
-            when: !contributions.viewInjections.isEmpty,
-            grantedCapabilities: capabilities
-        )
-        try requireCapability(
-            .routingOverlay,
-            for: manifest,
-            usage: "routing overlay contributions",
-            when: contributions.overlaySchema != nil,
-            grantedCapabilities: capabilities
-        )
-        try requireCapability(
-            .uiThemeMask,
-            for: manifest,
-            usage: "theme mask contributions",
-            when: contributions.themeMask != nil,
-            grantedCapabilities: capabilities
-        )
-    }
-
-    private func requireCapability(
-        _ capability: Capability,
-        for manifest: ModuleManifest,
-        usage: String,
-        when condition: Bool,
-        grantedCapabilities: Set<Capability>
+    private func validateDefaultRoleDependency(
+        _ role: DefaultModuleRole,
+        manifest: ModuleManifest,
+        capabilities: Set<Capability>
     ) throws {
-        guard condition, !grantedCapabilities.contains(capability) else {
-            return
+        if let capability = role.requiredCapability, !capabilities.contains(capability) {
+            throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                moduleID: manifest.moduleID,
+                reason: "Default role dependency '\(role.rawValue)' requires capability '\(capability.rawValue)'."
+            )
         }
 
-        throw ModuleManagerError.missingCapability(
-            moduleID: manifest.moduleID,
-            capability: capability,
-            usage: usage
-        )
+        guard providerAvailable(for: role) else {
+            throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                moduleID: manifest.moduleID,
+                reason: "Default role provider '\(role.rawValue)' is unavailable."
+            )
+        }
+    }
+
+    private func validateServiceRuntimeBoundary(for manifest: ModuleManifest, module: ForsettiModule) throws {
+        if manifest.moduleType == .service, module is ForsettiUIModule {
+            throw ModuleManagerError.unsatisfiedRuntimeRequirement(
+                moduleID: manifest.moduleID,
+                reason: "service modules cannot provide UI contributions."
+            )
+        }
+    }
+}
+
+private extension ModuleManager {
+    private func providerAvailable(for kind: ModuleIOKind) -> Bool {
+        switch kind {
+        case .networking:
+            return context.services.resolve(NetworkingService.self) != nil
+        case .storage:
+            return context.services.resolve(StorageService.self) != nil
+        case .secureStorage:
+            return context.services.resolve(SecureStorageService.self) != nil
+        case .fileExport:
+            return context.services.resolve(FileExportService.self) != nil
+        case .telemetry:
+            return context.services.resolve(TelemetryService.self) != nil
+        case .sharedDatabase:
+            return context.services.resolve(SharedDatabaseService.self) != nil ||
+                providerAvailable(for: DefaultModuleRole.sharedDatabase)
+        case .authentication:
+            return context.services.resolve(AuthenticationService.self) != nil ||
+                providerAvailable(for: DefaultModuleRole.authentication)
+        case .diagnostics:
+            return context.services.resolve(DiagnosticsService.self) != nil ||
+                providerAvailable(for: DefaultModuleRole.diagnostics)
+        case .api:
+            return context.services.resolve(APIService.self) != nil ||
+                providerAvailable(for: DefaultModuleRole.api)
+        case .security:
+            return context.services.resolve(SecurityService.self) != nil ||
+                providerAvailable(for: DefaultModuleRole.security)
+        }
+    }
+
+    private func providerAvailable(for role: DefaultModuleRole) -> Bool {
+        if role == .ui {
+            return manifestsByID.values.contains { $0.defaultModuleRole == .ui && $0.defaultModuleRole?.isValid(for: $0.moduleType) == true }
+        }
+
+        return manifestsByID.values.contains { manifest in
+            manifest.defaultModuleRole == role && role.isValid(for: manifest.moduleType)
+        }
     }
 }

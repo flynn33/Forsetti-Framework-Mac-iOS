@@ -44,7 +44,7 @@ final class ModuleLoggingTests: XCTestCase {
         let testBundle = try LoggingTestBundle(manifests: ["FailingService.json": manifest])
         let logger = RecordingForsettiLogger()
         let registry = ModuleRegistry()
-        registry.register(entryPoint: entryPoint) {
+        try registry.register(entryPoint: entryPoint) {
             FailingServiceModule()
         }
 
@@ -115,11 +115,11 @@ private final class FailingServiceModule: ForsettiModule {
         entryPoint: "FailingServiceModule"
     )
 
-    func start(context _: ForsettiContext) throws {
+    func start(context _: any ForsettiModuleContext) throws {
         throw ModuleLoggingTestError.refreshFailed
     }
 
-    func stop(context _: ForsettiContext) {}
+    func stop(context _: any ForsettiModuleContext) {}
 }
 
 private final class LoggingActivationStore: ActivationStore, @unchecked Sendable {
