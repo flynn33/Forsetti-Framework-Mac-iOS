@@ -15,7 +15,9 @@ This permission includes the right to download, install, run, and study the soft
 
 ## 2. Commercial Use
 
-Commercial use of this software is not permitted without a separate written license agreement from James Daley.
+Commercial use of this software is not permitted.
+
+Commercial licensing is not yet available. No commercial use may begin unless and until James Daley makes separate written commercial license terms available and grants written permission.
 
 Commercial use includes, but is not limited to:
 
@@ -25,7 +27,7 @@ Commercial use includes, but is not limited to:
 - Redistribution as part of a paid product or service
 - Use that directly or indirectly generates revenue
 
-To obtain a commercial license, written permission must be granted by James Daley before commercial use begins.
+No commercial license terms, pricing, or availability are currently offered.
 
 ## 3. Restrictions
 
@@ -61,9 +63,11 @@ This license is automatically terminated if you violate any of its terms.
 
 Upon termination, you must stop using the software and remove all copies in your possession or control.
 
-## 8. Contact for Commercial Licensing
+## 8. Other Permissions
 
-For commercial licensing, redistribution rights, or other permissions, contact James Daley directly.
+Commercial licensing is not yet available.
+
+For non-commercial permissions not already covered by this license, redistribution questions, or other non-commercial permission requests, contact James Daley directly.
 
 ---
 
