@@ -1,0 +1,72 @@
+name: PR Version Update
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, edited, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+concurrency:
+  group: pr-version-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  update-version:
+    name: Update SemVer for PR
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Read base version
+        id: base_version
+        run: |
+          git fetch origin "${{ github.event.pull_request.base.ref }}" --depth=1
+          base_version="$(git show "origin/${{ github.event.pull_request.base.ref }}:version.txt")"
+          echo "value=${base_version}" >> "$GITHUB_OUTPUT"
+
+      - name: Capture PR body
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: printf '%s' "$PR_BODY" > /tmp/forsetti-pr-body.md
+
+      - name: Update version files
+        id: version
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          python3 Scripts/update-pr-version.py \
+            --base-version "${{ steps.base_version.outputs.value }}" \
+            --title "$PR_TITLE" \
+            --body-file /tmp/forsetti-pr-body.md
+
+      - name: Validate chore PR version files
+        if: steps.version.outputs.skipped == 'true'
+        run: |
+          if ! git diff --quiet "origin/${{ github.event.pull_request.base.ref }}" -- version.txt README.md Sources/ForsettiCore/ForsettiVersion.swift; then
+            echo "chore PRs must not change version files."
+            git diff "origin/${{ github.event.pull_request.base.ref }}" -- version.txt README.md Sources/ForsettiCore/ForsettiVersion.swift
+            exit 1
+          fi
+
+      - name: Commit version update
+        if: steps.version.outputs.skipped != 'true'
+        run: |
+          if git diff --quiet -- version.txt README.md Sources/ForsettiCore/ForsettiVersion.swift; then
+            echo "Version files already match ${{ steps.version.outputs.version }}."
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add version.txt README.md Sources/ForsettiCore/ForsettiVersion.swift
+          git commit -m "chore: update version to ${{ steps.version.outputs.version }}"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"

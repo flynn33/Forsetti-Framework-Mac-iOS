@@ -10,7 +10,8 @@ Phase 00 installed repository-level remediation guidance and captured the local 
 
 ## GitHub/Remote
 
-- Local repository is connected to `origin`: `https://github.com/flynn33/Forsetti-Framework.git`
+- Phase 00 recorded `origin`: `https://github.com/flynn33/Forsetti-Framework.git`
+- Current repository remote: `https://github.com/flynn33/Forsetti-Framework-Mac-iOS.git`
 - Default branch checked out before Phase 00 branch creation: `main`
 - Phase branch created locally: `audit/baseline-guardrails`
 

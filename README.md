@@ -2,11 +2,11 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
-_Last updated: May 1, 2026_
+_Last updated: June 18, 2026_
 
-**Current Version: 0.1.0** <!-- x-release-please-version -->
+**Current Version: 0.1.1** <!-- x-release-please-version -->
 
-[View Changelog](CHANGELOG.md) | [All Releases](https://github.com/flynn33/Forsetti-Framework/releases)
+[View Changelog](CHANGELOG.md) | [All Releases](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/releases)
 
 ---
 
@@ -32,11 +32,12 @@ If you are implementing with Forsetti, this README is the canonical high-level r
 15. OOP and Modularity Rules
 16. Architecture Guardrails (Lint, Tests, CI)
 17. Recommended Consumer-Repo Guardrails
-18. Troubleshooting
-19. FAQ
-20. Additional Documentation
-21. License
-22. Xcode Templates (Production Starter)
+18. Versioning and Release Automation
+19. Troubleshooting
+20. FAQ
+21. Additional Documentation
+22. License
+23. Xcode Templates (Production Starter)
 
 ## 1) What Forsetti Is
 
@@ -68,9 +69,9 @@ Forsetti is designed for:
 - **Solo developers shipping modular applications** who want runtime governance without building custom infrastructure.
 - **Organizations managing multi-app portfolios** that want a shared modular runtime across products.
 
-Forsetti is proprietary software. Evaluation for internal assessment is permitted. Production or commercial use requires a written license from James Daley (see section 21 for details).
+Forsetti is proprietary software. Evaluation for internal assessment is permitted. Production or commercial use requires a written license from James Daley (see section 22 for details).
 
-If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode templates (section 22).
+If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode templates (section 23).
 
 ## 3) The Problem It Solves
 
@@ -282,7 +283,7 @@ Forsetti has two intentionally different starting paths:
 - Repository-local evaluation path: uses the internal `ForsettiModulesExample` target to inspect framework behavior quickly.
 - Production starter path: uses the Forsetti Xcode templates to generate app-owned module scaffolding.
 
-If you are preparing a real application, start with section 22 and `xcode-template-guide.md`.
+If you are preparing a real application, start with section 23 and `xcode-template-guide.md`.
 
 ```swift
 import ForsettiCore
@@ -450,6 +451,12 @@ This executes:
 - `swift test --parallel --enable-code-coverage`
 - `swiftlint lint --strict --config .swiftlint.yml`
 
+GitHub Actions also enforce:
+
+- `guardrails.yml`: package tests, architecture checks, SwiftLint, JSON validation, and iOS Simulator build coverage.
+- `lint-pr.yml`: conventional pull request title format.
+- `pr-version.yml`: SemVer version updates for non-`chore` pull requests.
+
 ## 17) Recommended Consumer-Repo Guardrails
 
 If your app consumes Forsetti, replicate guardrails in your own repository:
@@ -466,7 +473,30 @@ Suggested files in consumer repo:
 - `Scripts/verify-forsetti-guardrails.sh`
 - `.github/workflows/forsetti-guardrails.yml`
 
-## 18) Troubleshooting
+## 18) Versioning and Release Automation
+
+Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) across the PR-updated framework version surfaces:
+
+- `version.txt`
+- `Sources/ForsettiCore/ForsettiVersion.swift`
+- the visible README version marker
+
+`.release-please-manifest.json` remains release configuration state and is not changed by the PR version workflow.
+
+Pull request titles use conventional commit-style prefixes. The PR version workflow derives the next SemVer from the PR title and body:
+
+| PR signal | Version bump |
+| --- | --- |
+| `type!:` or `BREAKING CHANGE:` in the PR body | Major |
+| `feat:` | Minor |
+| other supported non-`chore` types | Patch |
+| `chore:` | No version change |
+
+This means documentation, CI, tests, fixes, refactors, performance work, and build changes all advance the framework version unless the PR is explicitly a repository chore. Chore PRs are reserved for maintenance that should not represent a framework version change, and the workflow fails a chore PR when version files already differ from the target branch.
+
+Release publication, changelog maintenance, tags, and GitHub releases remain a separate post-merge release process.
+
+## 19) Troubleshooting
 
 `moduleNotDiscovered`:
 
@@ -501,7 +531,7 @@ Suggested files in consumer repo:
 
 - Module tried to contribute UI or resolve a service without the required declared/granted capability.
 
-## 19) FAQ
+## 20) FAQ
 
 ### Why so many restrictions?
 
@@ -532,16 +562,18 @@ Runtime-level entitlement enforcement prevents policy drift and edge-case incons
 
 ### What about performance at scale or offline?
 
-See the [Performance and Reliability](https://github.com/flynn33/Forsetti-Framework/wiki/Security-Privacy-and-Reliability#performance-and-reliability) wiki section for detailed guidance on cold-start overhead, larger module counts, and offline entitlement behavior.
+See the [Performance and Reliability](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki/Security-Privacy-and-Reliability#performance-and-reliability) wiki section for detailed guidance on cold-start overhead, larger module counts, and offline entitlement behavior.
 In short: keep module `start()` fast, keep manifest files small, and rely on StoreKit's local receipt cache for offline entitlement resilience.
 
-## 20) Additional Documentation
+## 21) Additional Documentation
 
 - `developer-guide.md`
   - canonical integration rules and policies.
+- `docs/versioning-and-release-automation.md`
+  - SemVer rules, PR version workflow behavior, and release automation ownership.
 - `guide.md`
   - redirect to `developer-guide.md`.
-- [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework/wiki)
+- [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki)
   - comprehensive architecture, runtime, workflow, and integration documentation.
 - `framework-policy.json`
   - architecture source material, runtime policy, and phase context.
@@ -552,7 +584,7 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 - `xcode-template-guide.md`
   - template ownership model, generated structure, and production-starter workflow.
 
-## 21) License
+## 22) License
 
 Forsetti is proprietary software owned by James Daley.
 
@@ -562,7 +594,7 @@ Forsetti is proprietary software owned by James Daley.
 
 Full terms: `LICENSE.md`
 
-## 22) Xcode Templates (Production Starter)
+## 23) Xcode Templates (Production Starter)
 
 The Xcode template set is a first-class Forsetti onboarding path for production applications.
 

@@ -2,7 +2,7 @@
 
 This guide is for teams integrating Forsetti into their own apps.
 It defines the engineering rules your project should enforce so Forsetti remains modular, native, and maintainable.
-_Last updated: May 1, 2026_
+_Last updated: June 18, 2026_
 
 ## 1. Required Stack
 
@@ -120,9 +120,28 @@ In your app repository:
 1. Run your guardrail script (or equivalent test + lint commands) from repo root.
 2. Confirm architecture policy tests pass.
 3. Confirm lint rules pass with no violations.
-4. Open/update PR only after local guardrails pass.
+4. Use a conventional PR title, such as `feat: add module registration audit` or `fix: reject stale manifest records`.
+5. Open/update PR only after local guardrails pass.
 
 PRs should be blocked from merge unless guardrails also pass in CI.
+
+## 7b. Versioning Policy
+
+Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) for framework releases.
+The repository maintains the same PR-updated framework version value in `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker. `.release-please-manifest.json` remains release configuration state and is not changed by the PR version workflow.
+
+The PR version workflow updates those files automatically for same-repository pull requests:
+
+| PR title/body signal | Version result |
+| --- | --- |
+| `type!:` or `BREAKING CHANGE:` | Major bump |
+| `feat:` | Minor bump |
+| other supported non-`chore` types | Patch bump |
+| `chore:` | No bump |
+
+Use `chore:` only for repository maintenance that should not represent a framework release change. Documentation, CI, build, test, fix, refactor, and performance PRs intentionally receive a patch bump unless they are explicitly repository chores. Chore PRs must not include version-file changes.
+
+Release publication, tags, and changelog maintenance are separate post-merge release work.
 
 ## 8. Adding New App Code Safely (Integration-Only)
 
@@ -151,6 +170,7 @@ Use this checklist for every review:
 - Dependencies injected (not hidden globals)?
 - Tests added/updated for behavior and architecture impact?
 - Guardrail script executed successfully?
+- Version workflow behavior correct for the PR type?
 
 ## 10. Non-Compliance Policy
 
