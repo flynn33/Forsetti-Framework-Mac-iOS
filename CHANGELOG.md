@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.2.0](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/compare/v0.1.0...v0.2.0) (2026-06-18)
+
+
+### Features
+
+* align Apple runtime boundaries ([85b7ce7](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/commit/85b7ce715af78944858bcda8a6765120a3ebc7f8))
+
+## Changelog
+
 All notable changes to Forsetti Framework are documented in this file.
 
 ## Unreleased
