@@ -1,6 +1,6 @@
-# Codex Agent Brief
+# Execution Brief
 
-Read this before implementing or modifying a Forsetti-based application.
+Read this before implementing or modifying a Forsetti-based application or module.
 
 ## Framework truth
 

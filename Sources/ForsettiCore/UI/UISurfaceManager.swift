@@ -1,12 +1,11 @@
-import Combine
 import Foundation
 
 @MainActor
-public final class UISurfaceManager: ObservableObject {
-    @Published public private(set) var themeMask: ThemeMask?
-    @Published public private(set) var toolbarItems: [ToolbarItemDescriptor] = []
-    @Published public private(set) var viewInjectionsBySlot: [String: [ViewInjectionDescriptor]] = [:]
-    @Published public private(set) var overlaySchema: OverlaySchema?
+public final class UISurfaceManager {
+    public private(set) var themeMask: ThemeMask?
+    public private(set) var toolbarItems: [ToolbarItemDescriptor] = []
+    public private(set) var viewInjectionsBySlot: [String: [ViewInjectionDescriptor]] = [:]
+    public private(set) var overlaySchema: OverlaySchema?
 
     private var contributionsByModule: [String: UIContributions] = [:]
 

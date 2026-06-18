@@ -2,16 +2,20 @@ import Foundation
 import ForsettiCore
 
 public final class ExampleServiceModule: ForsettiModule {
+    public static let moduleID = "com.forsetti.module.example-service"
+    public static let entryPoint = "ExampleServiceModule"
+
     public let descriptor = ModuleDescriptor(
-        moduleID: "com.forsetti.module.example-service",
+        moduleID: ExampleServiceModule.moduleID,
         displayName: "Example Service",
         moduleVersion: SemVer(major: 0, minor: 1, patch: 0),
         moduleType: .service
     )
 
     public let manifest = ModuleManifest(
-        schemaVersion: ModuleManifest.supportedSchemaVersion,
-        moduleID: "com.forsetti.module.example-service",
+        schemaVersion: ModuleManifest.currentSchemaVersion,
+        manifestTemplateVersion: .current,
+        moduleID: ExampleServiceModule.moduleID,
         displayName: "Example Service",
         moduleVersion: SemVer(major: 0, minor: 1, patch: 0),
         moduleType: .service,
@@ -19,7 +23,27 @@ public final class ExampleServiceModule: ForsettiModule {
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
         capabilitiesRequested: [.storage, .telemetry],
         iapProductID: nil,
-        entryPoint: "ExampleServiceModule"
+        entryPoint: ExampleServiceModule.entryPoint,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            io: [
+                ModuleIORequirement(
+                    requirementID: "example-service.storage.last-started",
+                    kind: .storage,
+                    access: .readWrite,
+                    required: false
+                ),
+                ModuleIORequirement(
+                    requirementID: "example-service.telemetry.lifecycle",
+                    kind: .telemetry,
+                    access: .emit,
+                    required: false
+                )
+            ],
+            dataIsolation: ModuleDataIsolation(
+                mode: .privateToModule,
+                ownedStoreIDs: ["example-service"]
+            )
+        )
     )
 
     private var isStarted = false
@@ -27,57 +51,57 @@ public final class ExampleServiceModule: ForsettiModule {
 
     public init() {}
 
-    public func start(context: ForsettiContext) throws {
+    public func start(context: any ForsettiModuleContext) throws {
         guard !isStarted else {
             return
         }
 
-        let moduleLogger = context.moduleLogger(moduleID: descriptor.moduleID)
         let startedAt = Date().ISO8601Format()
         if let storage = context.services.resolve(StorageService.self) {
             storage.set(startedAt, forKey: lastStartedAtStorageKey)
         }
 
         isStarted = true
-        context.publishFrameworkEvent(
+        context.publishEvent(
             type: "example.service.started",
-            payload: ["moduleID": descriptor.moduleID, "startedAt": startedAt],
-            sourceModuleID: descriptor.moduleID
+            payload: ["moduleID": descriptor.moduleID, "startedAt": startedAt]
         )
-        moduleLogger.info("ExampleServiceModule started")
+        context.logger.info("ExampleServiceModule started")
     }
 
-    public func stop(context: ForsettiContext) {
+    public func stop(context: any ForsettiModuleContext) {
         guard isStarted else {
             return
         }
 
-        let moduleLogger = context.moduleLogger(moduleID: descriptor.moduleID)
         if let storage = context.services.resolve(StorageService.self) {
             storage.removeValue(forKey: lastStartedAtStorageKey)
         }
 
         isStarted = false
-        context.publishFrameworkEvent(
+        context.publishEvent(
             type: "example.service.stopped",
-            payload: ["moduleID": descriptor.moduleID],
-            sourceModuleID: descriptor.moduleID
+            payload: ["moduleID": descriptor.moduleID]
         )
-        moduleLogger.info("ExampleServiceModule stopped")
+        context.logger.info("ExampleServiceModule stopped")
     }
 }
 
 public final class ExampleUIModule: ForsettiUIModule {
+    public static let moduleID = "com.forsetti.module.example-ui"
+    public static let entryPoint = "ExampleUIModule"
+
     public let descriptor = ModuleDescriptor(
-        moduleID: "com.forsetti.module.example-ui",
+        moduleID: ExampleUIModule.moduleID,
         displayName: "Example UI",
         moduleVersion: SemVer(major: 0, minor: 1, patch: 0),
         moduleType: .ui
     )
 
     public let manifest = ModuleManifest(
-        schemaVersion: ModuleManifest.supportedSchemaVersion,
-        moduleID: "com.forsetti.module.example-ui",
+        schemaVersion: ModuleManifest.currentSchemaVersion,
+        manifestTemplateVersion: .current,
+        moduleID: ExampleUIModule.moduleID,
         displayName: "Example UI",
         moduleVersion: SemVer(major: 0, minor: 1, patch: 0),
         moduleType: .ui,
@@ -85,7 +109,17 @@ public final class ExampleUIModule: ForsettiUIModule {
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
         capabilitiesRequested: [.routingOverlay, .toolbarItems, .viewInjection],
         iapProductID: "com.forsetti.iap.example-ui",
-        entryPoint: "ExampleUIModule"
+        entryPoint: ExampleUIModule.entryPoint,
+        defaultModuleRole: .ui,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            ui: ModuleUIRequirements(
+                viewIDs: ["example-banner", "example-overlay-view"],
+                slotIDs: ["module.workspace", "overlay.main"],
+                toolbarItemIDs: ["example-ui-home"],
+                routeIDs: ["example-overlay"],
+                pointerIDs: ["home"]
+            )
+        )
     )
 
     public let uiContributions = UIContributions(
@@ -129,32 +163,32 @@ public final class ExampleUIModule: ForsettiUIModule {
 
     public init() {}
 
-    public func start(context: ForsettiContext) throws {
+    public func start(context: any ForsettiModuleContext) throws {
         guard !isStarted else {
             return
         }
 
         isStarted = true
-        context.moduleLogger(moduleID: descriptor.moduleID).info("ExampleUIModule started")
+        context.logger.info("ExampleUIModule started")
     }
 
-    public func stop(context: ForsettiContext) {
+    public func stop(context: any ForsettiModuleContext) {
         guard isStarted else {
             return
         }
 
         isStarted = false
-        context.moduleLogger(moduleID: descriptor.moduleID).info("ExampleUIModule stopped")
+        context.logger.info("ExampleUIModule stopped")
     }
 }
 
 public enum ExampleModuleRegistry {
-    public static func registerAll(into registry: ModuleRegistry) {
-        registry.register(entryPoint: "ExampleServiceModule") {
+    public static func registerAll(into registry: ModuleRegistry) throws {
+        try registry.register(entryPoint: ExampleServiceModule.entryPoint) {
             ExampleServiceModule()
         }
 
-        registry.register(entryPoint: "ExampleUIModule") {
+        try registry.register(entryPoint: ExampleUIModule.entryPoint) {
             ExampleUIModule()
         }
     }

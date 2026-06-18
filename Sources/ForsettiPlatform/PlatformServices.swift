@@ -196,6 +196,10 @@ public final class LocalFileExportService: FileExportService, @unchecked Sendabl
         let normalized = fileName
             .replacingOccurrences(of: "\\", with: "/")
             .trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty else {
+            throw LocalFileExportError.invalidFileName
+        }
+
         let lastPathComponent = URL(fileURLWithPath: normalized).lastPathComponent
         let sanitized = lastPathComponent.trimmingCharacters(in: .whitespacesAndNewlines)
 

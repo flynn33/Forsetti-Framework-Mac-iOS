@@ -16,7 +16,7 @@ Phase 00 installed repository-level remediation guidance and captured the local 
 
 ## Guidance Installed
 
-- Added root `AGENTS.md` from the remediation package as repository-level guidance.
+- Added root `REPOSITORY_RULES.md` from the remediation package as repository-level guidance.
 
 The remediation package itself remains outside the repository workspace.
 

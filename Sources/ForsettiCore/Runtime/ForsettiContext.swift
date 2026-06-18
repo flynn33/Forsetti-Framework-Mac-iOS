@@ -112,10 +112,46 @@ public struct ForsettiModuleLogger: Sendable {
     }
 }
 
-public final class ForsettiContext: @unchecked Sendable {
+public protocol ForsettiModuleContext: Sendable {
+    var moduleID: String { get }
+    var services: any ForsettiServiceProviding { get }
+    var logger: ForsettiModuleLogger { get }
+
+    func publishEvent(type: String, payload: [String: String])
+
+    @discardableResult
+    func sendMessage(
+        to targetModuleID: String,
+        type: String,
+        payload: [String: String]
+    ) throws -> ForsettiEvent
+
+    func subscribeToMessages(
+        eventType: String,
+        handler: @escaping @Sendable (ForsettiEvent) -> Void
+    ) throws -> SubscriptionToken
+
+    func subscribeToFrameworkEvents(
+        eventType: String,
+        handler: @escaping @Sendable (ForsettiEvent) -> Void
+    ) -> SubscriptionToken
+}
+
+public extension ForsettiModuleContext {
+    func publishEvent(type: String) {
+        publishEvent(type: type, payload: [:])
+    }
+
+    @discardableResult
+    func sendMessage(to targetModuleID: String, type: String) throws -> ForsettiEvent {
+        try sendMessage(to: targetModuleID, type: type, payload: [:])
+    }
+}
+
+public final class ForsettiContext: ForsettiModuleContext, @unchecked Sendable {
     public let services: any ForsettiServiceProviding
-    public let logger: any ForsettiLogger
     public let router: any OverlayRouting
+    private let runtimeLogger: any ForsettiLogger
     private let eventBus: ForsettiEventBus
     private let moduleCommunicationGuard: any ModuleCommunicationGuard
     private let boundModuleID: String?
@@ -131,14 +167,18 @@ public final class ForsettiContext: @unchecked Sendable {
     ) {
         self.eventBus = eventBus
         self.services = services
-        self.logger = logger
+        self.runtimeLogger = logger
         self.router = router
         self.moduleCommunicationGuard = moduleCommunicationGuard
         self.boundModuleID = boundModuleID
     }
 
-    public var moduleID: String? {
-        boundModuleID
+    public var moduleID: String {
+        boundModuleID ?? "forsetti.runtime"
+    }
+
+    public var logger: ForsettiModuleLogger {
+        moduleLogger(moduleID: moduleID)
     }
 
     public func scopedToModule(moduleID: String, grantedCapabilities: Set<Capability>) -> ForsettiContext {
@@ -148,13 +188,17 @@ public final class ForsettiContext: @unchecked Sendable {
                 baseProvider: services,
                 moduleID: moduleID,
                 grantedCapabilities: grantedCapabilities,
-                logger: logger
+                logger: runtimeLogger
             ),
-            logger: logger,
+            logger: runtimeLogger,
             router: router,
             moduleCommunicationGuard: moduleCommunicationGuard,
             boundModuleID: moduleID
         )
+    }
+
+    public func publishEvent(type: String, payload: [String: String] = [:]) {
+        publishFrameworkEvent(type: type, payload: payload)
     }
 
     public func publishFrameworkEvent(
@@ -208,7 +252,7 @@ public final class ForsettiContext: @unchecked Sendable {
                 expectedModuleID: boundModuleID,
                 requestedModuleID: sourceModuleID
             )
-            logger.logError(
+            runtimeLogger.logError(
                 error,
                 message: "Blocked module source identity spoofing",
                 sourceModuleID: boundModuleID,
@@ -253,12 +297,45 @@ public final class ForsettiContext: @unchecked Sendable {
         return event
     }
 
+    @discardableResult
+    public func sendMessage(
+        to targetModuleID: String,
+        type: String,
+        payload: [String: String] = [:]
+    ) throws -> ForsettiEvent {
+        try sendModuleMessage(to: targetModuleID, type: type, payload: payload)
+    }
+
+    public func subscribeToMessages(
+        eventType: String,
+        handler: @escaping @Sendable (ForsettiEvent) -> Void
+    ) throws -> SubscriptionToken {
+        try subscribeToModuleMessages(moduleID: moduleID, eventType: eventType, handler: handler)
+    }
+
     public func subscribeToModuleMessages(
         moduleID: String,
         eventType: String,
         handler: @escaping @Sendable (ForsettiEvent) -> Void
-    ) -> SubscriptionToken {
-        eventBus.subscribe(eventType: eventType) { event in
+    ) throws -> SubscriptionToken {
+        if let boundModuleID, moduleID != boundModuleID {
+            let error = ForsettiContextError.moduleIdentitySpoofingDenied(
+                expectedModuleID: boundModuleID,
+                requestedModuleID: moduleID
+            )
+            runtimeLogger.logError(
+                error,
+                message: "Blocked module subscription identity spoofing",
+                sourceModuleID: boundModuleID,
+                metadata: [
+                    "requestedModuleID": moduleID,
+                    "eventType": eventType
+                ]
+            )
+            throw error
+        }
+
+        return eventBus.subscribe(eventType: eventType) { event in
             guard event.payload[Self.targetModuleIDPayloadKey] == moduleID else {
                 return
             }
@@ -278,7 +355,7 @@ public final class ForsettiContext: @unchecked Sendable {
             requestedModuleID: moduleID,
             operation: "create module logger"
         ) ?? moduleID
-        return ForsettiModuleLogger(moduleID: effectiveModuleID, logger: logger)
+        return ForsettiModuleLogger(moduleID: effectiveModuleID, logger: runtimeLogger)
     }
 
     public func logModule(
@@ -291,7 +368,7 @@ public final class ForsettiContext: @unchecked Sendable {
             requestedModuleID: moduleID,
             operation: "log module message"
         ) ?? moduleID
-        logger.log(level, message: message, sourceModuleID: effectiveModuleID, metadata: metadata)
+        runtimeLogger.log(level, message: message, sourceModuleID: effectiveModuleID, metadata: metadata)
     }
 
     public func reportModuleError(
@@ -312,7 +389,7 @@ public final class ForsettiContext: @unchecked Sendable {
             return boundModuleID
         }
 
-        logger.log(
+        runtimeLogger.log(
             .warning,
             message: "Ignored source module ID override during \(operation).",
             sourceModuleID: boundModuleID,

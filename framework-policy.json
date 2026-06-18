@@ -1,5 +1,5 @@
 {
-  "artifact_type": "codex_build_instructions",
+  "artifact_type": "framework_policy",
   "artifact_version": "1.0.0",
   "project": {
     "name": "Forsetti Framework",
@@ -423,7 +423,7 @@
         "EntitlementProvider checks current entitlements and caches unlocked moduleIDs.",
         "Entitlements changes trigger ModuleManager eligibility updates."
       ],
-      "agent_tasks": [
+      "implementation_tasks": [
         "Implement StoreKit2 receipt/transaction checking for product IDs.",
         "Provide a simple async isUnlocked(productID) API.",
         "Provide a way to restore purchases."
@@ -518,7 +518,7 @@
     "Modules can add navigation pointers to base destinations without altering base navigation stack.",
     "Modules cannot depend on other modules; communication occurs only through ForsettiEventBus."
   ],
-  "notes_for_codex_agent": [
+  "implementation_notes": [
     "Implement v1 with a static ModuleRegistry (manual list) to keep things simple; add codegen later if desired.",
     "Use Swift Concurrency (async/await) for entitlement checks and lifecycle where helpful.",
     "Avoid UIKit/AppKit in ForsettiCore; keep platform-specific code in ForsettiPlatform.",

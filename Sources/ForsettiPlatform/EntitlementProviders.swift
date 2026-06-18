@@ -89,10 +89,6 @@ public final class StoreKit2EntitlementProvider: ForsettiEntitlementProvider, @u
         if observeTransactionUpdates {
             startTransactionUpdatesListener()
         }
-
-        Task {
-            await refreshEntitlements()
-        }
     }
 
     deinit {

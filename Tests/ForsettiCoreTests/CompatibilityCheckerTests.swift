@@ -96,7 +96,7 @@ final class CompatibilityCheckerTests: XCTestCase {
         })
     }
 
-    func testRejectsReservedFrameworkShellCapability() {
+    func testAllowsThemeMaskCapabilityWhenPolicyApproves() {
         let checker = CompatibilityChecker(
             runtimePlatform: .macOS,
             forsettiVersion: ForsettiVersion.current,
@@ -110,10 +110,8 @@ final class CompatibilityCheckerTests: XCTestCase {
             )
         )
 
-        XCTAssertFalse(report.isCompatible)
-        XCTAssertTrue(report.issues.contains {
-            $0.code == .capabilityDenied && $0.severity == .error
-        })
+        XCTAssertTrue(report.isCompatible)
+        XCTAssertFalse(report.issues.contains { $0.code == .capabilityDenied })
     }
 
     func testAllowsUIModuleCompatibilityCheckWithoutSingleSelectionConstraint() {

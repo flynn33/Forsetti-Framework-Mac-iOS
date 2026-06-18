@@ -136,25 +136,194 @@ public final class ManifestLoader {
     }
 
     private func validate(manifest: ModuleManifest, fileName: String) throws {
-        if manifest.schemaVersion.isEmpty {
+        try validateIdentityFields(manifest, fileName: fileName)
+        try validateSchemaVersions(manifest, fileName: fileName)
+        try validateVersionRange(manifest, fileName: fileName)
+        try validateDuplicateManifestArrays(manifest, fileName: fileName)
+        try validateRoleAndUIBoundary(manifest, fileName: fileName)
+        try validateIORequirements(manifest, fileName: fileName)
+        try validateUIRequirements(manifest.runtimeRequirements.ui, fileName: fileName)
+        try validateDataIsolation(manifest.runtimeRequirements.dataIsolation, fileName: fileName)
+    }
+
+    private func validateIdentityFields(_ manifest: ModuleManifest, fileName: String) throws {
+        if isBlank(manifest.schemaVersion) {
             throw ManifestLoaderError.validationFailed(file: fileName, reason: "schemaVersion is required")
         }
 
-        if manifest.moduleID.isEmpty {
+        if isBlank(manifest.moduleID) {
             throw ManifestLoaderError.validationFailed(file: fileName, reason: "moduleID is required")
         }
 
-        if manifest.displayName.isEmpty {
+        if isBlank(manifest.displayName) {
             throw ManifestLoaderError.validationFailed(file: fileName, reason: "displayName is required")
         }
 
-        if manifest.entryPoint.isEmpty {
+        if isBlank(manifest.entryPoint) {
             throw ManifestLoaderError.validationFailed(file: fileName, reason: "entryPoint is required")
         }
 
+        if !Self.moduleIDPattern.matches(manifest.moduleID) {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "moduleID '\(manifest.moduleID)' must use reverse-DNS segments."
+            )
+        }
+
+        if manifest.moduleID.hasPrefix("forsetti.") {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "moduleID '\(manifest.moduleID)' uses the reserved forsetti namespace."
+            )
+        }
+
+        if !Self.entryPointPattern.matches(manifest.entryPoint) {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "entryPoint '\(manifest.entryPoint)' must be a Swift type path."
+            )
+        }
+    }
+
+    private func validateSchemaVersions(_ manifest: ModuleManifest, fileName: String) throws {
+        guard ModuleManifest.supportedSchemaVersions.contains(manifest.schemaVersion) else {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "Unsupported schemaVersion '\(manifest.schemaVersion)'."
+            )
+        }
+
+        guard ModuleManifest.supportedManifestTemplateVersions.contains(manifest.manifestTemplateVersion) else {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "Unsupported manifestTemplateVersion '\(manifest.manifestTemplateVersion.rawValue)'."
+            )
+        }
+
+        if manifest.schemaVersion == ModuleManifest.currentSchemaVersion,
+           manifest.manifestTemplateVersion != .current {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "schemaVersion \(ModuleManifest.currentSchemaVersion) requires manifestTemplateVersion \(ManifestTemplateVersion.current.rawValue)."
+            )
+        }
+    }
+
+    private func validateVersionRange(_ manifest: ModuleManifest, fileName: String) throws {
         if manifest.supportedPlatforms.isEmpty {
             throw ManifestLoaderError.validationFailed(file: fileName, reason: "supportedPlatforms must include at least one platform")
         }
+
+        try validateSemVer(manifest.moduleVersion, label: "moduleVersion", fileName: fileName)
+        try validateSemVer(manifest.minForsettiVersion, label: "minForsettiVersion", fileName: fileName)
+        if let maxForsettiVersion = manifest.maxForsettiVersion {
+            try validateSemVer(maxForsettiVersion, label: "maxForsettiVersion", fileName: fileName)
+            if maxForsettiVersion < manifest.minForsettiVersion {
+                throw ManifestLoaderError.validationFailed(
+                    file: fileName,
+                    reason: "maxForsettiVersion cannot be below minForsettiVersion."
+                )
+            }
+        }
+    }
+
+    private func validateDuplicateManifestArrays(_ manifest: ModuleManifest, fileName: String) throws {
+        if hasDuplicates(manifest.supportedPlatforms) {
+            throw ManifestLoaderError.validationFailed(file: fileName, reason: "supportedPlatforms contains duplicates")
+        }
+
+        if hasDuplicates(manifest.capabilitiesRequested) {
+            throw ManifestLoaderError.validationFailed(file: fileName, reason: "capabilitiesRequested contains duplicates")
+        }
+    }
+
+    private func validateRoleAndUIBoundary(_ manifest: ModuleManifest, fileName: String) throws {
+        if let role = manifest.defaultModuleRole, !role.isValid(for: manifest.moduleType) {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "defaultModuleRole '\(role.rawValue)' is invalid for moduleType '\(manifest.moduleType.rawValue)'."
+            )
+        }
+
+        if manifest.moduleType == .service, manifest.runtimeRequirements.ui != nil {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "service modules cannot declare UI requirements."
+            )
+        }
+    }
+
+    private func validateIORequirements(_ manifest: ModuleManifest, fileName: String) throws {
+        let requestedCapabilities = Set(manifest.capabilitiesRequested)
+        var ioRequirementIDs = Set<String>()
+        for requirement in manifest.runtimeRequirements.io {
+            let requirementID = requirement.requirementID.trimmingCharacters(in: .whitespacesAndNewlines)
+            if requirementID.isEmpty {
+                throw ManifestLoaderError.validationFailed(file: fileName, reason: "I/O requirementID is required.")
+            }
+            if !ioRequirementIDs.insert(requirementID).inserted {
+                throw ManifestLoaderError.validationFailed(
+                    file: fileName,
+                    reason: "Duplicate I/O requirementID '\(requirementID)'."
+                )
+            }
+            let requiredCapability = requirement.kind.requiredCapability
+            if !requestedCapabilities.contains(requiredCapability) {
+                throw ManifestLoaderError.validationFailed(
+                    file: fileName,
+                    reason: "I/O requirement '\(requirementID)' requires capability '\(requiredCapability.rawValue)'."
+                )
+            }
+        }
+    }
+
+    private func validateSemVer(_ value: SemVer, label: String, fileName: String) throws {
+        guard value.hasNonNegativeComponents else {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "\(label) cannot contain negative components."
+            )
+        }
+    }
+
+    private func validateUIRequirements(_ requirements: ModuleUIRequirements?, fileName: String) throws {
+        guard let requirements else {
+            return
+        }
+
+        try validateIdentifierSet(requirements.themeIDs, label: "themeIDs", fileName: fileName)
+        try validateIdentifierSet(requirements.viewIDs, label: "viewIDs", fileName: fileName)
+        try validateIdentifierSet(requirements.slotIDs, label: "slotIDs", fileName: fileName)
+        try validateIdentifierSet(requirements.toolbarItemIDs, label: "toolbarItemIDs", fileName: fileName)
+        try validateIdentifierSet(requirements.routeIDs, label: "routeIDs", fileName: fileName)
+        try validateIdentifierSet(requirements.pointerIDs, label: "pointerIDs", fileName: fileName)
+    }
+
+    private func validateDataIsolation(_ dataIsolation: ModuleDataIsolation, fileName: String) throws {
+        try validateIdentifierSet(dataIsolation.ownedStoreIDs, label: "ownedStoreIDs", fileName: fileName)
+        if hasDuplicates(dataIsolation.requiredDefaultRoles) {
+            throw ManifestLoaderError.validationFailed(
+                file: fileName,
+                reason: "requiredDefaultRoles contains duplicates."
+            )
+        }
+    }
+
+    private func validateIdentifierSet(_ values: [String], label: String, fileName: String) throws {
+        if values.contains(where: isBlank) {
+            throw ManifestLoaderError.validationFailed(file: fileName, reason: "\(label) cannot contain blank values.")
+        }
+        if hasDuplicates(values) {
+            throw ManifestLoaderError.validationFailed(file: fileName, reason: "\(label) contains duplicates.")
+        }
+    }
+
+    private func isBlank(_ value: String) -> Bool {
+        value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private func hasDuplicates<T: Hashable>(_ values: [T]) -> Bool {
+        Set(values).count != values.count
     }
 
     private func recursiveJSONURLs(in directoryURL: URL) -> [URL] {
@@ -182,5 +351,24 @@ public final class ManifestLoader {
         }
 
         return manifestRootKeys.isSubset(of: Set(dictionary.keys))
+    }
+
+    private static let moduleIDPattern = RegexMatcher("^[A-Za-z][A-Za-z0-9]*(\\.[A-Za-z][A-Za-z0-9-]*)+$")
+    private static let entryPointPattern = RegexMatcher("^[A-Za-z_][A-Za-z0-9_.]*$")
+}
+
+private struct RegexMatcher {
+    private let regex: NSRegularExpression?
+
+    init(_ pattern: String) {
+        regex = try? NSRegularExpression(pattern: pattern)
+    }
+
+    func matches(_ value: String) -> Bool {
+        guard let regex else {
+            return false
+        }
+        let range = NSRange(value.startIndex..<value.endIndex, in: value)
+        return regex.firstMatch(in: value, range: range)?.range == range
     }
 }

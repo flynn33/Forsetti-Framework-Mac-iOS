@@ -28,6 +28,16 @@ public protocol TelemetryService: Sendable {
     func track(event: String, properties: [String: String])
 }
 
+public protocol SharedDatabaseService: Sendable {}
+
+public protocol AuthenticationService: Sendable {}
+
+public protocol DiagnosticsService: Sendable {}
+
+public protocol APIService: Sendable {}
+
+public protocol SecurityService: Sendable {}
+
 public final class ForsettiServiceContainer: ForsettiServiceProviding, @unchecked Sendable {
     private let lock = NSLock()
     private var services: [ObjectIdentifier: Any] = [:]
@@ -82,22 +92,22 @@ public final class CapabilityScopedServiceProvider: ForsettiServiceProviding, @u
         return baseProvider.resolve(type)
     }
 
-    private static func requiredCapability<T>(for type: T.Type) -> Capability? {
-        switch ObjectIdentifier(type) {
-        case ObjectIdentifier(NetworkingService.self):
-            return .networking
-        case ObjectIdentifier(StorageService.self):
-            return .storage
-        case ObjectIdentifier(SecureStorageService.self):
-            return .secureStorage
-        case ObjectIdentifier(FileExportService.self):
-            return .fileExport
-        case ObjectIdentifier(TelemetryService.self):
-            return .telemetry
-        default:
-            return nil
-        }
+    public static func requiredCapability<T>(for type: T.Type) -> Capability? {
+        capabilityByServiceIdentifier[ObjectIdentifier(type)]
     }
+
+    private static let capabilityByServiceIdentifier: [ObjectIdentifier: Capability] = [
+        ObjectIdentifier(NetworkingService.self): .networking,
+        ObjectIdentifier(StorageService.self): .storage,
+        ObjectIdentifier(SecureStorageService.self): .secureStorage,
+        ObjectIdentifier(FileExportService.self): .fileExport,
+        ObjectIdentifier(TelemetryService.self): .telemetry,
+        ObjectIdentifier(SharedDatabaseService.self): .sharedDatabase,
+        ObjectIdentifier(AuthenticationService.self): .authentication,
+        ObjectIdentifier(DiagnosticsService.self): .diagnostics,
+        ObjectIdentifier(APIService.self): .api,
+        ObjectIdentifier(SecurityService.self): .security
+    ]
 
     private func logDeniedResolution<T>(type: T.Type, reason: String) {
         logger.log(

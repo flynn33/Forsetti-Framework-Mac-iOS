@@ -24,7 +24,7 @@ final class ArchitectureEnforcementTests: XCTestCase {
     ]
 
     private static let disallowedFrameworkImports: [String: Set<String>] = [
-        "ForsettiCore": ["SwiftUI", "UIKit", "AppKit", "StoreKit"],
+        "ForsettiCore": ["SwiftUI", "UIKit", "AppKit", "StoreKit", "Combine"],
         "ForsettiPlatform": ["SwiftUI", "UIKit", "AppKit"],
         "ForsettiModulesExample": ["SwiftUI", "UIKit", "AppKit", "StoreKit"]
     ]
@@ -108,6 +108,87 @@ final class ArchitectureEnforcementTests: XCTestCase {
         )
     }
 
+    func testPublicRepositorySurfacesDoNotContainAttributionTerms() throws {
+        let prohibitedContentTerms = [
+            joined("Co-authored", "-by"),
+            joined("Generated", " by"),
+            joined("generated", " by"),
+            joined("authored", " by"),
+            joined("Authored", " by"),
+            joined("Chat", "GPT"),
+            joined("Open", "AI"),
+            joined("Cod", "ex"),
+            joined("AI", "-assisted"),
+            joined("AI", " generated"),
+            joined("AI", "-generated"),
+            joined("ag", "entic"),
+            joined("AI", " coding"),
+            joined("AI", joined(" ag", "ents"))
+        ]
+        let prohibitedPathTerms = [
+            joined("Cod", "ex").lowercased(),
+            joined("ag", "entic"),
+            joined("ag", "ent"),
+            joined("Chat", "GPT").lowercased(),
+            joined("Open", "AI").lowercased(),
+            joined("l", "lm")
+        ]
+
+        var violations: [String] = []
+        for path in try trackedRepositoryFiles() where !path.hasPrefix(".forsetti/") {
+            let lowercasePath = path.lowercased()
+            for term in prohibitedPathTerms where lowercasePath.contains(term) {
+                violations.append("Prohibited filename term in \(path).")
+            }
+
+            let fileURL = packageRootURL.appendingPathComponent(path)
+            guard let source = try? String(contentsOf: fileURL, encoding: .utf8) else {
+                continue
+            }
+
+            for term in prohibitedContentTerms where source.contains(term) {
+                violations.append("Prohibited content term in \(path).")
+            }
+        }
+
+        XCTAssertTrue(
+            violations.isEmpty,
+            """
+            Public repository surfaces must not contain prohibited attribution terms.
+            Violations:
+            \(violations.joined(separator: "\n"))
+            """
+        )
+    }
+
+    func testExampleAndTemplateManifestsDeclareRuntimeRequirements() throws {
+        let manifestPaths = [
+            "Sources/ForsettiModulesExample/Resources/ForsettiManifests/ExampleServiceModule.json",
+            "Sources/ForsettiModulesExample/Resources/ForsettiManifests/ExampleUIModule.json",
+            "XcodeTemplates/Project Templates/Forsetti/Forsetti App.xctemplate/AppModuleManifest.json",
+            "XcodeTemplates/Project Templates/Forsetti/Forsetti Service Module.xctemplate/ServiceModuleManifest.json",
+            "XcodeTemplates/Project Templates/Forsetti/Forsetti UI Module.xctemplate/UIModuleManifest.json",
+            "XcodeTemplates/Project Templates/Forsetti/Forsetti Manifest.xctemplate/ModuleManifest.json"
+        ]
+
+        for path in manifestPaths {
+            let data = try Data(contentsOf: packageRootURL.appendingPathComponent(path))
+            let object = try JSONSerialization.jsonObject(with: data)
+            guard let manifest = object as? [String: Any] else {
+                XCTFail("\(path) is not a JSON object.")
+                continue
+            }
+
+            XCTAssertEqual(manifest["schemaVersion"] as? String, "1.1", "\(path) must use schema 1.1.")
+            XCTAssertEqual(
+                manifest["manifestTemplateVersion"] as? String,
+                "1.1",
+                "\(path) must declare manifestTemplateVersion."
+            )
+            XCTAssertNotNil(manifest["runtimeRequirements"], "\(path) must declare runtimeRequirements.")
+        }
+    }
+
     private func parseImports(in fileURL: URL) throws -> [String] {
         let source = try String(contentsOf: fileURL, encoding: .utf8)
         let nsSource = source as NSString
@@ -185,6 +266,33 @@ final class ArchitectureEnforcementTests: XCTestCase {
         }
 
         return dependenciesByTarget
+    }
+
+    private func trackedRepositoryFiles() throws -> [String] {
+        let process = Process()
+        process.currentDirectoryURL = packageRootURL
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = ["git", "ls-files"]
+
+        let pipe = Pipe()
+        process.standardOutput = pipe
+        process.standardError = Pipe()
+        try process.run()
+        process.waitUntilExit()
+
+        guard process.terminationStatus == 0 else {
+            throw architectureError("Could not enumerate tracked repository files.")
+        }
+
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        guard let output = String(data: data, encoding: .utf8) else {
+            throw architectureError("Could not decode tracked repository file list.")
+        }
+        return output.split(separator: "\n").map(String.init)
+    }
+
+    private func joined(_ first: String, _ second: String) -> String {
+        first + second
     }
 
     private func relativePath(for url: URL) -> String {

@@ -1,4 +1,4 @@
-# AGENTS.md - Forsetti Framework Remediation Rules
+# Repository Rules - Forsetti Framework Remediation Rules
 
 Use this file as repository-level guidance while implementing the remediation plan.
 
@@ -10,9 +10,9 @@ Forsetti is a modularity-first, object-oriented Apple-platform framework for iOS
 
 Before changing code, read these files:
 
-- `CODEX_AGENT_BRIEF.md`
+- `EXECUTION_BRIEF.md`
 - `MODULE_BOUNDARY_RULES.md`
-- `agentic-coding-policy.json`
+- `implementation-policy.json`
 - `Package.swift`
 - `.swiftlint.yml`
 - `Scripts/verify-forsetti-guardrails.sh`
@@ -74,7 +74,7 @@ When public behavior changes:
 
 - Update `README.md` if it affects consumers.
 - Update `developer-guide.md` if it affects integration guidance.
-- Update `CODEX_AGENT_BRIEF.md`, `agentic-coding-policy.json`, or `forsetti-instructions.json` if agent guidance would otherwise drift.
+- Update `EXECUTION_BRIEF.md`, `implementation-policy.json`, or `framework-policy.json` if implementation guidance would otherwise drift.
 - Keep docs consistent with code and tests.
 
 ## Completion report format

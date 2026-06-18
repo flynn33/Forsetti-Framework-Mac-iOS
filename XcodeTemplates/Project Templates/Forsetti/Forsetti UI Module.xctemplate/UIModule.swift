@@ -19,7 +19,8 @@ final class ___PACKAGENAME:identifier___UIModule: ForsettiUIModule {
     )
 
     let manifest = ModuleManifest(
-        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        schemaVersion: ModuleManifest.currentSchemaVersion,
+        manifestTemplateVersion: .current,
         moduleID: Constants.moduleID,
         displayName: "___PACKAGENAME___ UI Module",
         moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
@@ -28,7 +29,15 @@ final class ___PACKAGENAME:identifier___UIModule: ForsettiUIModule {
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
         capabilitiesRequested: [.toolbarItems, .viewInjection],
         iapProductID: nil,
-        entryPoint: Constants.entryPoint
+        entryPoint: Constants.entryPoint,
+        defaultModuleRole: .ui,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            ui: ModuleUIRequirements(
+                viewIDs: [Constants.workspaceViewID],
+                slotIDs: ["module.workspace"],
+                toolbarItemIDs: ["___PACKAGENAME:identifier___.ui-module.refresh"]
+            )
+        )
     )
 
     let uiContributions = UIContributions(
@@ -54,22 +63,22 @@ final class ___PACKAGENAME:identifier___UIModule: ForsettiUIModule {
 
     init() {}
 
-    func start(context: ForsettiContext) throws {
+    func start(context: any ForsettiModuleContext) throws {
         guard !isStarted else {
             return
         }
 
         isStarted = true
-        context.moduleLogger(moduleID: descriptor.moduleID).info("UI module started")
+        context.logger.info("UI module started")
     }
 
-    func stop(context: ForsettiContext) {
+    func stop(context: any ForsettiModuleContext) {
         guard isStarted else {
             return
         }
 
         isStarted = false
-        context.moduleLogger(moduleID: descriptor.moduleID).info("UI module stopped")
+        context.logger.info("UI module stopped")
     }
 }
 #endif

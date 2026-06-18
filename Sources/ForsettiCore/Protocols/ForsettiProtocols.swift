@@ -4,8 +4,8 @@ public protocol ForsettiModule: AnyObject {
     var descriptor: ModuleDescriptor { get }
     var manifest: ModuleManifest { get }
 
-    func start(context: ForsettiContext) throws
-    func stop(context: ForsettiContext)
+    func start(context: any ForsettiModuleContext) throws
+    func stop(context: any ForsettiModuleContext)
 }
 
 public protocol ForsettiUIModule: ForsettiModule {

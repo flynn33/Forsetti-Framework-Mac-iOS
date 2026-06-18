@@ -19,7 +19,8 @@ final class ___PACKAGENAME:identifier___AppModule: ForsettiAppModule {
     )
 
     let manifest = ModuleManifest(
-        schemaVersion: ModuleManifest.supportedSchemaVersion,
+        schemaVersion: ModuleManifest.currentSchemaVersion,
+        manifestTemplateVersion: .current,
         moduleID: Constants.moduleID,
         displayName: "___PACKAGENAME___ App Module",
         moduleVersion: SemVer(major: 1, minor: 0, patch: 0),
@@ -28,7 +29,22 @@ final class ___PACKAGENAME:identifier___AppModule: ForsettiAppModule {
         minForsettiVersion: SemVer(major: 0, minor: 1, patch: 0),
         capabilitiesRequested: [.telemetry, .viewInjection],
         iapProductID: nil,
-        entryPoint: Constants.entryPoint
+        entryPoint: Constants.entryPoint,
+        defaultModuleRole: .ui,
+        runtimeRequirements: ModuleRuntimeRequirements(
+            io: [
+                ModuleIORequirement(
+                    requirementID: "___PACKAGENAME:identifier___.app-module.telemetry.lifecycle",
+                    kind: .telemetry,
+                    access: .emit,
+                    required: false
+                )
+            ],
+            ui: ModuleUIRequirements(
+                viewIDs: [Constants.primaryViewID],
+                slotIDs: ["module.workspace"]
+            )
+        )
     )
 
     let uiContributions = UIContributions(
@@ -46,13 +62,13 @@ final class ___PACKAGENAME:identifier___AppModule: ForsettiAppModule {
 
     init() {}
 
-    func start(context: ForsettiContext) throws {
+    func start(context: any ForsettiModuleContext) throws {
         guard !isStarted else {
             return
         }
 
         isStarted = true
-        context.moduleLogger(moduleID: descriptor.moduleID).info("Starter app module started")
+        context.logger.info("Starter app module started")
 
         if let telemetry = context.services.resolve(TelemetryService.self) {
             telemetry.track(
@@ -62,13 +78,13 @@ final class ___PACKAGENAME:identifier___AppModule: ForsettiAppModule {
         }
     }
 
-    func stop(context: ForsettiContext) {
+    func stop(context: any ForsettiModuleContext) {
         guard isStarted else {
             return
         }
 
         isStarted = false
-        context.moduleLogger(moduleID: descriptor.moduleID).info("Starter app module stopped")
+        context.logger.info("Starter app module stopped")
     }
 }
 #endif

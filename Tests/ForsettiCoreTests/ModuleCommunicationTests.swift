@@ -15,7 +15,7 @@ final class ModuleCommunicationTests: XCTestCase {
         let expectation = expectation(description: "Targeted module message received")
         let receivedEventBox = EventBox()
 
-        let token = context.subscribeToModuleMessages(moduleID: "com.forsetti.module.b", eventType: "module.message") { event in
+        let token = try context.subscribeToModuleMessages(moduleID: "com.forsetti.module.b", eventType: "module.message") { event in
             receivedEventBox.event = event
             expectation.fulfill()
         }
@@ -61,6 +61,32 @@ final class ModuleCommunicationTests: XCTestCase {
         XCTAssertTrue(logger.entries.contains {
             $0.level == .error &&
                 $0.message.contains("Blocked module-to-module communication")
+        })
+    }
+
+    func testScopedModuleCannotSubscribeAsAnotherModule() throws {
+        let logger = CommunicationRecordingLogger()
+        let context = ForsettiContext(
+            eventBus: InMemoryEventBus(),
+            services: ForsettiServiceContainer(),
+            logger: logger,
+            router: NoopOverlayRouter()
+        ).scopedToModule(moduleID: "com.forsetti.module.a", grantedCapabilities: [])
+
+        XCTAssertThrowsError(
+            try context.subscribeToModuleMessages(
+                moduleID: "com.forsetti.module.b",
+                eventType: "module.message"
+            ) { _ in }
+        ) { error in
+            guard case ForsettiContextError.moduleIdentitySpoofingDenied = error else {
+                return XCTFail("Expected moduleIdentitySpoofingDenied, received \(error).")
+            }
+        }
+
+        XCTAssertTrue(logger.entries.contains {
+            $0.level == .error &&
+                $0.message.contains("Blocked module subscription identity spoofing")
         })
     }
 }

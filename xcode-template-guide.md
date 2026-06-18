@@ -15,6 +15,7 @@ After remediation, the template defaults to an app-owned module flow:
 - App-owned starter module view (`AppModule/___PACKAGENAME___AppModuleView.swift`)
 - Explicit deployment mode configuration (`___PACKAGENAME___DeploymentMode.swift`)
 - Starter manifest resources under `Resources/ForsettiManifests/`
+- Schema/template `1.1` manifests with explicit `runtimeRequirements`
 - Production rendering waits for runtime boot and app module activation before showing the app module view.
 
 `ForsettiModulesExample` remains available for evaluation only, not as the default production starter path.
@@ -106,7 +107,8 @@ Start from the generated app module files:
    - `AppModule/<MyApp>AppModule.swift`
    - `Resources/ForsettiManifests/<MyApp>AppModuleManifest.json`
 3. Keep `entryPoint` in manifest equal to the registry registration string.
-4. Register the module once in `<MyApp>ModuleRegistry.swift`.
+4. Keep Swift manifest properties and JSON manifest fields aligned, including `manifestTemplateVersion`, `defaultModuleRole`, and `runtimeRequirements`.
+5. Register the module once in `<MyApp>ModuleRegistry.swift`; duplicate entry points throw unless replacement is explicit.
 
 ## 5. Adding a second module (Pattern B)
 
@@ -117,6 +119,7 @@ To add a service module:
 3. Add the service manifest JSON into `Resources/ForsettiManifests/`.
 4. Ensure module IDs and entry points are unique.
 5. Verify capabilities requested are necessary and policy-approved.
+6. Declare each required service/default-role dependency under `runtimeRequirements`.
 
 To add a second UI module (rare in Pattern B):
 
@@ -139,6 +142,9 @@ Safety rules:
 
 - Keep manifest `moduleID` consistent with module descriptor.
 - Keep manifest `entryPoint` consistent with registry factory key.
+- Use schema/template `1.1` for new manifests.
+- Keep `runtimeRequirements.io` aligned with requested capabilities.
+- Keep `runtimeRequirements.ui` aligned with toolbar, view, route, pointer, and theme contributions.
 - Keep requested capabilities minimal.
 - Treat manifest changes as architecture changes, not UI-only changes.
 
@@ -177,8 +183,9 @@ Production checklist:
 2. Confirm app module view is production UI, not placeholder text.
 3. Confirm no example/demo package dependency is required for app identity.
 4. Validate manifests and module registry alignment.
-5. Confirm the app module manifest declares capabilities needed by its UI contributions, such as `view_injection`.
-6. Run tests and guardrails before release.
+5. Confirm the app module manifest declares capabilities and UI requirements needed by its UI contributions, such as `view_injection` and declared view IDs.
+6. Confirm required I/O/default-role providers are registered or available.
+7. Run tests and guardrails before release.
 
 ## 9. Template install and uninstall
 

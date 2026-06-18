@@ -5,8 +5,8 @@ import XCTest
 
 final class ForsettiHostControllerTests: XCTestCase {
     @MainActor
-    func testBootLoadsServiceAndUIModuleLists() async {
-        let controller = makeController(
+    func testBootLoadsServiceAndUIModuleLists() async throws {
+        let controller = try makeController(
             unlockedModules: [
                 "com.forsetti.module.example-service"
             ],
@@ -25,8 +25,8 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testBootCanExplicitlyActivateAllEligibleModulesForDevelopment() async {
-        let controller = makeController(
+    func testBootCanExplicitlyActivateAllEligibleModulesForDevelopment() async throws {
+        let controller = try makeController(
             unlockedModules: [
                 "com.forsetti.module.example-service"
             ],
@@ -48,8 +48,8 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testBootCanActivateExplicitModuleIDs() async {
-        let controller = makeController(
+    func testBootCanActivateExplicitModuleIDs() async throws {
+        let controller = try makeController(
             unlockedModules: [
                 "com.forsetti.module.example-service"
             ],
@@ -71,8 +71,8 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testServiceToggleAndUIModuleSelection() async {
-        let controller = makeController(
+    func testServiceToggleAndUIModuleSelection() async throws {
+        let controller = try makeController(
             unlockedModules: [
                 "com.forsetti.module.example-service"
             ],
@@ -101,8 +101,8 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testLockedModuleCannotActivate() async {
-        let controller = makeController(
+    func testLockedModuleCannotActivate() async throws {
+        let controller = try makeController(
             unlockedModules: [
                 "com.forsetti.module.example-service"
             ]
@@ -143,9 +143,9 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testRestorePurchasesUnlocksUIModule() async {
+    func testRestorePurchasesUnlocksUIModule() async throws {
         let registry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: registry)
+        try ExampleModuleRegistry.registerAll(into: registry)
 
         let entitlements = StaticEntitlementProvider(
             unlockedModuleIDs: ["com.forsetti.module.example-service"],
@@ -180,9 +180,9 @@ final class ForsettiHostControllerTests: XCTestCase {
     }
 
     @MainActor
-    func testToolbarRouteActionUsesHostOverlayRouterResolution() async {
+    func testToolbarRouteActionUsesHostOverlayRouterResolution() async throws {
         let registry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: registry)
+        try ExampleModuleRegistry.registerAll(into: registry)
 
         let controller = ForsettiHostTemplateBootstrap.makeController(
             manifestsBundle: ExampleModuleResources.bundle,
@@ -211,9 +211,9 @@ final class ForsettiHostControllerTests: XCTestCase {
     private func makeController(
         unlockedModules: Set<String>,
         unlockedProducts: Set<String> = []
-    ) -> ForsettiHostController {
+    ) throws -> ForsettiHostController {
         let registry = ModuleRegistry()
-        ExampleModuleRegistry.registerAll(into: registry)
+        try ExampleModuleRegistry.registerAll(into: registry)
 
         let entitlements = StaticEntitlementProvider(
             unlockedModuleIDs: unlockedModules,

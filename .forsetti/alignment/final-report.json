@@ -1,0 +1,194 @@
+{
+  "status": "pass",
+  "phases_completed": [
+    "00",
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09"
+  ],
+  "acceptance_gates": [
+    {
+      "name": "public guidance surfaces use neutral project-owned names",
+      "status": "pass"
+    },
+    {
+      "name": "manifest template 1.1 exists and 1.0 manifests still decode",
+      "status": "pass"
+    },
+    {
+      "name": "manifests declare I/O, UI, data isolation, and default-role requirements",
+      "status": "pass"
+    },
+    {
+      "name": "unsupported schema and template versions fail closed",
+      "status": "pass"
+    },
+    {
+      "name": "discovery creates registration records",
+      "status": "pass"
+    },
+    {
+      "name": "startup validates registration records against current manifests",
+      "status": "pass"
+    },
+    {
+      "name": "required I/O fails without matching capability or provider",
+      "status": "pass"
+    },
+    {
+      "name": "UI contributions require declared capabilities and UI requirements",
+      "status": "pass"
+    },
+    {
+      "name": "modules receive a narrowed lifecycle context",
+      "status": "pass"
+    },
+    {
+      "name": "module message and event source spoofing is blocked",
+      "status": "pass"
+    },
+    {
+      "name": "Core remains free of UI framework and Combine imports",
+      "status": "pass"
+    },
+    {
+      "name": "templates and examples generate aligned code",
+      "status": "pass"
+    },
+    {
+      "name": "full validation passes on macOS",
+      "status": "pass"
+    }
+  ],
+  "commands_run": [
+    {
+      "command": "swift package dump-package >/tmp/forsetti-dump-package-final.json",
+      "status": "pass"
+    },
+    {
+      "command": "swift test --parallel --enable-code-coverage",
+      "status": "pass",
+      "notes": "81 tests executed by the package runner."
+    },
+    {
+      "command": "swiftlint lint --strict --config .swiftlint.yml",
+      "status": "pass",
+      "notes": "0 violations across 54 Swift files."
+    },
+    {
+      "command": "xcodebuild -scheme ForsettiFramework-Package -destination 'generic/platform=iOS Simulator' build",
+      "status": "pass"
+    },
+    {
+      "command": "./Scripts/verify-forsetti-guardrails.sh",
+      "status": "pass"
+    },
+    {
+      "command": "repository JSON validation",
+      "status": "pass"
+    },
+    {
+      "command": "Core Combine import scan",
+      "status": "pass",
+      "notes": "No matches."
+    },
+    {
+      "command": "public-surface prohibited-term scan",
+      "status": "pass",
+      "notes": "No matches outside ignored folders."
+    },
+    {
+      "command": "public filename scan",
+      "status": "pass",
+      "notes": "No matches outside ignored folders."
+    },
+    {
+      "command": "literal entry-point registration audit",
+      "status": "pass",
+      "notes": "Matches remain only in test fixtures."
+    }
+  ],
+  "commands_unavailable": [],
+  "files_changed": [
+    ".forsetti/alignment/baseline-file-inventory.json",
+    ".forsetti/alignment/phase-00-report.md",
+    ".forsetti/alignment/phase-00-report.json",
+    ".forsetti/alignment/phase-09-report.md",
+    ".forsetti/alignment/phase-09-report.json",
+    ".forsetti/alignment/final-report.md",
+    ".forsetti/alignment/final-report.json",
+    "Scripts/verify-forsetti-guardrails.sh",
+    "Sources/ForsettiCore/Model/ModuleModels.swift",
+    "Sources/ForsettiCore/Model/SemVer.swift",
+    "Sources/ForsettiCore/Protocols/ForsettiProtocols.swift",
+    "Sources/ForsettiCore/Runtime/CompatibilityChecker.swift",
+    "Sources/ForsettiCore/Runtime/ForsettiContext.swift",
+    "Sources/ForsettiCore/Runtime/ForsettiRuntime.swift",
+    "Sources/ForsettiCore/Runtime/ForsettiStaticModuleRegistry.swift",
+    "Sources/ForsettiCore/Runtime/ManifestLoader.swift",
+    "Sources/ForsettiCore/Runtime/ModuleManager.swift",
+    "Sources/ForsettiCore/Runtime/ModuleManager+UIValidation.swift",
+    "Sources/ForsettiCore/Runtime/ModuleRegistrationStore.swift",
+    "Sources/ForsettiCore/Runtime/ModuleRegistry.swift",
+    "Sources/ForsettiCore/Services/ForsettiServices.swift",
+    "Sources/ForsettiCore/UI/UISurfaceManager.swift",
+    "Sources/ForsettiModulesExample/ExampleModules.swift",
+    "Sources/ForsettiModulesExample/Resources/ForsettiManifests/ExampleServiceModule.json",
+    "Sources/ForsettiModulesExample/Resources/ForsettiManifests/ExampleUIModule.json",
+    "Sources/ForsettiPlatform/EntitlementProviders.swift",
+    "Sources/ForsettiPlatform/PlatformServices.swift",
+    "Tests/ForsettiArchitectureTests/ArchitectureEnforcementTests.swift",
+    "Tests/ForsettiCoreTests/CapabilityEnforcementTests.swift",
+    "Tests/ForsettiCoreTests/CompatibilityCheckerTests.swift",
+    "Tests/ForsettiCoreTests/ForsettiCoreBootstrapTests.swift",
+    "Tests/ForsettiCoreTests/ManifestLoaderTests.swift",
+    "Tests/ForsettiCoreTests/ModuleCommunicationTests.swift",
+    "Tests/ForsettiCoreTests/ModuleIdentityValidationTests.swift",
+    "Tests/ForsettiCoreTests/ModuleLoggingTests.swift",
+    "Tests/ForsettiCoreTests/ModuleRegistrationStoreTests.swift",
+    "Tests/ForsettiCoreTests/RuntimeLifecycleTests.swift",
+    "Tests/ForsettiCoreTests/RuntimeRequirementEnforcementTests.swift",
+    "Tests/ForsettiHostTemplateTests/ForsettiHostControllerTests.swift",
+    "Tests/ForsettiPlatformTests/PlatformServicesTests.swift",
+    "README.md",
+    "REPOSITORY_RULES.md",
+    "EXECUTION_BRIEF.md",
+    "IMPLEMENTATION_GUIDE.md",
+    "MODULE_BOUNDARY_RULES.md",
+    "developer-guide.md",
+    "xcode-template-guide.md",
+    "docs/remediation/phase-00-baseline.md",
+    "framework-policy.json",
+    "implementation-policy.json",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti App.xctemplate/AppModule.swift",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti App.xctemplate/AppModuleManifest.json",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti App.xctemplate/ForsettiBootstrap.swift",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti App.xctemplate/ModuleRegistry.swift",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti Manifest.xctemplate/ModuleManifest.json",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti Service Module.xctemplate/ServiceModule.swift",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti Service Module.xctemplate/ServiceModuleManifest.json",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti UI Module.xctemplate/UIModule.swift",
+    "XcodeTemplates/Project Templates/Forsetti/Forsetti UI Module.xctemplate/UIModuleManifest.json"
+  ],
+  "tests_added_or_updated": [
+    "Tests/ForsettiCoreTests/ManifestLoaderTests.swift",
+    "Tests/ForsettiCoreTests/CompatibilityCheckerTests.swift",
+    "Tests/ForsettiCoreTests/RuntimeLifecycleTests.swift",
+    "Tests/ForsettiCoreTests/CapabilityEnforcementTests.swift",
+    "Tests/ForsettiCoreTests/RuntimeRequirementEnforcementTests.swift",
+    "Tests/ForsettiCoreTests/ModuleCommunicationTests.swift",
+    "Tests/ForsettiCoreTests/ModuleIdentityValidationTests.swift",
+    "Tests/ForsettiCoreTests/ModuleLoggingTests.swift",
+    "Tests/ForsettiCoreTests/ModuleRegistrationStoreTests.swift",
+    "Tests/ForsettiHostTemplateTests/ForsettiHostControllerTests.swift",
+    "Tests/ForsettiArchitectureTests/ArchitectureEnforcementTests.swift",
+    "Tests/ForsettiPlatformTests/PlatformServicesTests.swift"
+  ],
+  "residual_risks": []
+}
