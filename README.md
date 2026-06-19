@@ -4,7 +4,7 @@ Forsetti is a native Apple modular runtime framework for iOS and macOS applicati
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
 _Last updated: June 18, 2026_
 
-**Current Version: 0.1.2** <!-- x-release-please-version -->
+**Current Version: 0.1.3** <!-- x-release-please-version -->
 
 [View Changelog](CHANGELOG.md) | [All Releases](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/releases)
 
@@ -575,6 +575,8 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
   - redirect to `developer-guide.md`.
 - [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki)
   - comprehensive architecture, runtime, workflow, and integration documentation.
+- [Downloadable wiki archive](docs/wiki/Forsetti-Framework-Mac-iOS-wiki-pages.zip)
+  - zipped snapshot of the published wiki pages.
 - `framework-policy.json`
   - architecture source material, runtime policy, and phase context.
 - `IMPLEMENTATION_GUIDE.md`
