@@ -6,6 +6,8 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Added
 
+- Added a tracked downloadable wiki archive at `docs/wiki/Forsetti-Framework-Mac-iOS-wiki-pages.zip` and linked it from the README documentation section.
+- Added documentation alignment coverage for the current package products, version workflow, live wiki maintenance model, and commercial-license availability.
 - Added repository-level remediation guidance and a local baseline verification record.
 - Added module-scoped service resolution so service access is constrained by granted capabilities.
 - Added runtime checks for UI contribution capabilities, module source identity, and factory/manifest identity alignment.
@@ -26,7 +28,8 @@ All notable changes to Forsetti Framework are documented in this file.
 - `LocalFileExportService` now sanitizes suggested filenames and keeps exports inside the configured directory.
 - Split large host root view responsibilities into focused SwiftUI components.
 - Renamed `license.md` to `LICENSE.md` and updated references.
-- Added `version.txt` to Release Please managed files.
+- Clarified that `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker are owned by the PR version workflow.
+- Clarified that Release Please files remain retained release configuration state, while `.github/workflows/pr-version.yml` is the active PR-time version updater.
 - Limited guardrail workflow push runs to `main` while preserving pull request checks.
 - Moved comprehensive wiki documentation to the GitHub Wiki as the canonical long-form documentation surface.
 - Rebuilt the Forsetti App Xcode template around an app module entry point instead of embedding application behavior directly in bootstrap code.

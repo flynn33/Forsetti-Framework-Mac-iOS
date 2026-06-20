@@ -2,9 +2,9 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
-_Last updated: June 18, 2026_
+_Last updated: June 20, 2026_
 
-**Current Version: 0.1.3** <!-- x-release-please-version -->
+**Current Version: 0.1.4** <!-- x-release-please-version -->
 
 [View Changelog](CHANGELOG.md) | [All Releases](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/releases)
 
@@ -481,7 +481,7 @@ Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) across the PR-updated fr
 - `Sources/ForsettiCore/ForsettiVersion.swift`
 - the visible README version marker
 
-`.release-please-manifest.json` remains release configuration state and is not changed by the PR version workflow.
+`.release-please-manifest.json` remains retained release configuration state and is not changed by the PR version workflow.
 
 Pull request titles use conventional commit-style prefixes. The PR version workflow derives the next SemVer from the PR title and body:
 
