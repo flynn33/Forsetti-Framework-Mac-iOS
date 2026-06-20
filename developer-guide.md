@@ -128,7 +128,7 @@ PRs should be blocked from merge unless guardrails also pass in CI.
 ## 7b. Versioning Policy
 
 Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) for framework releases.
-The repository maintains the same PR-updated framework version value in `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker. `.release-please-manifest.json` remains release configuration state and is not changed by the PR version workflow.
+The repository maintains the same PR-updated framework version value in `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker. `.release-please-manifest.json` remains retained release configuration state and is not changed by the PR version workflow.
 
 The PR version workflow updates those files automatically for same-repository pull requests:
 

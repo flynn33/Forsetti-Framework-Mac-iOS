@@ -13,7 +13,7 @@ The current framework version is stored in three tracked surfaces:
 | `Sources/ForsettiCore/ForsettiVersion.swift` | Runtime value used by compatibility checks. |
 | `README.md` | User-visible repository version marker. |
 
-All three values must match. `.release-please-manifest.json` is release configuration state and is not changed by the PR version workflow.
+All three values must match. `.release-please-manifest.json` is retained release configuration state and is not changed by the PR version workflow.
 
 ## PR Version Workflow
 
@@ -75,8 +75,8 @@ cp -R version.txt README.md Sources "$tmpdir/"
   cd "$tmpdir"
   python3 "$OLDPWD/Scripts/update-pr-version.py" \
     --base-version 0.1.0 \
-    --title "feat: add runtime feature"
+    --title "docs: align documentation surfaces"
 )
 ```
 
-The copied files should update to `0.2.0`.
+The copied files should update to `0.1.1`. A `chore:` title should report `skipped=true` and leave the copied version files unchanged.
