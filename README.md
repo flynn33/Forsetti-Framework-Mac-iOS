@@ -21,6 +21,8 @@ The named `Forsetti-SDK-0.2.0.zip` release asset contains complete policies, con
 
 Only generated/adapted app-owned Swift files and manifest resources enter the application. Keep the extracted kit, its template metadata, and its development tools outside app source/resource targets. Framework maintainers can read [SDK packaging and release instructions](docs/sdk/releasing.md) and the [qualification procedure](docs/sdk/qualification.md). `SDK/` contains document assembly inputs; packaging resolves their version/revision tokens and includes canonical policies from the recorded Git commit.
 
+[0.2.0 qualification results](docs/sdk/0.2.0-results.md) record 86 SDK tests, 81 Swift tests, nine native builds, six macOS/iOS Simulator executions, and the published archive checksum. The signed release tag pins the qualified source; later documentation updates retain version `0.2.0` without replacing the asset.
+
 ## Integration boundary — read before using Forsetti
 
 **DO NOT import, copy, vendor, embed, or use this entire repository as an application starter, even without modifying it.**
