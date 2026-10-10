@@ -11,6 +11,7 @@ find . \
   -path './.git' -prune -o \
   -path './.build' -prune -o \
   -path './.swiftpm' -prune -o \
+  -path './output' -prune -o \
   -name '*.json' -print0 |
   xargs -0 -n1 python3 -m json.tool >/dev/null
 
@@ -49,11 +50,16 @@ for term in "${bad_path_terms[@]}"; do
     -path './.build' -prune -o \
     -path './.swiftpm' -prune -o \
     -path './.forsetti' -prune -o \
-    -type f -iname "*$term*" -print | grep -q .; then
+    -path './output' -prune -o \
+    -name '__pycache__' -prune -o \
+    -type f ! -path './AGENTS.md' -iname "*$term*" -print | grep -q .; then
     echo "Repository file names contain prohibited attribution terms." >&2
     exit 1
   fi
 done
+
+echo "==> Running SDK packaging and consumer tool tests..."
+python3 -m unittest discover -s Tests/SDKToolTests -v
 
 echo "==> Running Swift tests (includes architecture enforcement tests)..."
 swift test --parallel --enable-code-coverage

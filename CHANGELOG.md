@@ -4,6 +4,27 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ## Unreleased
 
+## 0.2.0 - 2026-10-10
+
+### Added
+
+- Added the curated Forsetti SDK developer kit alongside an immutable source-based remote runtime dependency.
+- Added deterministic allowlist packaging, canonical policy/template provenance, archive/checksum verification, consumer documentation, and separate repository/consumer instructions.
+- Added portable template install/remove tools, noninteractive app/UI/service/manifest generation, and consumer integration verification for declared dependencies, tracked source/resource content, resolved pins, and supplied built bundles.
+- Added positive/negative SDK tool tests and a native independent-consumer qualification harness for macOS, iOS Simulator, multi-module activation, rejection behavior, and iOS device compilation.
+
+### Changed
+
+- Aligned SDK/runtime version surfaces at `0.2.0` and documented the curated release asset separately from GitHub's automatic source archives.
+- Kept complete canonical templates and policy files authoritative in the framework repository, with release copies generated from the recorded source commit.
+
+### Fixed
+
+- Limited template installation/removal to the four approved names while preserving unrelated templates and rejecting unsafe paths.
+- Required consumer dependency pins and built manifest contents to agree with their declared sources, and detected renamed runtime-file copies without rejecting legitimate app-owned local module packages.
+
+## Prior unreleased framework maintenance
+
 ### Added
 
 - Added `CONSUMPTION_POLICY.md` with explicit public-product and Xcode-scaffold allowlists, a prohibition on copied repository application foundations, and a consumer integration verification sequence.

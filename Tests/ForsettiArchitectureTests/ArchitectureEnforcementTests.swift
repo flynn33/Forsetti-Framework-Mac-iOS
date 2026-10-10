@@ -135,9 +135,10 @@ final class ArchitectureEnforcementTests: XCTestCase {
         ]
 
         var violations: [String] = []
+        let instructionPaths: Set<String> = ["AGENTS.md"]
         for path in try trackedRepositoryFiles() where !path.hasPrefix(".forsetti/") {
             let lowercasePath = path.lowercased()
-            for term in prohibitedPathTerms where lowercasePath.contains(term) {
+            for term in prohibitedPathTerms where lowercasePath.contains(term) && !instructionPaths.contains(path) {
                 violations.append("Prohibited filename term in \(path).")
             }
 

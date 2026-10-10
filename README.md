@@ -4,7 +4,7 @@ Forsetti is a native Apple modular runtime framework for iOS and macOS applicati
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
 _Last updated: October 10, 2026_
 
-**Current Version: 0.1.5** <!-- x-release-please-version -->
+**Current Version: 0.2.0** <!-- x-release-please-version -->
 
 [View Changelog](CHANGELOG.md) | [All Releases](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/releases)
 
@@ -12,6 +12,14 @@ _Last updated: October 10, 2026_
 
 If you are evaluating Forsetti, start here.
 If you are implementing with Forsetti, this README is the canonical high-level reference.
+
+## Forsetti SDK for application development
+
+Download the curated [Forsetti SDK 0.2.0 developer kit](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/releases/tag/v0.2.0), then follow its `README.md` and `Documentation/Getting-Started.md`. The SDK offering combines that kit with the exact remote runtime revision recorded in `sdk-manifest.json`. Select `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate` as needed; the supplied app scaffold uses all three.
+
+The named `Forsetti-SDK-0.2.0.zip` release asset contains complete policies, consumer instructions, four approved Xcode templates, portable install/remove/generation tools, an integration verifier, and consumer documentation. It contains no runtime `Sources/` tree or prebuilt XCFrameworks. SwiftPM/Xcode downloads and compiles the pinned source-based runtime; network access is required. GitHub's automatic source-code archives are framework development snapshots, not the SDK.
+
+Only generated/adapted app-owned Swift files and manifest resources enter the application. Keep the extracted kit, its template metadata, and its development tools outside app source/resource targets. Framework maintainers can read [SDK packaging and release instructions](docs/sdk/releasing.md) and the [qualification procedure](docs/sdk/qualification.md). `SDK/` contains document assembly inputs; packaging resolves their version/revision tokens and includes canonical policies from the recorded Git commit.
 
 ## Integration boundary — read before using Forsetti
 
@@ -488,7 +496,7 @@ Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) across three framework v
 - `Sources/ForsettiCore/ForsettiVersion.swift`
 - the visible README version marker
 
-`.release-please-manifest.json` and `release-please-config.json` remain retained release configuration state. Their presence does not provide an active release workflow.
+`.release-please-manifest.json` is aligned with the SDK/runtime release version; `release-please-config.json` remains retained release configuration. Their presence does not provide an active release workflow.
 
 `Scripts/update-pr-version.py` is retained for manually reviewed version updates. When explicitly run, it derives the next SemVer from a supplied base version and conventional title/body:
 
@@ -573,6 +581,9 @@ See the [Performance and Reliability](https://github.com/flynn33/Forsetti-Framew
 In short: keep module `start()` fast, keep manifest files small, and rely on StoreKit's local receipt cache for offline entitlement resilience.
 
 ## 21) Additional Documentation
+
+- [SDK packaging and release instructions](docs/sdk/releasing.md) and [qualification procedure](docs/sdk/qualification.md)
+  - curated payload, reproducibility, consumer runtime checks, and owner-controlled publication.
 
 - [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md)
   - mandatory product/scaffold allowlist and repository-copy prohibition.

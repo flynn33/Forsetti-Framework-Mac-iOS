@@ -75,6 +75,10 @@ If a command is unavailable in the environment, report it clearly with the exact
 
 ## Documentation expectations
 
+SDK consumers use the curated developer kit and its immutable remote runtime dependency. The framework repository's agent entry point is `AGENTS.md`; maintained consumer instructions are `SDK/Consumer-Instructions.md`, packaged as the kit's own `AGENTS.md`. Do not apply consumer-mode restrictions to explicitly requested upstream maintenance.
+
+For SDK tooling changes, run `python3 -m unittest discover -s Tests/SDKToolTests -v` and follow `docs/sdk/qualification.md`. Release packaging and verification commands are documented in `docs/sdk/releasing.md`. Generated artifacts belong in the ignored `output/` directory. Keep the public runtime product allowlist, canonical policy copies, template provenance, and source/runtime release versions aligned.
+
 When public behavior changes:
 
 - Update `README.md` if it affects consumers.

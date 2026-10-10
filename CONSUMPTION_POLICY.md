@@ -45,6 +45,12 @@ Install these templates into the user's Xcode template directory, or adapt only 
 
 `Scripts/install-forsetti-xcode-template.sh` and `Scripts/uninstall-forsetti-xcode-template.sh` are development-time utilities only. A separate checkout outside the consumer source tree may be used to run them, inspect documentation, or evaluate the framework. That checkout must not become a consumer target, vendored dependency, submodule, subtree, or copied project foundation.
 
+### SDK developer-kit delivery
+
+The curated Forsetti SDK developer kit packages these complete templates, canonical policies/license, consumer documentation, and development-time tools alongside a separately pinned, source-based remote runtime dependency. It does not contain a second runtime source tree or prebuilt runtime binaries. SwiftPM/Xcode may still fetch framework source to compile the selected products.
+
+The kit's `Scripts/generate-forsetti-scaffold.sh` reuses only the approved template payloads. `Scripts/verify-forsetti-integration.sh` reviews consumer content, dependency/source/resource membership, and supplied built bundles within its documented coverage. Both are development-time utilities, not application runtime or bundle assets. Keep the extracted kit outside the consumer's tracked tree. Only approved generated/adapted Swift files and app-owned manifest resources cross into application targets; required notices remain governed by their licenses.
+
 ## 3. Schematics and repository infrastructure: read, do not import
 
 | Repository material | Classification and boundary |

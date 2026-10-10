@@ -6,6 +6,8 @@ Read this before implementing or modifying a Forsetti-based application or modul
 
 Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before selecting dependencies or copying files.
 
+For consumer application work, start with the released Forsetti SDK developer kit and its recorded immutable remote runtime dependency. Its consumer instructions and generated scaffolds belong outside this framework-maintenance checkout. See [SDK release maintenance](docs/sdk/releasing.md) for explicitly requested upstream packaging work.
+
 **DO NOT import, copy, vendor, embed, or use the entire Forsetti repository as an application starter, even unmodified.** Import only the allowlisted public package products: `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`, as needed. Generate/adapt app-owned scaffold files only from the four designated Xcode templates.
 
 SwiftPM/Xcode-managed dependency checkouts are allowed. Copied framework source trees, internal example targets, schematic folder layouts, tests, and repository-maintenance files are not application dependencies. State selected products and exact scaffold destinations before implementing; verify the consumer's tracked files and target/resource membership afterward.

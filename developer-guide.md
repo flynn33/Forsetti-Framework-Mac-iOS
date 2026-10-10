@@ -6,6 +6,8 @@ _Last updated: October 10, 2026_
 
 ## Mandatory consumption boundary
 
+Use the released Forsetti SDK developer kit and its pinned source-based runtime dependency for application onboarding. Follow the kit's Getting Started instructions and integration verifier; no framework-development checkout is required. [Maintainer packaging](docs/sdk/releasing.md) and [qualification](docs/sdk/qualification.md) remain separate repository workflows.
+
 Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before integration. **Do not copy, vendor, embed, or use the entire Forsetti repository as an application starter, even unmodified.** Consume only the allowlisted public package products and designated Xcode scaffold outputs. Package-manager-controlled checkouts are allowed; app-owned copies of framework library sources are not. The architecture schematics and framework-maintenance files are reference material, not an application product.
 
 These are supported-integration rules, not additional license restrictions. [LICENSE](LICENSE) remains authoritative for license rights and required notices.

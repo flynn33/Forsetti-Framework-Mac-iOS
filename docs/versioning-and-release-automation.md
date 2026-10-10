@@ -15,7 +15,7 @@ The current framework version is stored in three tracked surfaces:
 | `Sources/ForsettiCore/ForsettiVersion.swift` | Runtime value used by compatibility checks. |
 | `README.md` | User-visible repository version marker. |
 
-All three values must match. `.release-please-manifest.json` and `release-please-config.json` are retained release configuration state; they do not provide an active release workflow.
+All three values must match. For SDK releases, `.release-please-manifest.json` is also aligned with that version and the assembled archive's metadata/root name. `release-please-config.json` is retained release configuration; neither file provides an active release workflow. See [SDK release maintenance](sdk/releasing.md).
 
 ## Removed PR Version Workflow
 

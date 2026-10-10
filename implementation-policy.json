@@ -1,6 +1,6 @@
 {
   "artifact_type": "implementation_policy",
-  "artifact_version": "1.2.0",
+  "artifact_version": "1.3.0",
   "name": "Forsetti Implementation Policy",
   "owner": "James Daley",
   "license_reference": "LICENSE",
@@ -250,8 +250,11 @@
     "scaffold_copy_scope": "Designated scaffold source/JSON files adapted into app-owned code/resources; not template metadata or .xctemplate directories in the app.",
     "development_only_utilities": [
       "Scripts/install-forsetti-xcode-template.sh",
-      "Scripts/uninstall-forsetti-xcode-template.sh"
+      "Scripts/uninstall-forsetti-xcode-template.sh",
+      "Scripts/generate-forsetti-scaffold.sh",
+      "Scripts/verify-forsetti-integration.sh"
     ],
+    "sdk_delivery": "A curated external developer kit plus an immutable source-based remote runtime dependency. Complete policies/templates and consumer tools stay in the development kit; only approved app-owned scaffold code/resources enter application targets.",
     "reference_only_paths": [
       "Sources/ForsettiModulesExample/",
       "Tests/",
@@ -347,6 +350,9 @@
     "https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki",
     "LICENSE",
     "CONSUMPTION_POLICY.md",
+    "AGENTS.md",
+    "docs/sdk/releasing.md",
+    "docs/sdk/qualification.md",
     "Scripts/verify-forsetti-guardrails.sh",
     ".swiftlint.yml",
     "Tests/ForsettiArchitectureTests/ArchitectureEnforcementTests.swift"

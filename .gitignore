@@ -13,3 +13,6 @@ coverage/
 *.profdata
 .vscode/
 .idea/
+/output/
+__pycache__/
+*.pyc

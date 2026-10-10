@@ -6,6 +6,8 @@ _Last updated: October 10, 2026_
 
 ## Mandatory template boundary
 
+The Forsetti SDK developer kit includes these complete templates and portable tools. Run the installer or generator from the extracted kit; a framework-development checkout is optional for upstream maintenance, not required consumer onboarding. The generated app keeps using the SDK's separately pinned remote runtime dependency.
+
 Follow [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md). The four templates under `XcodeTemplates/Project Templates/Forsetti/` are the approved scaffold sources; **the repository itself is not an application template**. `ForsettiHostTemplate` is a public Swift package library, not a source directory to copy.
 
 Run the installer from a separate development checkout outside the consumer source tree, or install just the designated template directory into Xcode. Only generated/adapted app-owned scaffold code and manifest resources go into the application. Do not include `.xctemplate` directories, `TemplateInfo.plist`, installer scripts, example modules, or the framework repository in the app bundle or tracked app sources.
@@ -203,6 +205,17 @@ Production checklist:
 ## 9. Template install and uninstall
 
 Run these development-time utilities from a separate framework checkout outside the consumer source tree. The checkout and scripts must not become an app target or application resource.
+
+Both installation and removal accept `--destination "/path/with spaces/Forsetti"` for a custom Forsetti template category directory. They operate only on the four named templates and preserve unrelated siblings. From an extracted kit, use its own `Scripts/` paths; the tools locate template payloads relative to themselves, independent of the current working directory.
+
+The noninteractive path reuses the same payloads:
+
+```bash
+Scripts/generate-forsetti-scaffold.sh --template app --name MyApplication \
+  --module-id com.example.myapplication --output "/path/to/My Application/App"
+```
+
+Use `--template ui`, `service`, or `manifest` for the other approved scaffolds. Review the JSON input/output inventory, add generated Swift sources and `Resources/ForsettiManifests` to the owning targets, and reject unresolved identities or overwrites. Generated app resources must preserve the loader's bundle layout.
 
 Install all Forsetti templates:
 

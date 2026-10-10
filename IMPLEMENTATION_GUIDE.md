@@ -11,6 +11,8 @@ Do not infer the implementation model from scattered hints across the repository
 
 ## Product boundary before architecture
 
+Start consumer work from the released Forsetti SDK developer kit, then add its recorded immutable runtime revision to an independent app-owned project. The kit supplies complete policies, approved template payloads, and consumer tools; it does not ship a second runtime source tree. Framework maintainers assemble it using [the SDK release procedure](docs/sdk/releasing.md).
+
 Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before creating targets or copying files. **Do not import, copy, vendor, embed, or use the entire Forsetti repository as your application starter, even unmodified.** Select only the public package products your targets need and generate/adapt only the designated Xcode scaffold outputs.
 
 A SwiftPM/Xcode-managed dependency checkout is allowed. Recreating the framework's source/target tree in an application is not. `framework-policy.json` contains architecture schematics and implementation history, not a copyable application layout. `ForsettiHostTemplate` is a library product; its source directory is not the Xcode template directory.
