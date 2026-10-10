@@ -136,6 +136,19 @@ class ConsumerHarnessTests(unittest.TestCase):
             with self.assertRaises(HARNESS.SmokeError):
                 HARNESS.project_graph("App", "org.example.app", sources, url, revision)
 
+    def test_presentation_wait_accepts_finite_nonnegative_values_and_cli_rejects_invalid_input(self):
+        self.assertEqual(HARNESS.presentation_wait("0"), 0.0)
+        self.assertEqual(HARNESS.presentation_wait("2.5"), 2.5)
+        for value in ("-1", "nan", "inf", "-inf", "invalid"):
+            with self.subTest(value=value):
+                result = subprocess.run(["python3", str(ROOT / "Scripts/test-forsetti-sdk-consumer.py"),
+                                         "--sdk", str(self.sdk), "--workdir", str(self.workdir),
+                                         "--runtime-commit", SHA, "--simulator", "unused", "--device-set", "unused",
+                                         "--presentation-wait=" + value], capture_output=True, text=True)
+                self.assertEqual(result.returncode, 2)
+                self.assertIn("finite nonnegative", result.stderr)
+                self.assertFalse((self.workdir / "Consumers").exists())
+
     def valid_receipt(self, variant, platform="macOS"):
         spec = HARNESS.VARIANTS[variant]
         value = {"variant": variant, "platform": platform, "registeredEntryPoints": [spec["name"] + "AppModule"],

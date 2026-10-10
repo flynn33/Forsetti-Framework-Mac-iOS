@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import platform
@@ -29,6 +30,16 @@ CHECK_NAMES = ("generated-source", "clean-consumer", "macos-runtime", "ios-simul
 
 class SmokeError(ValueError):
     pass
+
+
+def presentation_wait(value):
+    try:
+        seconds = float(value)
+    except ValueError as error:
+        raise argparse.ArgumentTypeError("--presentation-wait must be a finite nonnegative number of seconds") from error
+    if not math.isfinite(seconds) or seconds < 0:
+        raise argparse.ArgumentTypeError("--presentation-wait must be a finite nonnegative number of seconds")
+    return seconds
 
 
 def save_json(path, value):
@@ -313,12 +324,14 @@ class Runner:
         self.commands = []
         self.failure_check = "generated-source"
 
-    def run(self, arguments, label, cwd=None, env=None, timeout=1200):
+    def run(self, arguments, label, cwd=None, env=None, timeout=1200, capture_details=None):
         log = self.workdir / "Logs" / (label + ".log")
         log.parent.mkdir(parents=True, exist_ok=True)
         command = list(map(str, arguments))
         print(f"==> {label}", flush=True)
         record = {"label": label, "command": command, "cwd": str(cwd or self.workdir), "log": str(log)}
+        if capture_details is not None:
+            record["capture"] = capture_details
         self.commands.append(record)
         try:
             with log.open("w", encoding="utf-8") as stream:
@@ -479,8 +492,11 @@ def run_simulator(runner, consumer, build, simulator, device_set):
         save_json(retained, receipt)
         screenshot = runner.workdir / "Screenshots" / (consumer["variant"] + "-ios.png")
         screenshot.parent.mkdir(parents=True, exist_ok=True)
-        time.sleep(0.5)
-        runner.run(simctl + ["io", simulator, "screenshot", screenshot], label + "-screenshot")
+        # The observed launch trace put module view appearance before the
+        # simulator presentation transition completed. Review captured pixels.
+        time.sleep(runner.presentation_wait)
+        runner.run(simctl + ["io", simulator, "screenshot", screenshot], label + "-screenshot",
+                   capture_details={"presentationWaitSeconds": runner.presentation_wait, "visualReview": "required"})
     finally:
         runner.run(simctl + ["terminate", simulator, consumer["bundleID"]], label + "-terminate")
     return {"receipt": str(retained), "simulatorContainer": str(data_container), "screenshot": str(screenshot), "observed": receipt}
@@ -494,6 +510,8 @@ def main():
     parser.add_argument("--simulator", required=True, help="dedicated iOS Simulator UUID")
     parser.add_argument("--device-set", required=True, type=Path, help="dedicated custom simulator device-set directory")
     parser.add_argument("--report", type=Path, help="verification JSON; defaults to WORKDIR/consumer-verification.json")
+    parser.add_argument("--presentation-wait", type=presentation_wait, default=5.0,
+                        help="finite nonnegative seconds to wait before simulator screenshots (default: 5); visually review screenshots")
     parser.add_argument("--prepare-only", action="store_true", help="generate/validate projects without resolving or building the remote dependency")
     args = parser.parse_args()
     sdk, workdir, device_set = args.sdk.expanduser().resolve(), args.workdir.expanduser().resolve(), args.device_set.expanduser().resolve()
@@ -519,12 +537,14 @@ def main():
                                                   "The app-owned smoke probe observes real runtime fields and view appearance; it does not replace governance or exercise every application interaction."]}
     runner = Runner(workdir)
     runner.sdk = sdk
+    runner.presentation_wait = args.presentation_wait
     def passed(name, details):
         next(check for check in report["checks"] if check["name"] == name).update(status="passed", details=details)
     try:
         report["testedEnvironments"].append({"name": "Native Apple consumer verification", "hostOS": platform.platform(),
                                             "architecture": platform.machine(), "xcode": execute(["xcodebuild", "-version"]).strip(),
-                                            "swift": execute(["xcrun", "swift", "--version"]).strip(), "simulator": args.simulator, "deviceSet": str(device_set)})
+                                            "swift": execute(["xcrun", "swift", "--version"]).strip(), "simulator": args.simulator,
+                                            "deviceSet": str(device_set), "presentationWaitSeconds": args.presentation_wait})
         for variant in VARIANTS:
             report["consumers"][variant] = prepare_consumer(sdk, workdir, variant, args.runtime_commit)
         save_json(workdir / "consumer-projects.json", report["consumers"])
