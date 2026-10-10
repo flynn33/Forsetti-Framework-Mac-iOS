@@ -2,7 +2,13 @@
 
 This guide is for teams integrating Forsetti into their own apps.
 It defines the engineering rules your project should enforce so Forsetti remains modular, native, and maintainable.
-_Last updated: June 18, 2026_
+_Last updated: October 10, 2026_
+
+## Mandatory consumption boundary
+
+Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before integration. **Do not copy, vendor, embed, or use the entire Forsetti repository as an application starter, even unmodified.** Consume only the allowlisted public package products and designated Xcode scaffold outputs. Package-manager-controlled checkouts are allowed; app-owned copies of framework library sources are not. The architecture schematics and framework-maintenance files are reference material, not an application product.
+
+These are supported-integration rules, not additional license restrictions. [LICENSE](LICENSE) remains authoritative for license rights and required notices.
 
 ## 1. Required Stack
 
@@ -36,16 +42,20 @@ Forsetti must be treated as the sealed runtime framework in consumer projects. F
 
 ### Allowed
 
-- Use Forsetti package products through their public APIs.
+- Add [Forsetti's remote package dependency](https://github.com/flynn33/Forsetti-Framework-Mac-iOS) and select only `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate` as needed by each target. Record the resolved version/revision through your app's normal dependency-resolution workflow.
+- Generate or adapt app-owned files from the four approved templates under `XcodeTemplates/Project Templates/Forsetti/`.
 - Build your app features in your own targets/packages.
 - Implement your own modules using public contracts such as `ForsettiModule`, `ForsettiAppModule`, or `ForsettiUIModule`.
+
+`ForsettiHostTemplate` is a compiled library product; its source directory is not a copyable scaffold. `ForsettiFramework` is the package name, not an importable umbrella product. `ForsettiModulesExample` and its resources are internal evaluation/test fixtures.
 
 ### Not Allowed
 
 - Forking or modifying Forsetti internal targets for app-specific behavior.
-- Copying Forsetti source files into your app and editing them.
+- Copying framework library sources or the complete repository into your app, whether modified or unmodified; use public package products instead.
 - Subclassing or patching Forsetti runtime internals through unsupported hooks.
 - Coupling your app targets back into Forsetti internal targets.
+- Using `.package(path:)` with a vendored Forsetti repository, or editing/committing managed dependency caches.
 
 If a required extension point is missing, request a framework enhancement instead of patching internals.
 
@@ -89,7 +99,7 @@ these are target-specific architecture guardrails, not blanket bans for every co
 
 ## 6. How to Enforce These Rules in Your App
 
-Use enforcement in your own repository, not in Forsetti's source tree.
+Author enforcement for your app's targets and contracts in your own repository. Framework tests, lint configuration, scripts, and CI are reference material; do not copy them into the consumer project.
 
 - Add architecture tests in your app repo that validate:
   - allowed target dependencies
@@ -128,24 +138,26 @@ PRs should be blocked from merge unless guardrails also pass in CI.
 ## 7b. Versioning Policy
 
 Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) for framework releases.
-The repository maintains the same PR-updated framework version value in `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker. `.release-please-manifest.json` remains retained release configuration state and is not changed by the PR version workflow.
+The repository must maintain the same framework version value in `version.txt`, `Sources/ForsettiCore/ForsettiVersion.swift`, and the README version marker. `.release-please-manifest.json` and `release-please-config.json` remain retained release configuration state.
 
-The PR version workflow updates those files automatically for same-repository pull requests:
+The PR version workflow was removed on August 16, 2026. The retained `Scripts/update-pr-version.py` supports manually reviewed version updates using a supplied base version and title/body:
 
-| PR title/body signal | Version result |
+| Supplied title/body signal | Version result |
 | --- | --- |
-| `type!:` or `BREAKING CHANGE:` | Major bump |
+| non-`chore` `type!:` or `BREAKING CHANGE:` | Major bump |
 | `feat:` | Minor bump |
 | other supported non-`chore` types | Patch bump |
 | `chore:` | No bump |
 
-Use `chore:` only for repository maintenance that should not represent a framework release change. Documentation, CI, build, test, fix, refactor, and performance PRs intentionally receive a patch bump unless they are explicitly repository chores. Chore PRs must not include version-file changes.
+These are script classification rules, not active PR automation. `chore:` makes the script return `skipped=true` without changing version files. Review release scope and the resulting diff before committing a version update. See [versioning-and-release-automation.md](docs/versioning-and-release-automation.md) for the retained tools and historical workflow.
 
 Release publication, tags, and changelog maintenance are separate post-merge release work.
 
 ## 8. Adding New App Code Safely (Integration-Only)
 
 When adding capabilities in a project that uses Forsetti:
+
+Before edits, identify the work as consumer integration and name the selected public products, any exact scaffold files to generate/adapt, and their app-owned destinations. Keep the Xcode project and module targets app-owned. Framework maintenance belongs in a separate framework checkout, not in an app-owned copy of Forsetti.
 
 1. Create or choose an app-owned target/package for your Forsetti modules.
 2. Implement `ForsettiAppModule` (single-module apps), `ForsettiUIModule` (multi-module UI), or `ForsettiModule` (service/feature) in your own codebase.
@@ -159,6 +171,8 @@ When adding capabilities in a project that uses Forsetti:
 10. Run guardrails before opening/updating a PR.
 11. If an API gap is discovered, propose an upstream Forsetti change; do not patch internal framework code.
 
+Put manifest JSON in the resource bundle that owns it and pass that bundle to discovery. The app scaffold uses `.main` because its manifests belong to the app target; a module package owning resources must supply its own bundle. Do not use `ExampleModuleResources.bundle` in a consumer app.
+
 ## 9. Review Checklist
 
 Use this checklist for every review:
@@ -170,7 +184,9 @@ Use this checklist for every review:
 - Dependencies injected (not hidden globals)?
 - Tests added/updated for behavior and architecture impact?
 - Guardrail script executed successfully?
-- Version workflow behavior correct for the PR type?
+- Version values aligned and any manual version update reviewed?
+- Selected public products and scaffold destinations documented?
+- Target dependencies, source/resource membership, and tracked files verified against the consumption allowlist, with no copied framework tree, example fixtures, template metadata, or framework-maintenance infrastructure?
 
 ## 10. Non-Compliance Policy
 

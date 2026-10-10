@@ -75,6 +75,10 @@ A consumer application may build app-owned Forsetti-compatible modules in its ow
 
 Those app-owned modules may use Apple-native frameworks appropriate to their responsibilities, provided they respect Forsetti’s modular structure and public extension points.
 
+Follow [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before selecting dependencies or scaffold files. Consume `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate` as needed through a remote SwiftPM/Xcode dependency. `ForsettiHostTemplate` is a compiled library product; only the designated Xcode scaffold outputs may be generated or adapted into app-owned files.
+
+Do not copy, vendor, embed, or use the framework repository as the application's starting tree, even unmodified. Internal examples, framework tests, schematic layouts, and maintenance infrastructure remain reference material. Verify the consumer's target dependencies, source/resource membership, and tracked files against the allowlist. These supported-integration rules do not amend [LICENSE](LICENSE).
+
 ## Explicit Allowed Technology Examples
 
 The following are explicitly valid when used in the correct module or architectural layer:

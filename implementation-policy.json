@@ -1,9 +1,9 @@
 {
   "artifact_type": "implementation_policy",
-  "artifact_version": "1.1.0",
+  "artifact_version": "1.2.0",
   "name": "Forsetti Implementation Policy",
   "owner": "James Daley",
-  "license_reference": "LICENSE.md",
+  "license_reference": "LICENSE",
   "description": "Comprehensive machine-readable instructions for developers working with Forsetti or apps built on Forsetti.",
   "usage": {
     "intended_for": [
@@ -12,7 +12,7 @@
       "Reviewers enforcing Forsetti architecture policy"
     ],
     "how_to_apply": [
-      "Review this file at task start.",
+      "Review CONSUMPTION_POLICY.md and this file at task start.",
       "Require acknowledgement of all mandatory rules before code changes.",
       "Treat all MUST and MUST_NOT rules as hard constraints."
     ]
@@ -117,9 +117,36 @@
     {
       "id": "R008",
       "priority": "critical",
-      "rule": "Implementer MUST respect proprietary licensing boundaries and MUST_NOT imply open-source usage rights.",
+      "rule": "Implementer MUST follow LICENSE and preserve applicable notices. Supported-integration rules MUST_NOT be presented as additional license restrictions.",
       "applies_to_modes": ["framework_repo_mode", "consumer_repo_mode"],
-      "rationale": "Forsetti is proprietary software under explicit licensing terms."
+      "rationale": "The repository LICENSE governs licensing; this policy governs supported engineering practice."
+    },
+    {
+      "id": "R014",
+      "priority": "critical",
+      "rule": "Implementer MUST_NOT import, copy, vendor, embed, or use the entire Forsetti repository as a consumer application starter, even unmodified. Normal SwiftPM/Xcode-managed dependency checkouts are permitted; app-owned repository copies, submodules, subtrees, and vendored local-path packages are not.",
+      "applies_to_modes": [
+        "consumer_repo_mode"
+      ],
+      "rationale": "The framework repository contains both distributable products and non-product schematics/infrastructure."
+    },
+    {
+      "id": "R015",
+      "priority": "critical",
+      "rule": "Implementer MUST consume only the public products and designated scaffold outputs in consumer_distribution_contract and CONSUMPTION_POLICY.md. ForsettiHostTemplate is a library product, not a source-copy template. Internal example targets and schematic layouts MUST_NOT be treated as production products or app templates.",
+      "applies_to_modes": [
+        "consumer_repo_mode"
+      ],
+      "rationale": "An explicit allowlist separates product imports, template generation, and reference-only material."
+    },
+    {
+      "id": "R016",
+      "priority": "critical",
+      "rule": "Before consumer integration, Implementer MUST name selected package products and exact scaffold source/destination files. Before completion, Implementer MUST verify tracked files and target/resource membership contain no copied framework tree, internal samples, or framework-maintenance artifacts, and report verification results.",
+      "applies_to_modes": [
+        "consumer_repo_mode"
+      ],
+      "rationale": "A supported integration must be demonstrated, not inferred from a successful build."
     }
   ],
   "framework_repo_architecture_constraints": {
@@ -199,6 +226,48 @@
       "Tests/ForsettiHostTemplateTests/ForsettiHostControllerTests.swift"
     ]
   },
+  "consumer_distribution_contract": {
+    "policy_reference": "CONSUMPTION_POLICY.md",
+    "scope": "Supported consumer integration; does not amend LICENSE.",
+    "repository_is_consumer_product": false,
+    "default_for_unlisted_artifacts": "reference_only_do_not_import_or_copy",
+    "public_package_products": [
+      "ForsettiCore",
+      "ForsettiPlatform",
+      "ForsettiHostTemplate"
+    ],
+    "library_source_copy_allowed": false,
+    "package_manager_managed_checkout_allowed": true,
+    "consumer_owned_repository_copy_allowed": false,
+    "vendored_local_path_dependency_allowed": false,
+    "scaffold_root": "XcodeTemplates/Project Templates/Forsetti",
+    "scaffold_templates": [
+      "Forsetti App.xctemplate",
+      "Forsetti UI Module.xctemplate",
+      "Forsetti Service Module.xctemplate",
+      "Forsetti Manifest.xctemplate"
+    ],
+    "scaffold_copy_scope": "Designated scaffold source/JSON files adapted into app-owned code/resources; not template metadata or .xctemplate directories in the app.",
+    "development_only_utilities": [
+      "Scripts/install-forsetti-xcode-template.sh",
+      "Scripts/uninstall-forsetti-xcode-template.sh"
+    ],
+    "reference_only_paths": [
+      "Sources/ForsettiModulesExample/",
+      "Tests/",
+      "framework-policy.json",
+      "docs/",
+      ".forsetti/alignment/",
+      ".github/",
+      ".swiftlint.yml",
+      "Scripts/verify-forsetti-guardrails.sh",
+      "Scripts/update-pr-version.py",
+      "release-please-config.json",
+      ".release-please-manifest.json"
+    ],
+    "license_notice_exception": "Retain license/notice material required by applicable distribution terms.",
+    "framework_maintenance_exception": "A separate external worktree may support explicitly requested upstream framework development/evaluation/template installation. It must not be copied into the consumer tree or committed as its integration method."
+  },
   "consumer_repo_guidance": {
     "allowed_patterns": [
       "Implement app-owned modules using ForsettiAppModule (single-module apps), ForsettiUIModule (multi-module UI), or ForsettiModule (service/feature).",
@@ -206,9 +275,11 @@
       "Treat Metal as permitted in the correct app-owned module/layer when the module responsibility justifies it.",
       "Use Forsetti service container and protocol-based service contracts.",
       "Compose runtime and host through public bootstrap/runtime APIs.",
-      "Create app-level architecture tests and lint rules mirroring Forsetti principles."
+      "Create app-specific architecture tests, lint rules, and CI implementing Forsetti principles; do not transplant framework-maintenance files."
     ],
     "forbidden_patterns": [
+      "Copying, vendoring, embedding, or using the Forsetti repository as an application starter, even unmodified.",
+      "Using internal example modules/resources, template metadata, or framework-maintenance infrastructure as application dependencies or assets.",
       "Editing Forsetti package internals inside vendor or copied source folders.",
       "Adding reverse dependencies from app targets into Forsetti internals.",
       "Bypassing entitlement/capability checks with ad-hoc host-side overrides."
@@ -265,7 +336,7 @@
     ]
   },
   "suggested_task_prompt_template": {
-    "template": "You are coding in {MODE}. Follow implementation-policy.json as hard constraints. Confirm R001-R013 compliance (when applicable), then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
+    "template": "You are coding in {MODE}. Follow implementation-policy.json as hard constraints. Confirm R001-R016 compliance (when applicable), then implement only via allowed patterns. Before finishing, run required_verification_commands for {MODE}, report results, and include residual risks.",
     "mode_values": ["framework_repo_mode", "consumer_repo_mode"]
   },
   "document_references": [
@@ -273,10 +344,10 @@
     "developer-guide.md",
     "framework-policy.json",
     "guide.md",
-    "https://github.com/flynn33/Forsetti-Framework/wiki",
-    "LICENSE.md",
+    "https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki",
+    "LICENSE",
+    "CONSUMPTION_POLICY.md",
     "Scripts/verify-forsetti-guardrails.sh",
-    ".github/workflows/guardrails.yml",
     ".swiftlint.yml",
     "Tests/ForsettiArchitectureTests/ArchitectureEnforcementTests.swift"
   ]

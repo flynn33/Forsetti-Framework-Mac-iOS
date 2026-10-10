@@ -1,6 +1,14 @@
 {
   "artifact_type": "framework_policy",
-  "artifact_version": "1.0.0",
+  "artifact_version": "1.1.0",
+  "consumption_boundary": {
+    "classification": "Architecture/design reference with historical implementation phases; not runtime configuration or a consumer application starter.",
+    "policy_reference": "CONSUMPTION_POLICY.md",
+    "product_allowlist_reference": "implementation-policy.json#consumer_distribution_contract",
+    "application_integration": "Consume the public package products through a remote SwiftPM/Xcode dependency and generate/adapt only the designated Xcode scaffold outputs. Do not copy or recreate this repository's source/target tree in an application, even unmodified.",
+    "license_reference": "LICENSE",
+    "license_scope": "Supported-integration guidance does not amend the repository license."
+  },
   "project": {
     "name": "Forsetti Framework",
     "summary": "A reusable, adaptable, modular Swift/Apple-framework runtime for consistent app development across iOS and macOS. Apps discover, validate, unlock, and activate bundled modules. Forsetti is modularity-first and Apple-native by design: app-owned modules should use Apple-native technologies in the correct architectural layer. In multi-module single applications, the app UI lives in a dedicated UI module that may use SwiftUI; Apple-native frameworks such as Metal are valid where appropriate to a module's responsibility.",
@@ -39,7 +47,7 @@
       },
       {
         "name": "ForsettiHostTemplate",
-        "role": "Developer-facing app template for module discovery, activation, and testing. Includes framework controls (Home, Settings, module switcher) that are intended for use during development. In production single-module apps, these controls are hidden and the framework runs silently behind the module's own UI. This host/template surface is a reference implementation and does not imply that SwiftUI is framework-internal only."
+        "role": "Public compiled library providing reusable host bootstrap, controller, routing, and SwiftUI composition APIs. Import its package product; do not copy its source directory. App-owned scaffolds are generated/adapted from the designated XcodeTemplates instead. Development host controls can be hidden in production single-module apps. This layer does not imply that SwiftUI is framework-internal only."
       },
       {
         "name": "ForsettiModules",
@@ -69,6 +77,7 @@
         "ForsettiModules/ModuleB/"
       ],
       "notes": [
+        "This layout describes framework architecture, not a consumer project template. Keep an independent app-owned project; do not copy or recreate the framework source/target tree in it. Follow CONSUMPTION_POLICY.md for supported products and scaffold outputs.",
         "Keep ForsettiCore independent of UI/platform frameworks. Place SwiftUI and other Apple-native UI code in the appropriate app-owned UI or host layer; prefer platform-neutral models in Core.",
         "Apply Apple-native frameworks such as Metal in the correct owning module/layer when responsibilities require rendering, graphics, or compute.",
         "ForsettiPlatform may import UIKit/AppKit as needed."

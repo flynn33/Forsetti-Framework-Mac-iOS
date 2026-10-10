@@ -33,6 +33,7 @@ term_fourteen="AI"" ag""ents"
 prohibited_pattern="$term_one|$term_two|$term_three|$term_four|$term_five|$term_six|$term_seven|$term_eight|$term_nine|$term_ten|$term_eleven|$term_twelve|$term_thirteen|$term_fourteen"
 
 if rg -n "$prohibited_pattern" --hidden \
+  --glob '!/LICENSE' \
   --glob '!.git/**' \
   --glob '!.build/**' \
   --glob '!.swiftpm/**' \

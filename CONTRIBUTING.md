@@ -1,5 +1,7 @@
 # Contributing
 
+_Last updated: October 10, 2026_
+
 This repository is published as open source under the [Apache License, Version 2.0](LICENSE).
 
 You are welcome to use, study, modify, and distribute the code under the terms of that license.
@@ -11,6 +13,8 @@ This project is not open to collaboration. Outside contributions—including pul
 Repository access controls and rulesets restrict write access to the owner.
 
 If you want to build on this work, fork the repository under Apache 2.0 and maintain your changes in your own fork or product.
+
+That license permission is separate from supported consumer integration. [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) defines the engineering boundary: applications consume the allowlisted package products and scaffold outputs rather than copying or vendoring the framework repository. The policy does not amend or replace the Apache license; preserve applicable license and attribution notices when distributing material.
 
 ## Issues and discussions
 

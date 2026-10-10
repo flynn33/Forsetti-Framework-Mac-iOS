@@ -2,7 +2,7 @@
 
 Forsetti is a native Apple modular runtime framework for iOS and macOS applications.
 It gives host apps a consistent way to discover, validate, unlock, activate, and render feature modules while keeping architecture boundaries strict and enforceable.
-_Last updated: June 20, 2026_
+_Last updated: October 10, 2026_
 
 **Current Version: 0.1.5** <!-- x-release-please-version -->
 
@@ -12,6 +12,15 @@ _Last updated: June 20, 2026_
 
 If you are evaluating Forsetti, start here.
 If you are implementing with Forsetti, this README is the canonical high-level reference.
+
+## Integration boundary — read before using Forsetti
+
+**DO NOT import, copy, vendor, embed, or use this entire repository as an application starter, even without modifying it.**
+Consume only the public SwiftPM products `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate` as needed. Generate or adapt app-owned scaffolds only from the designated templates under `XcodeTemplates/Project Templates/Forsetti/`.
+
+A normal SwiftPM/Xcode-managed dependency checkout is allowed; a copied repository in the app's tracked source or bundle is not. `ForsettiHostTemplate` is a library product, not a source-copy template. Examples, schematics, tests, documentation archives, and framework-maintenance files are not the application product.
+
+**Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) for the complete product/scaffold allowlist, prohibited integrations, and implementation checklist.** These engineering rules do not change [LICENSE](LICENSE).
 
 ## Table of Contents
 
@@ -30,7 +39,7 @@ If you are implementing with Forsetti, this README is the canonical high-level r
 13. Entitlements and Paid Modules
 14. Capability Governance
 15. OOP and Modularity Rules
-16. Architecture Guardrails (Lint, Tests, CI)
+16. Architecture Guardrails (Local Checks)
 17. Recommended Consumer-Repo Guardrails
 18. Versioning and Release Automation
 19. Troubleshooting
@@ -149,7 +158,7 @@ Forsetti is the sealed runtime framework. Framework internals are sealed behind 
 
 Allowed:
 
-- Use Forsetti public package products and public APIs.
+- Use only the public package products and scaffold outputs allowlisted in [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md), through their supported APIs.
 - Build app-owned modules in your own targets.
 - Compose host runtime/services through public extension points.
 - Request upstream enhancements if an extension point is missing.
@@ -157,7 +166,8 @@ Allowed:
 Not allowed:
 
 - Modifying Forsetti internals for app-specific behavior.
-- Copying Forsetti source files into your app and patching them.
+- Copying, vendoring, embedding, or using the complete repository as an application starter, whether modified or unmodified.
+- Copying framework library sources into the app instead of consuming their package products.
 - Backdoor coupling from app targets into Forsetti internals.
 
 Decision rule:
@@ -166,7 +176,7 @@ Decision rule:
 
 ## 6) Package Structure
 
-Forsetti ships as multiple products/targets with clear responsibilities:
+Forsetti publishes three library products and keeps one separate internal example/test target. Their presence in the same repository does not make the entire repository a consumer product:
 
 - `ForsettiCore`
   - Runtime contracts, models, compatibility checks, activation orchestration.
@@ -174,9 +184,11 @@ Forsetti ships as multiple products/targets with clear responsibilities:
 - `ForsettiPlatform`
   - Native platform service adapters and entitlement implementations.
 - `ForsettiHostTemplate`
-  - SwiftUI host controller/views for module discovery and activation UI.
+  - Public library with host bootstrap/controller APIs and SwiftUI views for module discovery and activation UI. Import it; do not copy its source directory. It is separate from the Xcode scaffolds.
 - `ForsettiModulesExample`
-  - Internal reference/test target with example modules and manifests. It is not exposed as a public package product.
+  - Internal evaluation/test fixture with example modules and manifests. It is not exposed as a public package product or a production module/template.
+
+`ForsettiFramework` is the package name, not an umbrella library product. Do not use `import ForsettiFramework` or recreate internal targets in a consumer package. Add the remote dependency and select the public products each target needs; an app-owned module using only core contracts needs only `ForsettiCore` directly.
 
 ## 7) Core Runtime Concepts
 
@@ -280,10 +292,10 @@ A consumer application may build app-owned Forsetti-compatible modules in its ow
 
 Forsetti has two intentionally different starting paths:
 
-- Repository-local evaluation path: uses the internal `ForsettiModulesExample` target to inspect framework behavior quickly.
+- Repository-local evaluation path: uses the internal `ForsettiModulesExample` target in a separate framework checkout outside the consumer source tree to inspect framework behavior quickly.
 - Production starter path: uses the Forsetti Xcode templates to generate app-owned module scaffolding.
 
-If you are preparing a real application, start with section 23 and `xcode-template-guide.md`.
+For a real application, first follow [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md), section 23, and `xcode-template-guide.md`. The following composition excerpt uses an app-owned registry and manifests in the app bundle; it is not a standalone application. Replace `MyAppModuleRegistry` with your generated/app-owned registry and run this setup on the main actor. If another bundle owns your manifests, pass that bundle instead.
 
 ```swift
 import ForsettiCore
@@ -293,12 +305,10 @@ import ForsettiHostTemplate
 let registry = ModuleRegistry()
 try MyAppModuleRegistry.registerAll(into: registry)
 
-let entitlementProvider = ForsettiEntitlementProviderFactory.makeDefault(
-    macOSUnlockedProductIDs: ["com.forsetti.iap.example-ui"]
-)
+let entitlementProvider = ForsettiEntitlementProviderFactory.makeDefault()
 
 let controller = ForsettiHostTemplateBootstrap.makeController(
-    manifestsBundle: ExampleModuleResources.bundle,
+    manifestsBundle: .main,
     moduleRegistry: registry,
     entitlementProvider: entitlementProvider
 )
@@ -338,7 +348,7 @@ In consumer apps, create your own module target and follow this sequence.
 2. Implement `descriptor` and `manifest` with aligned `moduleID` and `entryPoint`.
 3. Implement lifecycle (`start`/`stop`) as idempotent, bounded operations.
 4. Register module factory in your bootstrap.
-5. Include manifest JSON in bundle resources.
+5. Include app-owned manifest JSON in the owning target's bundle resources and pass that bundle to runtime discovery; do not use `ExampleModuleResources.bundle` in a consumer app.
 6. Run architecture/lint/test guardrails before merge.
 
 Guidance:
@@ -432,13 +442,13 @@ Why:
 - Makes coupling explicit.
 - Improves deterministic behavior under modular composition.
 
-## 16) Architecture Guardrails (Lint, Tests, CI)
+## 16) Architecture Guardrails (Local Checks)
 
 This repository includes hard guardrails:
 
 - Architecture test target for layering and class finality checks.
 - Strict `SwiftLint` policy with custom layer import rules.
-- CI workflow that blocks regressions on push/PR.
+- Local verification script for JSON validation, repository guidance, tests, and lint.
 
 Run locally:
 
@@ -448,18 +458,15 @@ Run locally:
 
 This executes:
 
+- JSON validation and repository guidance checks.
 - `swift test --parallel --enable-code-coverage`
 - `swiftlint lint --strict --config .swiftlint.yml`
 
-GitHub Actions also enforce:
-
-- `guardrails.yml`: package tests, architecture checks, SwiftLint, JSON validation, and iOS Simulator build coverage.
-- `lint-pr.yml`: conventional pull request title format.
-- `pr-version.yml`: SemVer version updates for non-`chore` pull requests.
+The `guardrails.yml`, `lint-pr.yml`, and `pr-version.yml` GitHub Actions workflows were removed on August 16, 2026 to stop runner spend. These checks and version updates are no longer automated by this repository.
 
 ## 17) Recommended Consumer-Repo Guardrails
 
-If your app consumes Forsetti, replicate guardrails in your own repository:
+If your app consumes Forsetti, author app-specific guardrails in your own repository. Use the framework's checks as reference; do not transplant its test suite, scripts, lint configuration, or CI files:
 
 - Add architecture policy tests for your app targets.
 - Add strict lint import/dependency rules.
@@ -475,24 +482,24 @@ Suggested files in consumer repo:
 
 ## 18) Versioning and Release Automation
 
-Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) across the PR-updated framework version surfaces:
+Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) across three framework version surfaces that must remain aligned:
 
 - `version.txt`
 - `Sources/ForsettiCore/ForsettiVersion.swift`
 - the visible README version marker
 
-`.release-please-manifest.json` remains retained release configuration state and is not changed by the PR version workflow.
+`.release-please-manifest.json` and `release-please-config.json` remain retained release configuration state. Their presence does not provide an active release workflow.
 
-Pull request titles use conventional commit-style prefixes. The PR version workflow derives the next SemVer from the PR title and body:
+`Scripts/update-pr-version.py` is retained for manually reviewed version updates. When explicitly run, it derives the next SemVer from a supplied base version and conventional title/body:
 
-| PR signal | Version bump |
+| Supplied title/body signal | Version bump |
 | --- | --- |
-| `type!:` or `BREAKING CHANGE:` in the PR body | Major |
+| non-`chore` `type!:` or `BREAKING CHANGE:` in the body | Major |
 | `feat:` | Minor |
 | other supported non-`chore` types | Patch |
 | `chore:` | No version change |
 
-This means documentation, CI, tests, fixes, refactors, performance work, and build changes all advance the framework version unless the PR is explicitly a repository chore. Chore PRs are reserved for maintenance that should not represent a framework version change, and the workflow fails a chore PR when version files already differ from the target branch.
+The script returns `skipped=true` for `chore:` and leaves version files unchanged. Other supported non-breaking types except `feat:` produce a patch bump. Review the requested release scope and resulting file diff before committing; no workflow currently runs this script or publishes its changes automatically.
 
 Release publication, changelog maintenance, tags, and GitHub releases remain a separate post-merge release process.
 
@@ -567,10 +574,12 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 
 ## 21) Additional Documentation
 
+- [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md)
+  - mandatory product/scaffold allowlist and repository-copy prohibition.
 - `developer-guide.md`
   - canonical integration rules and policies.
 - `docs/versioning-and-release-automation.md`
-  - SemVer rules, PR version workflow behavior, and release automation ownership.
+  - SemVer script rules, historical PR workflow, and manual release ownership.
 - `guide.md`
   - redirect to `developer-guide.md`.
 - [GitHub Wiki](https://github.com/flynn33/Forsetti-Framework-Mac-iOS/wiki)
@@ -633,12 +642,14 @@ Option B: manual install
 
 1. File > New > Project > Multiplatform.
 2. Choose `Forsetti App`.
-3. Add the `ForsettiFramework` Swift package to your app target.
+3. Add this repository URL as a remote SwiftPM dependency in Xcode; do not copy or vendor the repository into the application.
 4. Add package products: `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`.
+
+Use [the repository's remote URL](https://github.com/flynn33/Forsetti-Framework-Mac-iOS) and record the resolved version/revision through your app's dependency-resolution workflow. Do not use `.package(path:)` pointing to a vendored Forsetti checkout. The installer and `.xctemplate` metadata are development-time utilities, not application resources.
 
 ### Ownership Model (summary)
 
-- App-owned files: generated app bootstrap, deployment mode configuration, module registry, module implementation, and module view.
+- App-owned files: generated app bootstrap, deployment mode configuration, module registry, module implementation, module view, and manifest resources.
 - Framework-owned files: Forsetti package internals (`Sources/ForsettiCore`, `Sources/ForsettiPlatform`, `Sources/ForsettiHostTemplate`) in this repository.
 
 ### Recommended Pattern to Start

@@ -142,7 +142,8 @@ final class ArchitectureEnforcementTests: XCTestCase {
             }
 
             let fileURL = packageRootURL.appendingPathComponent(path)
-            guard let source = try? String(contentsOf: fileURL, encoding: .utf8) else {
+            // The canonical license retains its required legal wording and notices.
+            guard path != "LICENSE", let source = try? String(contentsOf: fileURL, encoding: .utf8) else {
                 continue
             }
 

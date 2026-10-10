@@ -1,5 +1,7 @@
 # Versioning and Release Automation
 
+_Last updated: October 10, 2026_
+
 Forsetti uses Semantic Versioning (`MAJOR.MINOR.PATCH`) for framework version numbers.
 Version updates are intentionally reviewable because the runtime version participates in manifest compatibility checks.
 
@@ -9,55 +11,41 @@ The current framework version is stored in three tracked surfaces:
 
 | Surface | Purpose |
 | --- | --- |
-| `version.txt` | Plain text version used by scripts and workflows. |
+| `version.txt` | Plain text version used by version scripts. |
 | `Sources/ForsettiCore/ForsettiVersion.swift` | Runtime value used by compatibility checks. |
 | `README.md` | User-visible repository version marker. |
 
-All three values must match. `.release-please-manifest.json` is retained release configuration state and is not changed by the PR version workflow.
+All three values must match. `.release-please-manifest.json` and `release-please-config.json` are retained release configuration state; they do not provide an active release workflow.
 
-## PR Version Workflow
+## Removed PR Version Workflow
 
-`.github/workflows/pr-version.yml` runs on same-repository pull requests.
-It reads the version from the target branch, calculates the next version from the PR title/body, updates the framework version files, and pushes a version commit back to the PR branch when needed.
+The `guardrails.yml`, `lint-pr.yml`, and `pr-version.yml` GitHub Actions workflows were removed on August 16, 2026 to stop runner spend (commits `31d362a`, `a732c38`, and `0097a42`).
 
-```mermaid
-flowchart TD
-    PR["Pull request opened, edited, or synchronized"] --> SameRepo{"Head branch is in this repository?"}
-    SameRepo -- no --> SkipFork["Skip write workflow"]
-    SameRepo -- yes --> Title["Parse conventional PR title"]
-    Title --> Chore{"type is chore?"}
-    Chore -- yes --> Skip["No version change"]
-    Chore -- no --> Bump{"Version signal"}
-    Bump -- "type! or BREAKING CHANGE" --> Major["Major bump"]
-    Bump -- "feat" --> Minor["Minor bump"]
-    Bump -- "other type" --> Patch["Patch bump"]
-    Major --> Write["Update version files"]
-    Minor --> Write
-    Patch --> Write
-    Write --> Commit{"Files changed?"}
-    Commit -- yes --> Push["Commit and push version update"]
-    Commit -- no --> Done["No-op"]
-```
+Historically, the PR version workflow calculated a version from a same-repository PR's title/body and target-branch version, then pushed changed version files to the PR branch. That automation and its chore-version consistency check are no longer present.
 
-## Bump Rules
+## Retained Version Script
 
-| PR signal | Bump | Example |
+`Scripts/update-pr-version.py` remains available for explicit, manually reviewed use. It accepts `--base-version`, `--title`, and an optional `--body-file`, then updates the three version surfaces. It does not commit or push. Select the base version deliberately, inspect the resulting diff, and confirm all three values still match before committing.
+
+### Script Bump Rules
+
+| Supplied title/body signal | Bump | Example |
 | --- | --- | --- |
-| Breaking change marker | Major | `feat!: replace manifest schema` |
+| Breaking change marker on a non-`chore` type | Major | `feat!: replace manifest schema` |
 | Feature | Minor | `feat: add module provider registry` |
 | Fix, docs, refactor, test, CI, build, style, performance | Patch | `docs: expand lifecycle guide` |
 | Repository chore | None | `chore: rotate workflow labels` |
 
-The workflow uses the same supported title types as `lint-pr.yml`. It treats `chore:` as an explicit statement that the PR should not represent a framework version change. Chore PRs fail the workflow if version files already differ from the target branch.
+The script accepts `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `perf`, `ci`, `build`, and `style`. It checks `chore:` first, returns `skipped=true`, and leaves version files unchanged. It does not compare them with a target branch or enforce PR consistency. The bump rules describe script behavior only; opening a PR does not run it.
 
 ## Release Handoff
 
-The PR version workflow is responsible only for keeping framework version files aligned before merge.
+Framework maintainers must keep the version files aligned through local review and verification.
 Release publication, changelog maintenance, tags, and GitHub releases are handled as separate post-merge release work.
 
 ## Local Validation
 
-Run these commands before publishing version or release workflow changes:
+Run these commands before publishing version script or release configuration changes:
 
 ```bash
 python3 -m py_compile Scripts/update-pr-version.py

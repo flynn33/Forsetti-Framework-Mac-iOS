@@ -6,6 +6,8 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Added
 
+- Added `CONSUMPTION_POLICY.md` with explicit public-product and Xcode-scaffold allowlists, a prohibition on copied repository application foundations, and a consumer integration verification sequence.
+- Added the supported consumer distribution contract and rules R014-R016 to `implementation-policy.json`.
 - Added a tracked downloadable wiki archive at `docs/wiki/Forsetti-Framework-Mac-iOS-wiki-pages.zip` and linked it from the README documentation section.
 - Added documentation alignment coverage for the current package products, version workflow, live wiki maintenance model, and commercial-license availability.
 - Added repository-level remediation guidance and a local baseline verification record.
@@ -21,6 +23,8 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Changed
 
+- Aligned onboarding, module boundary rules, architecture schematics, and the wiki snapshot with the supported consumption boundary while preserving the Apache license terms.
+- Updated consumer setup examples to use app-owned manifest resources and remote package products instead of internal example resources.
 - Restored activation state is now reconciled through the normal activation path instead of being treated as already-live runtime state.
 - UI/app module activation now follows the single-active UI model by default while service modules remain concurrently active.
 - Production template rendering now waits for successful runtime boot and module activation before showing app module UI.
@@ -38,6 +42,7 @@ All notable changes to Forsetti Framework are documented in this file.
 
 ### Fixed
 
+- Excluded the canonical `LICENSE` text from attribution scans so required Apache wording does not fail repository guardrails; project files remain scanned.
 - Fixed persisted activation restore so restored modules are resolved, validated, started, loaded, and reconnected to UI surfaces.
 - Fixed failed restore behavior so modules are not left falsely enabled after restore failures.
 - Fixed factory mismatch handling so descriptor and manifest identity mismatches fail before lifecycle start.

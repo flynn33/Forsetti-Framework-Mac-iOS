@@ -2,6 +2,14 @@
 
 Read this before implementing or modifying a Forsetti-based application or module.
 
+## Mandatory consumption boundary
+
+Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before selecting dependencies or copying files.
+
+**DO NOT import, copy, vendor, embed, or use the entire Forsetti repository as an application starter, even unmodified.** Import only the allowlisted public package products: `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`, as needed. Generate/adapt app-owned scaffold files only from the four designated Xcode templates.
+
+SwiftPM/Xcode-managed dependency checkouts are allowed. Copied framework source trees, internal example targets, schematic folder layouts, tests, and repository-maintenance files are not application dependencies. State selected products and exact scaffold destinations before implementing; verify the consumer's tracked files and target/resource membership afterward.
+
 ## Framework truth
 
 Forsetti is a modularity-first, object-oriented Apple-platform framework.

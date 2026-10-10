@@ -1,6 +1,10 @@
 # Repository Rules - Forsetti Framework Remediation Rules
 
-Use this file as repository-level guidance while implementing the remediation plan.
+Use this file as repository-level guidance for framework maintenance. For consumer integration, [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) defines the mandatory distribution boundary.
+
+**DO NOT import, copy, vendor, embed, or use the entire repository as a consumer application starter, even unmodified.** Consume only allowlisted package products and designated Xcode scaffold outputs. A package-manager-controlled checkout or a separate framework-maintenance worktree is not permission to copy the repository into an app.
+
+Reference layouts in `framework-policy.json` describe the framework; they are not consumer project templates. Reading this repository while integrating an application does not authorize framework-internal edits in the application.
 
 ## Framework identity
 
@@ -10,6 +14,7 @@ Forsetti is a modularity-first, object-oriented Apple-platform framework for iOS
 
 Before changing code, read these files:
 
+- `CONSUMPTION_POLICY.md`
 - `EXECUTION_BRIEF.md`
 - `MODULE_BOUNDARY_RULES.md`
 - `implementation-policy.json`
@@ -97,4 +102,4 @@ At the end of each remediation task, report:
 - Do not swallow errors silently.
 - Do not degrade Sendable/concurrency correctness.
 - Do not make examples or tests the source of production defaults.
-- Do not change proprietary license terms.
+- Do not change the license terms in `LICENSE`.

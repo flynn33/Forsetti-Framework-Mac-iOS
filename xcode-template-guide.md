@@ -2,6 +2,13 @@
 
 This document is the canonical support guide for Forsetti Xcode templates.
 It explains what the templates generate, who owns each file, and how to move from developer setup to production deployment.
+_Last updated: October 10, 2026_
+
+## Mandatory template boundary
+
+Follow [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md). The four templates under `XcodeTemplates/Project Templates/Forsetti/` are the approved scaffold sources; **the repository itself is not an application template**. `ForsettiHostTemplate` is a public Swift package library, not a source directory to copy.
+
+Run the installer from a separate development checkout outside the consumer source tree, or install just the designated template directory into Xcode. Only generated/adapted app-owned scaffold code and manifest resources go into the application. Do not include `.xctemplate` directories, `TemplateInfo.plist`, installer scripts, example modules, or the framework repository in the app bundle or tracked app sources.
 
 ## 1. Template behavior before and after remediation
 
@@ -94,6 +101,10 @@ Framework-owned (do not patch for app-specific behavior):
 - `Sources/ForsettiPlatform/*`
 - `Sources/ForsettiHostTemplate/*`
 
+Add [Forsetti's remote package dependency](https://github.com/flynn33/Forsetti-Framework-Mac-iOS) to the independent app project. The app scaffold needs the three compiled products `ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`; a module using only core contracts needs only `ForsettiCore` directly. Record the resolved version/revision through the application's dependency-resolution workflow. Do not copy these source directories or use a vendored `.package(path:)` dependency.
+
+Before generation/adaptation, name the exact scaffold files and their app-owned destinations. Resolve placeholders, replace sample identities, and retain runtime activation checks.
+
 Decision rule:
 
 - If your app behavior requires changing framework internals, stop and add/ask for a public extension point instead.
@@ -136,7 +147,8 @@ Manifest location:
 
 Runtime loading:
 
-- Template bootstrap calls `ForsettiHostTemplateBootstrap.makeController(..., manifestsSubdirectory: "ForsettiManifests")`.
+- Template bootstrap calls `ForsettiHostTemplateBootstrap.makeController(manifestsBundle: .main, ..., manifestsSubdirectory: "ForsettiManifests")` because the generated manifests belong to the app target.
+- If another target/package owns the manifests, pass its resource bundle instead. Never use `ExampleModuleResources.bundle` for consumer manifests.
 
 Safety rules:
 
@@ -181,13 +193,16 @@ Production checklist:
 
 1. Set deployment mode to `.production`.
 2. Confirm app module view is production UI, not placeholder text.
-3. Confirm no example/demo package dependency is required for app identity.
+3. Confirm no example target or example resources are included in the app.
 4. Validate manifests and module registry alignment.
 5. Confirm the app module manifest declares capabilities and UI requirements needed by its UI contributions, such as `view_injection` and declared view IDs.
 6. Confirm required I/O/default-role providers are registered or available.
 7. Run tests and guardrails before release.
+8. Verify target dependencies, source/resource membership, and tracked files against the consumption allowlist. Exclude framework source trees, template metadata, documentation archives, and framework-maintenance infrastructure; retain required license/notice files.
 
 ## 9. Template install and uninstall
+
+Run these development-time utilities from a separate framework checkout outside the consumer source tree. The checkout and scripts must not become an app target or application resource.
 
 Install all Forsetti templates:
 

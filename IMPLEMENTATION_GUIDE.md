@@ -1,12 +1,19 @@
 # Implementation Guide
 
 This file is a canonical implementation guide for developers and reviewers implementing applications with Forsetti.
+_Last updated: October 10, 2026_
 
 ## Purpose
 
 This guide exists to remove ambiguity.
 
 Do not infer the implementation model from scattered hints across the repository. Use this document as the explicit implementation guide when building a Forsetti-based application.
+
+## Product boundary before architecture
+
+Read [CONSUMPTION_POLICY.md](CONSUMPTION_POLICY.md) before creating targets or copying files. **Do not import, copy, vendor, embed, or use the entire Forsetti repository as your application starter, even unmodified.** Select only the public package products your targets need and generate/adapt only the designated Xcode scaffold outputs.
+
+A SwiftPM/Xcode-managed dependency checkout is allowed. Recreating the framework's source/target tree in an application is not. `framework-policy.json` contains architecture schematics and implementation history, not a copyable application layout. `ForsettiHostTemplate` is a library product; its source directory is not the Xcode template directory.
 
 ## Framework Identity
 
@@ -105,6 +112,8 @@ Those modules may use Apple-native frameworks appropriate to their responsibilit
 
 Use this workflow when implementing a Forsetti-based application.
 
+Before edits, identify the work as consumer integration, select the needed public products (`ForsettiCore`, `ForsettiPlatform`, and `ForsettiHostTemplate`), and name any exact scaffold files to generate/adapt with their app-owned destinations. Create or retain an independent app-owned Xcode project and add [Forsetti's remote package dependency](https://github.com/flynn33/Forsetti-Framework-Mac-iOS). Record its resolved version/revision through the app's dependency-resolution workflow. Framework maintenance belongs in a separate framework checkout.
+
 ### Step 1: Choose the deployment pattern
 
 Choose whether the application is:
@@ -165,6 +174,8 @@ Examples:
 
 Use Forsetti through its public APIs, public contracts, and supported extension points.
 
+Keep application identities, module registrations, and manifest resources in the consumer project. Pass the bundle that owns those manifests to discovery; do not use `ExampleModuleResources.bundle`.
+
 Do not patch Forsetti internals to implement app-specific behavior.
 
 ### Step 8: Validate modular boundaries
@@ -175,6 +186,8 @@ Before merging:
 - confirm service responsibilities remain in service modules
 - confirm chosen Apple-native frameworks are used in the correct module/layer
 - confirm no target-level boundary rules have been misread as blanket bans
+- confirm the product/scaffold allowlist was followed and no framework repository tree, example resources, or maintenance infrastructure was copied into the application
+- verify target dependencies, source/resource membership, and tracked files; report the selected products, generated/adapted files, and checks performed, including unavailable checks
 
 ## Wrong Interpretations to Avoid
 
