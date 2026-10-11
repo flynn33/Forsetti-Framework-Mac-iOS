@@ -88,7 +88,7 @@ Forsetti is designed for:
 - **Solo developers shipping modular applications** who want runtime governance without building custom infrastructure.
 - **Organizations managing multi-app portfolios** that want a shared modular runtime across products.
 
-Forsetti is open source under the Apache License, Version 2.0. See [LICENSE](LICENSE) and section 22 for details.
+Forsetti is dual-licensed. Non-commercial, academic, and personal use is free. Commercial use requires a separate written license. See [LICENSE](LICENSE) and section 22 for details.
 
 If you are evaluating Forsetti, start with the Quick Start (section 10) and the Xcode templates (section 23).
 
@@ -610,7 +610,7 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 
 ## 22) License
 
-This project is licensed under the Apache License, Version 2.0.
+This project is dual-licensed. Non-commercial, academic, and personal use is free. Commercial use requires a separate written license.
 Copyright 2026 James Daley.
 
 See [LICENSE](LICENSE) for the full terms.
@@ -681,6 +681,6 @@ The rules are not there to reduce flexibility; they are there to preserve long-t
 
 ## Contributing
 
-This project is open source under Apache License, Version 2.0. You are welcome to use, modify, and redistribute the code under that license.
+This project is dual-licensed. Non-commercial, academic, and personal use is free under [LICENSE](LICENSE). Commercial use requires a separate written license from the copyright holder.
 
 Outside contributions to this repository are not accepted. Pull requests and collaboration requests will not be reviewed or merged. See [CONTRIBUTING.md](CONTRIBUTING.md).
