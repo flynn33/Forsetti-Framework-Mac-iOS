@@ -610,10 +610,13 @@ In short: keep module `start()` fast, keep manifest files small, and rely on Sto
 
 ## 22) License
 
-This project is licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE).
-Copyright 2026 James Daley.
+Copyright (c) 2026 James Daley, Raven Forge Software
 
-See [LICENSE](LICENSE) for the full terms.
+The Forsetti Framework for Mac and iOS is licensed under the Apache License, Version 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+You may use, modify, and distribute this project, including for commercial purposes. The copyright stays with James Daley, Raven Forge Software.
+
+You must give credit to James Daley, Raven Forge Software, for the Forsetti Framework for Mac and iOS. Keep that credit with every copy or product that uses this work. Keep the LICENSE and NOTICE files, keep the copyright lines in the source, and state the changes you make.
 
 ## 23) Xcode Templates (Production Starter)
 
